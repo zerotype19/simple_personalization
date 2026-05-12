@@ -4,11 +4,12 @@ import { BrowserRouter } from "react-router-dom";
 import { boot } from "@si/sdk";
 import App from "./App";
 import "./index.css";
+import { workerUrl } from "./workerUrl";
 
 async function main() {
   await boot({
-    configUrl: "/config",
-    collectUrl: "/collect",
+    configUrl: workerUrl("/config"),
+    collectUrl: workerUrl("/collect"),
     forceInspector: true,
   });
 

@@ -11,6 +11,9 @@ importers:
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
+      wrangler:
+        specifier: ^3.114.0
+        version: 3.114.17(@cloudflare/workers-types@4.20260511.1)
 
   apps/dashboard:
     dependencies:
@@ -130,7 +133,7 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
       wrangler:
-        specifier: ^3.91.0
+        specifier: ^3.114.0
         version: 3.114.17(@cloudflare/workers-types@4.20260511.1)
 
 packages:

@@ -1,19 +1,23 @@
+# Session Intelligence API — Cloudflare Worker + D1.
+# Local: `database_id = "REPLACE_ME"` is OK (Wrangler simulates D1). For production, run
+# `pnpm cloudflare:bootstrap` or paste a real id from `wrangler d1 create session-intelligence`.
 name = "session-intelligence-worker"
 main = "src/index.ts"
-compatibility_date = "2024-11-01"
+compatibility_date = "2025-05-12"
+
+# Uncomment if Wrangler cannot infer account (CI / multiple accounts):
+# account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
 
 [vars]
-# Optional: set a shared secret in production and validate `x-si-token` headers.
 SI_ENV = "dev"
 
-# KV is optional for MVP local dev. Uncomment and set a real namespace id when ready.
+# Optional: remote config overrides + collect rate limits (create KV in dashboard, then set id).
 # [[kv_namespaces]]
 # binding = "SI_KV"
-# id = "REPLACE_ME"
+# id = "YOUR_KV_NAMESPACE_ID"
 
 [[d1_databases]]
 binding = "SI_DB"
 database_name = "session-intelligence"
 database_id = "REPLACE_ME"
 migrations_dir = "db/migrations"
-

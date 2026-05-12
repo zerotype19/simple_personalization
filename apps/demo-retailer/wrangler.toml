@@ -1,0 +1,7 @@
+# Cloudflare Pages — Velocity Motors demo (static Vite build).
+# Deploy from monorepo root after build, for example:
+#   VITE_SI_WORKER_URL="https://<worker>.<subdomain>.workers.dev" pnpm --filter @si/demo-retailer build
+#   pnpm exec wrangler pages deploy --cwd apps/demo-retailer --branch main --commit-dirty
+name = "si-session-demo"
+compatibility_date = "2025-05-12"
+pages_build_output_dir = "dist"

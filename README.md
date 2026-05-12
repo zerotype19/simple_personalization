@@ -8,9 +8,11 @@ Monorepo implementing the **Session Intelligence** MVP described in the product 
 - `packages/shared` — shared types (`@si/shared`)
 - `apps/demo-retailer` — Velocity Motors demo site (React + Vite)
 - `apps/dashboard` — operator dashboard (React + Vite)
-- `worker` — Cloudflare Worker (`GET /config`, `POST /collect`, `GET /dashboard/*`)
+- `worker` — Cloudflare Worker (`GET /config`, `POST /collect`, `GET /dashboard/*`); config in `worker/wrangler.toml`
+- `apps/*/wrangler.toml` — Cloudflare Pages project names and `dist` output for direct upload / CI
+- `.github/workflows/cloudflare-deploy.yml` — optional GitHub deploy (secrets documented in `docs/CLOUDFLARE.md`)
 
-**Live Cloudflare (Worker + D1 + Pages):** after `pnpm exec wrangler login`, run `pnpm cloudflare:bootstrap` from the repo root, or follow the manual checklist in [`docs/CLOUDFLARE.md`](docs/CLOUDFLARE.md).
+**Live Cloudflare (Worker + D1 + Pages):** after `pnpm exec wrangler login`, run `pnpm cloudflare:bootstrap` from the repo root, or use **Actions → Cloudflare deploy** with repository secrets, or follow [`docs/CLOUDFLARE.md`](docs/CLOUDFLARE.md).
 
 ## Prereqs
 

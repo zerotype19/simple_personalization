@@ -6,7 +6,7 @@
  * 3) Apply D1 migrations --remote
  * 4) wrangler deploy (Worker)
  * 5) Build demo + dashboard with VITE_SI_WORKER_URL
- * 6) wrangler pages deploy (two projects; override names via env)
+ * 6) wrangler pages deploy for apps/demo-retailer and apps/dashboard (uses each app’s wrangler.toml)
  *
  * Usage (repo root):
  *   pnpm cloudflare:bootstrap
@@ -22,13 +22,19 @@ import { fileURLToPath } from "node:url";
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const workerDir = path.join(rootDir, "worker");
 const wranglerTomlPath = path.join(workerDir, "wrangler.toml");
+const demoWranglerPath = path.join(rootDir, "apps", "demo-retailer", "wrangler.toml");
+const dashWranglerPath = path.join(rootDir, "apps", "dashboard", "wrangler.toml");
 
 const skipPages = process.env.SKIP_PAGES === "1" || process.argv.includes("--skip-pages");
-const pagesDemo = process.env.CF_PAGES_DEMO_PROJECT ?? "si-session-demo";
-const pagesDash = process.env.CF_PAGES_DASH_PROJECT ?? "si-session-dashboard";
 
 function readWranglerToml() {
   return fs.readFileSync(wranglerTomlPath, "utf8");
+}
+
+function readTomlName(tomlPath) {
+  const t = fs.readFileSync(tomlPath, "utf8");
+  const m = t.match(/^name\s*=\s*"([^"]+)"/m);
+  return m?.[1] ?? path.basename(path.dirname(tomlPath));
 }
 
 function readWorkerName(toml) {
@@ -96,6 +102,23 @@ function wranglerRun(args, inherit = true) {
   return { stdout: r.stdout || "", stderr: r.stderr || "" };
 }
 
+function wranglerPagesFromRoot(appRelative, inherit = true) {
+  const r = spawnSync(
+    "pnpm",
+    ["exec", "wrangler", "pages", "deploy", "--cwd", appRelative, "--branch", "main", "--commit-dirty"],
+    {
+      cwd: rootDir,
+      encoding: "utf8",
+      env: process.env,
+      stdio: inherit ? "inherit" : ["inherit", "pipe", "pipe"],
+    },
+  );
+  if (r.status !== 0) {
+    const detail = inherit ? "" : `\n${r.stdout || ""}\n${r.stderr || ""}`;
+    throw new Error(`wrangler pages deploy ${appRelative} failed (exit ${r.status})${detail}`);
+  }
+}
+
 function findD1Uuid(listJson, databaseName) {
   const rows = Array.isArray(listJson) ? listJson : listJson?.result ?? listJson?.databases ?? [];
   const row = rows.find((x) => x?.name === databaseName);
@@ -130,6 +153,8 @@ function main() {
   let toml = readWranglerToml();
   const workerName = readWorkerName(toml);
   const databaseName = readD1DatabaseName(toml);
+  const pagesDemoName = readTomlName(demoWranglerPath);
+  const pagesDashName = readTomlName(dashWranglerPath);
 
   console.log("Checking Wrangler auth…");
   wranglerRun(["whoami"], true);
@@ -190,7 +215,7 @@ function main() {
 
   if (skipPages) {
     console.log("\n(Skipping Pages: SKIP_PAGES=1 or --skip-pages)\n");
-    printNext(workerUrl, pagesDemo, pagesDash, false);
+    printNext(workerUrl, pagesDemoName, pagesDashName, false);
     return;
   }
 
@@ -204,47 +229,23 @@ function main() {
     throw new Error("Expected dist/ folders after build");
   }
 
-  console.log(`\nDeploying Pages project "${pagesDemo}"…`);
+  console.log(`\nDeploying Pages (${pagesDemoName})…`);
   try {
-    wranglerRun(
-      [
-        "pages",
-        "deploy",
-        path.relative(workerDir, demoDist),
-        "--project-name",
-        pagesDemo,
-        "--branch",
-        "main",
-        "--commit-dirty",
-      ],
-      true,
-    );
+    wranglerPagesFromRoot("apps/demo-retailer", true);
   } catch (e) {
     console.error(String(e));
     console.error(
-      "\nIf Pages deploy failed (permissions or project name), create two Pages projects in the dashboard\n" +
-        "or set CF_PAGES_DEMO_PROJECT / CF_PAGES_DASH_PROJECT and ensure the API token includes Pages:Edit.\n",
+      "\nIf Pages deploy failed (permissions), ensure the API token includes Cloudflare Pages — Edit.\n" +
+        "Project names come from apps/*/wrangler.toml (top-level `name`).\n",
     );
-    printNext(workerUrl, pagesDemo, pagesDash, true);
+    printNext(workerUrl, pagesDemoName, pagesDashName, true);
     process.exit(1);
   }
 
-  console.log(`\nDeploying Pages project "${pagesDash}"…`);
-  wranglerRun(
-    [
-      "pages",
-      "deploy",
-      path.relative(workerDir, dashDist),
-      "--project-name",
-      pagesDash,
-      "--branch",
-      "main",
-      "--commit-dirty",
-    ],
-    true,
-  );
+  console.log(`\nDeploying Pages (${pagesDashName})…`);
+  wranglerPagesFromRoot("apps/dashboard", true);
 
-  printNext(workerUrl, pagesDemo, pagesDash, false);
+  printNext(workerUrl, pagesDemoName, pagesDashName, false);
 }
 
 function printNext(workerUrl, demoProject, dashProject, pagesPartial) {

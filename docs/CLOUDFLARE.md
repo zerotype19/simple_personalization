@@ -10,10 +10,24 @@ From the **repo root**, after you are logged in (see below):
 pnpm cloudflare:bootstrap
 ```
 
-This script: checks auth, finds or creates the D1 database named in `worker/wrangler.toml`, writes `database_id`, applies migrations **remotely**, deploys the Worker, builds the demo + dashboard with `VITE_SI_WORKER_URL`, and runs **`wrangler pages deploy`** for two Pages projects (default names: `si-session-demo`, `si-session-dashboard`; override with `CF_PAGES_DEMO_PROJECT` / `CF_PAGES_DASH_PROJECT`).
+This script: checks auth, finds or creates the D1 database named in `worker/wrangler.toml`, writes `database_id`, applies migrations **remotely**, deploys the Worker, builds the demo + dashboard with `VITE_SI_WORKER_URL`, and runs **`wrangler pages deploy`** for both apps using each app's `wrangler.toml` (Pages `name`: `si-session-demo`, `si-session-dashboard`; edit those files to rename projects).
 
 - Worker + D1 only (no Pages): `SKIP_PAGES=1 pnpm cloudflare:bootstrap` or `pnpm cloudflare:bootstrap -- --skip-pages`
 - If deploy logs do not contain a `*.workers.dev` URL: set `SI_WORKER_URL=https://…workers.dev` and rerun (or rerun from the build step after a manual deploy).
+
+### Repo layout (Cloudflare)
+
+| File | Role |
+|------|------|
+| `worker/wrangler.toml` | Worker script, D1 binding, `migrations_dir`, optional KV. |
+| `apps/demo-retailer/wrangler.toml` | Pages project `si-session-demo`, `pages_build_output_dir = "dist"`. |
+| `apps/dashboard/wrangler.toml` | Pages project `si-session-dashboard`, `pages_build_output_dir = "dist"`. |
+| `scripts/cloudflare-bootstrap.mjs` | Local one-shot: D1 + Worker + builds + Pages. |
+| `.github/workflows/cloudflare-deploy.yml` | GitHub Actions deploy (`workflow_dispatch`); set repository secrets. |
+
+**GitHub secrets:** `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `SI_WORKER_URL` (Worker HTTPS origin, no trailing slash; same as `VITE_SI_WORKER_URL` for builds).
+
+**Root scripts:** `pnpm cloudflare:deploy:worker` and `pnpm cloudflare:deploy:pages` (build both apps with `VITE_SI_WORKER_URL` first, then `deploy:pages`).
 
 ### What you still set up manually in Cloudflare
 

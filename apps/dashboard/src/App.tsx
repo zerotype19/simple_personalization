@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { DashboardSummary, ExperimentReport } from "@si/shared";
+import { workerUrl } from "./workerUrl";
 
 export default function App() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -11,8 +12,8 @@ export default function App() {
     async function load() {
       try {
         const [sRes, eRes] = await Promise.all([
-          fetch("/dashboard/summary"),
-          fetch("/dashboard/experiments"),
+          fetch(workerUrl("/dashboard/summary")),
+          fetch(workerUrl("/dashboard/experiments")),
         ]);
         if (!sRes.ok || !eRes.ok) throw new Error("Failed to load dashboard APIs");
         const s = (await sRes.json()) as DashboardSummary;
@@ -47,8 +48,8 @@ export default function App() {
           <div className="rounded-2xl border border-red-900/60 bg-red-950/30 p-5 text-sm text-red-200">
             <div className="font-semibold">Could not reach worker APIs</div>
             <div className="mt-2 text-red-200/80">
-              Start the Cloudflare worker locally (<code className="rounded bg-black/30 px-2 py-1">pnpm dev:worker</code>)
-              or update Vite proxy targets.
+              Start the Cloudflare worker locally (<code className="rounded bg-black/30 px-2 py-1">pnpm dev:worker</code>),
+              set <code className="rounded bg-black/30 px-2 py-1">VITE_SI_WORKER_URL</code> for production builds, or check the Vite proxy targets.
             </div>
             <div className="mt-2 text-xs text-red-200/70">Details: {error}</div>
           </div>
