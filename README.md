@@ -12,7 +12,7 @@ Monorepo implementing the **Session Intelligence** MVP described in the product 
 - `apps/*/wrangler.toml` — Cloudflare Pages project names and `dist` output for direct upload / CI
 - `.github/workflows/cloudflare-deploy.yml` — optional GitHub deploy (secrets documented in `docs/CLOUDFLARE.md`)
 
-**Live Cloudflare (Worker + D1 + Pages):** after `pnpm exec wrangler login`, run `pnpm cloudflare:bootstrap` from the repo root, or use **Actions → Cloudflare deploy** with repository secrets, or follow [`docs/CLOUDFLARE.md`](docs/CLOUDFLARE.md).
+**Live Cloudflare:** `pnpm exec wrangler login` once, then **`pnpm cloudflare:up`** (Wrangler-only shell script). Details: [`docs/CLOUDFLARE.md`](docs/CLOUDFLARE.md).
 
 ## Prereqs
 

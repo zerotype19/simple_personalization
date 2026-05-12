@@ -2,7 +2,34 @@
 
 Use this when you want a **real** `*.workers.dev` Worker and hosted UIs—not local Miniflare.
 
-## Automated path (recommended)
+## One command (Wrangler CLI only)
+
+**1.** Log in once (browser opens):
+
+```bash
+pnpm exec wrangler login
+```
+
+**2.** From the repo root, create/use remote D1, patch `worker/wrangler.toml`, apply migrations, deploy the Worker, build both Vite apps, and upload both Pages projects:
+
+```bash
+pnpm cloudflare:up
+```
+
+That runs `scripts/cloudflare-up.sh`, which is only **`pnpm exec wrangler …`** plus **`pnpm --filter … build`**. No separate Node bootstrap required.
+
+If deploy output does not show a `*.workers.dev` URL, set `SI_WORKER_URL` and run again from step 5:
+
+```bash
+export SI_WORKER_URL='https://YOUR-WORKER.….workers.dev'
+pnpm --filter @si/demo-retailer build && pnpm --filter @si/dashboard build
+pnpm exec wrangler pages deploy --cwd apps/demo-retailer --branch main --commit-dirty
+pnpm exec wrangler pages deploy --cwd apps/dashboard --branch main --commit-dirty
+```
+
+---
+
+## Automated path (Node bootstrap, optional)
 
 From the **repo root**, after you are logged in (see below):
 
