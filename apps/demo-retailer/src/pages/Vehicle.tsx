@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useSiPage } from "../hooks/useSiPage";
 import { getVehicle } from "../data/vehicles";
 
@@ -6,6 +7,15 @@ export default function VehiclePage() {
   useSiPage("vdp");
   const { id } = useParams();
   const v = id ? getVehicle(id) : undefined;
+
+  useEffect(() => {
+    if (!v) return;
+    const prev = document.title;
+    document.title = `${v.name} | Velocity Motors`;
+    return () => {
+      document.title = prev;
+    };
+  }, [v?.id, v?.name]);
 
   if (!v) {
     return (

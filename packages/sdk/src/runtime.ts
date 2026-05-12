@@ -44,14 +44,14 @@ export class SessionIntelRuntime {
       this.profile,
     );
 
-    this.lastContextUrl = ctx.url;
-    this.tick(ctx);
+    this.lastContextUrl = null;
+    this.tick();
 
     this.stopObserver = startObserver(
-      () => inferPageContext().page_type,
+      () => inferPageContext({ minimal: true }).page_type,
       (mut) => {
         mut(this.profile);
-        this.tick(inferPageContext());
+        this.tick();
       },
     );
 
@@ -82,11 +82,11 @@ export class SessionIntelRuntime {
         },
         onTogglePersonalization: (enabled) => {
           this.personalizationEnabled = enabled;
-          this.tick(inferPageContext());
+          this.tick();
         },
         onForcePersona: (persona) => {
           this.profile.persona = persona;
-          this.tick(inferPageContext());
+          this.tick();
         },
         getPersonalizationEnabled: () => this.personalizationEnabled,
       });
@@ -136,7 +136,7 @@ export class SessionIntelRuntime {
     this.profile = loadOrCreateProfile(ctx.page_type);
     this.profile.experiment_assignment = assignExperiments(this.config.experiments, this.profile);
     this.lastContextUrl = null;
-    this.tick(ctx);
+    this.tick();
   }
 
   private emit(): void {
@@ -160,17 +160,29 @@ export class SessionIntelRuntime {
     }
   }
 
-  private tick(ctx: ReturnType<typeof inferPageContext>): void {
-    const isNewPageContext = this.lastContextUrl !== ctx.url;
-    this.lastContextUrl = ctx.url;
+  private tick(): void {
+    const urlNow = window.location.pathname + window.location.search;
+    const isNewPageContext = this.lastContextUrl !== urlNow;
+    const ctx = inferPageContext({ minimal: !isNewPageContext });
 
     if (isNewPageContext) {
-      // Merge lightweight category hits from this page into rolling signal map.
+      // Decay prior page keyword mass so a later sedan VDP can overtake an early SUV browse.
+      if (this.lastContextUrl != null) {
+        const decay = 0.84;
+        for (const key of Object.keys(this.profile.signals.category_hits)) {
+          const v = this.profile.signals.category_hits[key]!;
+          const next = Math.floor(v * decay);
+          if (next <= 0) delete this.profile.signals.category_hits[key];
+          else this.profile.signals.category_hits[key] = next;
+        }
+      }
       for (const [k, v] of Object.entries(ctx.category_hits)) {
-        this.profile.signals.category_hits[k] =
-          (this.profile.signals.category_hits[k] ?? 0) + v;
+        if (v <= 0) continue;
+        this.profile.signals.category_hits[k] = (this.profile.signals.category_hits[k] ?? 0) + v;
       }
     }
+
+    this.lastContextUrl = ctx.url;
 
     recomputeScores(this.profile);
 

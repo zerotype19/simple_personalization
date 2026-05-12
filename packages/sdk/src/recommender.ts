@@ -43,6 +43,14 @@ function defaultRecommendation(p: SessionProfile): Recommendation | null {
       reason: collectReasons(p, ["SUV affinity", "family signals"]),
     };
   }
+  if ((p.category_affinity.sedan ?? 0) >= 0.36) {
+    return {
+      next_best_action: "Surface sedans, efficiency, and commuter-friendly trims",
+      treatment_hint: "researcher",
+      confidence: 0.58,
+      reason: collectReasons(p, ["sedan affinity from session"]),
+    };
+  }
   if ((p.category_affinity.luxury ?? 0) >= 0.35) {
     return {
       next_best_action: "Highlight premium trims and white-glove concierge",

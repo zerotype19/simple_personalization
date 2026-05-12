@@ -39,9 +39,8 @@ export function recomputeScores(profile: SessionProfile): SessionProfile {
   profile.engagement_score = clamp(engagement);
 
   // Category affinity: EMA toward each tag's share of *session* keyword hits
-  // (signals.category_hits), merged across pages in runtime. We intentionally do
-  // not decay on every DOM tick or when the current route's copy omits a tag
-  // (e.g. test-drive form after a sedan VDP) — that produced false "dropping interest".
+  // (signals.category_hits). Hits are merged on each route change in runtime with a
+  // decay step so interest can shift (e.g. SUV browse → sedan VDP) without stale mass.
   const cumulative = s.category_hits;
   const totalHits = Object.values(cumulative).reduce((a, b) => a + b, 0);
   if (totalHits > 0) {
