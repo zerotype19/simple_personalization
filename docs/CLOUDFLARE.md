@@ -2,6 +2,8 @@
 
 Use this when you want a **real** `*.workers.dev` Worker and hosted UIs—not local Miniflare.
 
+**Hosted demo narrative + script:** after a successful deploy, use [DEMO_WALKTHROUGH.md](./DEMO_WALKTHROUGH.md) and run `./scripts/demo-walkthrough.sh` from the repo root (`--open` opens demo + dashboard on macOS).
+
 ## One command (Wrangler CLI only)
 
 **1.** Log in once (browser opens):
