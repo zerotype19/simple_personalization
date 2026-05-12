@@ -30,3 +30,8 @@ export function subscribe(cb: (p: import("@si/shared").SessionProfile) => void) 
 export function markConversion(type?: string) {
   singleton?.markConversion(type);
 }
+
+export { buildRuleContext, evaluateExpression } from "./rules";
+export { DEFAULT_CONFIG } from "./defaults";
+export { resetProfile } from "./session";
+export { clearTreatments } from "./personalization";

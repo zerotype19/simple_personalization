@@ -1,6 +1,14 @@
 import type { SessionProfile } from "@si/shared";
-import { useEffect, useMemo, useState } from "react";
-import { subscribe } from "@si/sdk";
+import { useMemo, useSyncExternalStore } from "react";
+import {
+  buildRuleContext,
+  clearTreatments,
+  DEFAULT_CONFIG,
+  evaluateExpression,
+  getState,
+  resetProfile,
+  subscribe,
+} from "@si/sdk";
 
 const TREATMENT_LABELS: Record<string, string> = {
   t_high_intent: "High-intent urgency (hero CTA + subtext)",
@@ -11,7 +19,49 @@ const TREATMENT_LABELS: Record<string, string> = {
 
 type StripKey = "control" | "experiment" | "rules" | "mixed" | "pending_home" | "idle";
 
-/** All possible strip states (only one applies per session at a time). Shown as a legend below the live strip. */
+/** Fingerprint for useSyncExternalStore: getSnapshot must be stable when the store has not changed (React 18). */
+function fingerprint(p: SessionProfile): string {
+  return JSON.stringify({
+    e: p.experiment_assignment,
+    at: p.active_treatments,
+    i: Math.round(p.intent_score * 10) / 10,
+    u: Math.round(p.urgency_score * 10) / 10,
+    g: Math.round(p.engagement_score * 10) / 10,
+    s: p.signals,
+    page: p.page_type,
+    aff: p.category_affinity,
+    updated: p.updated_at,
+  });
+}
+
+let siStripCache: { fp: string; snap: SessionProfile } | null = null;
+
+function subscribeStrip(onStoreChange: () => void): () => void {
+  try {
+    return subscribe((p) => {
+      const fp = fingerprint(p);
+      if (!siStripCache || fp !== siStripCache.fp) {
+        siStripCache = { fp, snap: p };
+        onStoreChange();
+      }
+    });
+  } catch {
+    return () => {};
+  }
+}
+
+function getStripSnapshot(): SessionProfile | null {
+  try {
+    const p = getState();
+    const fp = fingerprint(p);
+    if (siStripCache && siStripCache.fp === fp) return siStripCache.snap;
+    siStripCache = { fp, snap: p };
+    return p;
+  } catch {
+    return siStripCache?.snap ?? null;
+  }
+}
+
 const STRIP_LEGEND: { key: StripKey; label: string; swatch: string; hint?: string }[] = [
   { key: "control", label: "A/B control", swatch: "bg-amber-500", hint: "no DOM treatments" },
   { key: "idle", label: "Scoring only", swatch: "bg-slate-500", hint: "treatment arm, not qualified yet" },
@@ -88,22 +138,23 @@ function stripVariant(p: SessionProfile): {
   };
 }
 
+function treatmentRuleRows(p: SessionProfile) {
+  const ctx = buildRuleContext(p);
+  return DEFAULT_CONFIG.treatments
+    .filter((t): t is (typeof t & { applies_when: string }) => !!t.applies_when)
+    .map((t) => ({
+      id: t.id,
+      name: t.name,
+      when: t.applies_when,
+      met: evaluateExpression(t.applies_when, ctx),
+    }));
+}
+
 export default function SessionPersonalizationStrip() {
-  const [profile, setProfile] = useState<SessionProfile | null>(null);
-  const [bootError, setBootError] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      return subscribe(setProfile);
-    } catch (e) {
-      setBootError(e instanceof Error ? e.message : "SDK not ready");
-      return undefined;
-    }
-  }, []);
-
+  const profile = useSyncExternalStore(subscribeStrip, getStripSnapshot, getStripSnapshot);
   const variant = useMemo(() => (profile ? stripVariant(profile) : null), [profile]);
+  const ruleRows = useMemo(() => (profile ? treatmentRuleRows(profile) : []), [profile]);
 
-  if (bootError) return null;
   if (!profile || !variant) return null;
 
   const { signals } = profile;
@@ -124,13 +175,27 @@ export default function SessionPersonalizationStrip() {
                 Session Intelligence
               </span>
               <span className="font-semibold text-white">{variant.title}</span>
+              <button
+                type="button"
+                className="ml-auto rounded-lg border border-slate-600 bg-slate-900 px-2.5 py-1 text-[11px] font-medium text-slate-200 hover:border-indigo-500 hover:text-white sm:ml-0"
+                onClick={() => {
+                  resetProfile();
+                  clearTreatments();
+                  siStripCache = null;
+                  window.location.reload();
+                }}
+              >
+                New session · re-roll A/B
+              </button>
             </div>
             <p className="text-xs leading-relaxed text-slate-300">
-              <strong className="text-white">One live state at a time</strong> — the thick left border matches your
-              session below. To see another A/B arm, open a fresh window (e.g. incognito). Clicks on CTAs (
-              <code className="text-indigo-200">data-si-cta</code>), price taps, finance/compare modules, routes, and
-              scroll update scores. Treatments rewrite slots on <strong className="text-white">Home</strong> (and
-              elsewhere when slots exist).
+              <strong className="text-white">Why the top state may not move:</strong> in <strong className="text-white">control</strong>, the SDK never applies DOM treatments, so the color key stays on{" "}
+              <strong className="text-amber-200">A/B control</strong> even while you click. In <strong className="text-white">treatment</strong> on Home, you may stay on{" "}
+              <strong className="text-indigo-200">Experiment</strong> until payment/family/luxury rules also match — then it becomes{" "}
+              <strong className="text-fuchsia-200">mixed</strong>. Use <strong className="text-white">New session</strong> to draw the other variant.
+            </p>
+            <p className="text-xs leading-relaxed text-slate-400">
+              The <strong className="text-white">rule dots</strong> below always update from your session (scores + clicks + routes).
             </p>
             {at.length > 0 ? (
               <ul className="mt-2 list-inside list-disc text-xs text-slate-200">
@@ -182,7 +247,36 @@ export default function SessionPersonalizationStrip() {
 
         <div className="mt-3 border-t border-slate-800/80 pt-3">
           <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-            Color key (all states — you are highlighted)
+            Rule conditions (live — updates as you browse / click)
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {ruleRows.map((row) => (
+              <span
+                key={row.id}
+                title={row.when}
+                className={[
+                  "inline-flex max-w-[280px] items-center gap-2 rounded-lg border px-2 py-1.5 text-[11px] leading-tight",
+                  row.met ? "border-emerald-700/80 bg-emerald-950/40 text-emerald-100" : "border-slate-700/90 bg-slate-950/40 text-slate-400",
+                ].join(" ")}
+              >
+                <span className="text-base leading-none" aria-hidden>
+                  {row.met ? "●" : "○"}
+                </span>
+                <span>
+                  <span className="font-mono text-[10px] text-slate-500">{row.id}</span>
+                  <span className="mt-0.5 block font-medium text-slate-200">{row.name}</span>
+                  {exp?.is_control && row.met ? (
+                    <span className="mt-0.5 block text-[10px] text-amber-200/90">condition met · not applied (control)</span>
+                  ) : null}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-3 border-t border-slate-800/80 pt-3">
+          <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+            Color key (strip mode — you are highlighted)
           </div>
           <div className="flex flex-wrap gap-2">
             {STRIP_LEGEND.map((item) => {
