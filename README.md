@@ -10,7 +10,7 @@ Monorepo implementing the **Session Intelligence** MVP described in the product 
 - `apps/dashboard` — operator dashboard (React + Vite)
 - `worker` — Cloudflare Worker (`GET /config`, `POST /collect`, `GET /dashboard/*`)
 
-**Live Cloudflare (Worker + D1 + Pages):** step-by-step checklist in [`docs/CLOUDFLARE.md`](docs/CLOUDFLARE.md).
+**Live Cloudflare (Worker + D1 + Pages):** after `pnpm exec wrangler login`, run `pnpm cloudflare:bootstrap` from the repo root, or follow the manual checklist in [`docs/CLOUDFLARE.md`](docs/CLOUDFLARE.md).
 
 ## Prereqs
 

@@ -11,6 +11,7 @@
     "dev:dashboard": "pnpm --filter @si/dashboard dev",
     "dev:sdk": "pnpm --filter @si/sdk dev",
     "dev:worker": "pnpm --filter @si/worker dev",
+    "cloudflare:bootstrap": "node scripts/cloudflare-bootstrap.mjs",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {

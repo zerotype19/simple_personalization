@@ -1,6 +1,36 @@
 # Live Cloudflare setup (Worker + D1 + Pages)
 
-Use this when you want a **real** `*.workers.dev` (or custom domain) Worker and hosted UIs—not local Miniflare.
+Use this when you want a **real** `*.workers.dev` Worker and hosted UIs—not local Miniflare.
+
+## Automated path (recommended)
+
+From the **repo root**, after you are logged in (see below):
+
+```bash
+pnpm cloudflare:bootstrap
+```
+
+This script: checks auth, finds or creates the D1 database named in `worker/wrangler.toml`, writes `database_id`, applies migrations **remotely**, deploys the Worker, builds the demo + dashboard with `VITE_SI_WORKER_URL`, and runs **`wrangler pages deploy`** for two Pages projects (default names: `si-session-demo`, `si-session-dashboard`; override with `CF_PAGES_DEMO_PROJECT` / `CF_PAGES_DASH_PROJECT`).
+
+- Worker + D1 only (no Pages): `SKIP_PAGES=1 pnpm cloudflare:bootstrap` or `pnpm cloudflare:bootstrap -- --skip-pages`
+- If deploy logs do not contain a `*.workers.dev` URL: set `SI_WORKER_URL=https://…workers.dev` and rerun (or rerun from the build step after a manual deploy).
+
+### What you still set up manually in Cloudflare
+
+| Manual step | When |
+|-------------|------|
+| **Cloudflare account** | Always. |
+| **Wrangler auth** | Once per machine: `pnpm exec wrangler login` (browser), **or** create an **API token** under My Profile → API Tokens and export `CLOUDFLARE_API_TOKEN` (and `CLOUDFLARE_ACCOUNT_ID` if Wrangler asks). |
+| **API token permissions** (if you use a token) | Include at least **Workers Scripts: Edit**, **D1: Edit**, **Cloudflare Pages: Edit** (and account read as needed) so bootstrap can deploy Worker + D1 + Pages. |
+| **Dashboard clicks** | **Usually none** for Worker/D1/Pages if the script succeeds—Wrangler creates Pages projects on first deploy. Open **Workers & Pages** in the dashboard only to copy **Visit** URLs or attach **custom domains** (optional). |
+
+If `wrangler pages deploy` fails with **permission denied**, fix the token (Pages:Edit) or use the manual Pages section below.
+
+---
+
+## Manual path (step-by-step)
+
+If you prefer not to use the script, follow the numbered steps below.
 
 ## What you are provisioning
 
