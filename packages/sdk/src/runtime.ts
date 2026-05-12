@@ -153,7 +153,7 @@ export class SessionIntelRuntime {
       }
     }
 
-    recomputeScores(this.profile, ctx);
+    recomputeScores(this.profile);
 
     const { matches } = runRules(this.config.rules, this.profile);
     const rec = chooseRecommendation(

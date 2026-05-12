@@ -1,5 +1,4 @@
 import type { JourneyStage, SessionProfile } from "@si/shared";
-import type { PageContext } from "./site";
 
 function clamp(v: number, min = 0, max = 100): number {
   return Math.max(min, Math.min(max, Math.round(v)));
@@ -9,7 +8,7 @@ function clamp(v: number, min = 0, max = 100): number {
  * Recompute intent / urgency / engagement / journey stage / category affinity
  * from current signals. All scoring is local, deterministic and explainable.
  */
-export function recomputeScores(profile: SessionProfile, ctx: PageContext | null): SessionProfile {
+export function recomputeScores(profile: SessionProfile): SessionProfile {
   const s = profile.signals;
 
   const intent =
@@ -39,25 +38,23 @@ export function recomputeScores(profile: SessionProfile, ctx: PageContext | null
   profile.urgency_score = clamp(urgency);
   profile.engagement_score = clamp(engagement);
 
-  // Category affinity uses an exponential moving average of signal hits.
-  if (ctx) {
-    const total =
-      Object.values(ctx.category_hits).reduce((a, b) => a + b, 0) || 1;
-    for (const [tag, hits] of Object.entries(ctx.category_hits)) {
+  // Category affinity: EMA toward each tag's share of *session* keyword hits
+  // (signals.category_hits), merged across pages in runtime. We intentionally do
+  // not decay on every DOM tick or when the current route's copy omits a tag
+  // (e.g. test-drive form after a sedan VDP) — that produced false "dropping interest".
+  const cumulative = s.category_hits;
+  const totalHits = Object.values(cumulative).reduce((a, b) => a + b, 0);
+  if (totalHits > 0) {
+    for (const [tag, hits] of Object.entries(cumulative)) {
+      if (hits <= 0) continue;
       const prev = profile.category_affinity[tag] ?? 0;
-      const localScore = hits / total;
-      profile.category_affinity[tag] = +(prev * 0.6 + localScore * 0.4).toFixed(3);
+      const sessionShare = hits / totalHits;
+      profile.category_affinity[tag] = +(prev * 0.6 + sessionShare * 0.4).toFixed(3);
     }
   }
-  // Decay categories that did not appear this page so stale affinity fades.
   for (const tag of Object.keys(profile.category_affinity)) {
-    if (!ctx || !(tag in ctx.category_hits)) {
-      profile.category_affinity[tag] = +(
-        profile.category_affinity[tag] * 0.85
-      ).toFixed(3);
-      if (profile.category_affinity[tag] < 0.05) {
-        delete profile.category_affinity[tag];
-      }
+    if (!(tag in cumulative) || (cumulative[tag] ?? 0) <= 0) {
+      delete profile.category_affinity[tag];
     }
   }
 
