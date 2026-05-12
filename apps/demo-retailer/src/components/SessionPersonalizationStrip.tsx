@@ -9,8 +9,25 @@ const TREATMENT_LABELS: Record<string, string> = {
   t_luxury_buyer: "Luxury positioning",
 };
 
+type StripKey = "control" | "experiment" | "rules" | "mixed" | "pending_home" | "idle";
+
+/** All possible strip states (only one applies per session at a time). Shown as a legend below the live strip. */
+const STRIP_LEGEND: { key: StripKey; label: string; swatch: string; hint?: string }[] = [
+  { key: "control", label: "A/B control", swatch: "bg-amber-500", hint: "no DOM treatments" },
+  { key: "idle", label: "Scoring only", swatch: "bg-slate-500", hint: "treatment arm, not qualified yet" },
+  {
+    key: "pending_home",
+    label: "Assigned → Home",
+    swatch: "bg-indigo-400",
+    hint: "treatment arm on a non-Home route",
+  },
+  { key: "experiment", label: "Experiment", swatch: "bg-indigo-500", hint: "hero copy from A/B treatment" },
+  { key: "rules", label: "Rules / signals", swatch: "bg-emerald-500", hint: "clicks & pages crossed thresholds" },
+  { key: "mixed", label: "Experiment + rules", swatch: "bg-fuchsia-500", hint: "both sources active" },
+];
+
 function stripVariant(p: SessionProfile): {
-  key: "control" | "experiment" | "rules" | "mixed" | "pending_home" | "idle";
+  key: StripKey;
   title: string;
   borderClass: string;
   bgClass: string;
@@ -109,9 +126,11 @@ export default function SessionPersonalizationStrip() {
               <span className="font-semibold text-white">{variant.title}</span>
             </div>
             <p className="text-xs leading-relaxed text-slate-300">
-              Clicks on CTAs (<code className="text-indigo-200">data-si-cta</code>), price taps, finance/compare
-              modules, routes, and scroll update scores. Treatments rewrite slots on{" "}
-              <strong className="text-white">Home</strong> (and elsewhere when slots exist).
+              <strong className="text-white">One live state at a time</strong> — the thick left border matches your
+              session below. To see another A/B arm, open a fresh window (e.g. incognito). Clicks on CTAs (
+              <code className="text-indigo-200">data-si-cta</code>), price taps, finance/compare modules, routes, and
+              scroll update scores. Treatments rewrite slots on <strong className="text-white">Home</strong> (and
+              elsewhere when slots exist).
             </p>
             {at.length > 0 ? (
               <ul className="mt-2 list-inside list-disc text-xs text-slate-200">
@@ -159,6 +178,38 @@ export default function SessionPersonalizationStrip() {
               <dd>{exp ? `${exp.variant_id} (${exp.is_control ? "control" : "treatment"})` : "—"}</dd>
             </dl>
           </details>
+        </div>
+
+        <div className="mt-3 border-t border-slate-800/80 pt-3">
+          <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+            Color key (all states — you are highlighted)
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {STRIP_LEGEND.map((item) => {
+              const active = variant.key === item.key;
+              return (
+                <span
+                  key={item.key}
+                  title={item.hint}
+                  className={[
+                    "inline-flex max-w-[200px] items-center gap-2 rounded-lg border px-2 py-1.5 text-[11px] leading-tight text-slate-200",
+                    active
+                      ? "border-white/40 bg-white/10 ring-1 ring-white/30"
+                      : "border-slate-700/90 bg-slate-950/40",
+                  ].join(" ")}
+                >
+                  <span className={`h-6 w-1 shrink-0 rounded-full ${item.swatch}`} aria-hidden />
+                  <span>
+                    <span className="font-medium text-white">{item.label}</span>
+                    {item.hint ? <span className="mt-0.5 block text-[10px] text-slate-500">{item.hint}</span> : null}
+                    {active ? (
+                      <span className="mt-0.5 block text-[10px] font-semibold text-emerald-300">← you are here</span>
+                    ) : null}
+                  </span>
+                </span>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
