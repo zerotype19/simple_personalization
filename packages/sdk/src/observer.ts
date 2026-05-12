@@ -2,6 +2,13 @@ import type { PageType, SessionProfile } from "@si/shared";
 
 type Update = (mut: (p: SessionProfile) => void) => void;
 
+/** Clicks often target `Text` nodes; `closest` exists only on `Element`. */
+function eventTargetElement(ev: Event): Element | null {
+  const t = ev.target;
+  if (!t || !(t instanceof Node)) return null;
+  return t.nodeType === Node.ELEMENT_NODE ? (t as Element) : t.parentElement;
+}
+
 /**
  * Wire up DOM observers and event listeners. We aim for low-frequency,
  * high-signal events rather than streaming raw telemetry.
@@ -28,10 +35,10 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
   window.addEventListener("scroll", scrollHandler, { passive: true });
 
   const clickHandler = (e: Event) => {
-    const target = e.target as HTMLElement | null;
-    if (!target || target.closest("#si-inspector-root")) return;
+    const el = eventTargetElement(e);
+    if (!el || el.closest("#si-inspector-root")) return;
 
-    const ctaEl = target.closest<HTMLElement>(
+    const ctaEl = el.closest<HTMLElement>(
       "[data-si-cta], button.primary, a.cta",
     );
     if (ctaEl) {
@@ -41,28 +48,28 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
         if (role === "finance") p.signals.finance_interactions++;
         if (role === "compare") p.signals.compare_interactions++;
       });
-    } else if (target.closest("main a[href], main button")) {
+    } else if (el.closest("main a[href], main button")) {
       // Nav links and in-page buttons without data-si-cta still move scores (demo feedback).
       update((p) => {
         p.signals.cta_clicks++;
       });
     }
-    if (target.closest("[data-si-price]")) {
+    if (el.closest("[data-si-price]")) {
       update((p) => p.signals.pricing_views++);
     }
-    if (target.closest("[data-si-compare-item]")) {
+    if (el.closest("[data-si-compare-item]")) {
       update((p) => p.signals.compare_interactions++);
     }
-    if (target.closest("[data-si-finance]")) {
+    if (el.closest("[data-si-finance]")) {
       update((p) => p.signals.finance_interactions++);
     }
   };
   document.addEventListener("click", clickHandler, { passive: true, capture: true });
 
   const formHandler = (e: Event) => {
-    const target = e.target as HTMLElement | null;
-    if (!target) return;
-    if (target.closest("[data-si-finance]")) {
+    const el = eventTargetElement(e);
+    if (!el) return;
+    if (el.closest("[data-si-finance]")) {
       update((p) => p.signals.finance_interactions++);
     }
   };
