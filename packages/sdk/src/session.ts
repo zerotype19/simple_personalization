@@ -6,7 +6,10 @@ import type {
 } from "@si/shared";
 import { detectReturnVisit, safeGetJSON, safeSetJSON } from "./storage";
 
-const SESSION_KEY = "si:session";
+/** sessionStorage key for the persisted SessionProfile (not a cookie). */
+export const SI_SESSION_STORAGE_KEY = "si:session";
+
+const SESSION_KEY = SI_SESSION_STORAGE_KEY;
 
 function generateId(): string {
   // RFC4122-ish v4 without crypto.subtle dependency.

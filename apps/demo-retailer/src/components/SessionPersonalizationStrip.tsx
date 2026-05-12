@@ -1,12 +1,11 @@
 import type { SessionProfile } from "@si/shared";
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   buildRuleContext,
-  clearTreatments,
   DEFAULT_CONFIG,
   evaluateExpression,
   getState,
-  resetProfile,
+  softResetSession,
   subscribe,
 } from "@si/sdk";
 
@@ -18,49 +17,6 @@ const TREATMENT_LABELS: Record<string, string> = {
 };
 
 type StripKey = "control" | "experiment" | "rules" | "mixed" | "pending_home" | "idle";
-
-/** Fingerprint for useSyncExternalStore: getSnapshot must be stable when the store has not changed (React 18). */
-function fingerprint(p: SessionProfile): string {
-  return JSON.stringify({
-    e: p.experiment_assignment,
-    at: p.active_treatments,
-    i: Math.round(p.intent_score * 10) / 10,
-    u: Math.round(p.urgency_score * 10) / 10,
-    g: Math.round(p.engagement_score * 10) / 10,
-    s: p.signals,
-    page: p.page_type,
-    aff: p.category_affinity,
-    updated: p.updated_at,
-  });
-}
-
-let siStripCache: { fp: string; snap: SessionProfile } | null = null;
-
-function subscribeStrip(onStoreChange: () => void): () => void {
-  try {
-    return subscribe((p) => {
-      const fp = fingerprint(p);
-      if (!siStripCache || fp !== siStripCache.fp) {
-        siStripCache = { fp, snap: p };
-        onStoreChange();
-      }
-    });
-  } catch {
-    return () => {};
-  }
-}
-
-function getStripSnapshot(): SessionProfile | null {
-  try {
-    const p = getState();
-    const fp = fingerprint(p);
-    if (siStripCache && siStripCache.fp === fp) return siStripCache.snap;
-    siStripCache = { fp, snap: p };
-    return p;
-  } catch {
-    return siStripCache?.snap ?? null;
-  }
-}
 
 const STRIP_LEGEND: { key: StripKey; label: string; swatch: string; hint?: string }[] = [
   { key: "control", label: "A/B control", swatch: "bg-amber-500", hint: "no DOM treatments" },
@@ -151,7 +107,22 @@ function treatmentRuleRows(p: SessionProfile) {
 }
 
 export default function SessionPersonalizationStrip() {
-  const profile = useSyncExternalStore(subscribeStrip, getStripSnapshot, getStripSnapshot);
+  const [profile, setProfile] = useState<SessionProfile | null>(() => {
+    try {
+      return getState();
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      return subscribe(() => setProfile(getState()));
+    } catch {
+      return undefined;
+    }
+  }, []);
+
   const variant = useMemo(() => (profile ? stripVariant(profile) : null), [profile]);
   const ruleRows = useMemo(() => (profile ? treatmentRuleRows(profile) : []), [profile]);
 
@@ -178,12 +149,7 @@ export default function SessionPersonalizationStrip() {
               <button
                 type="button"
                 className="ml-auto rounded-lg border border-slate-600 bg-slate-900 px-2.5 py-1 text-[11px] font-medium text-slate-200 hover:border-indigo-500 hover:text-white sm:ml-0"
-                onClick={() => {
-                  resetProfile();
-                  clearTreatments();
-                  siStripCache = null;
-                  window.location.reload();
-                }}
+                onClick={() => softResetSession()}
               >
                 New session · re-roll A/B
               </button>
@@ -192,10 +158,11 @@ export default function SessionPersonalizationStrip() {
               <strong className="text-white">Why the top state may not move:</strong> in <strong className="text-white">control</strong>, the SDK never applies DOM treatments, so the color key stays on{" "}
               <strong className="text-amber-200">A/B control</strong> even while you click. In <strong className="text-white">treatment</strong> on Home, you may stay on{" "}
               <strong className="text-indigo-200">Experiment</strong> until payment/family/luxury rules also match — then it becomes{" "}
-              <strong className="text-fuchsia-200">mixed</strong>. Use <strong className="text-white">New session</strong> to draw the other variant.
+              <strong className="text-fuchsia-200">mixed</strong>. Use <strong className="text-white">New session</strong> or the inspector{" "}
+              <strong className="text-white">Clear session (no reload)</strong> to re-draw A/B. Open <strong className="text-white">Signals</strong> — numbers should tick when you use nav links, CTAs, finance sliders, or VDP price.
             </p>
             <p className="text-xs leading-relaxed text-slate-400">
-              The <strong className="text-white">rule dots</strong> below always update from your session (scores + clicks + routes).
+              The <strong className="text-white">rule dots</strong> below reflect live <code className="text-slate-500">applies_when</code> math (including in control, where DOM is not changed).
             </p>
             {at.length > 0 ? (
               <ul className="mt-2 list-inside list-disc text-xs text-slate-200">

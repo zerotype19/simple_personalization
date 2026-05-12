@@ -72,6 +72,9 @@ export class SessionIntelRuntime {
       this.stopInspector = mountInspector({
         getState: () => this.getState(),
         subscribe: (cb) => this.subscribe(cb),
+        onSoftReset: () => {
+          this.softResetSession();
+        },
         onReset: () => {
           resetProfile();
           clearTreatments();
@@ -118,6 +121,22 @@ export class SessionIntelRuntime {
     this.converted = true;
     this.conversionType = type;
     void this.batcher?.flush("conversion");
+  }
+
+  /**
+   * Clears persisted session storage, starts a fresh session id, re-draws A/B assignment,
+   * clears applied DOM treatments, and re-runs scoring — **without** a full page reload.
+   */
+  softResetSession(): void {
+    resetProfile();
+    clearTreatments();
+    this.converted = false;
+    this.conversionType = null;
+    const ctx = inferPageContext();
+    this.profile = loadOrCreateProfile(ctx.page_type);
+    this.profile.experiment_assignment = assignExperiments(this.config.experiments, this.profile);
+    this.lastContextUrl = null;
+    this.tick(ctx);
   }
 
   private emit(): void {

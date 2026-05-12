@@ -3,6 +3,8 @@ import type { SessionProfile } from "@si/shared";
 export interface InspectorOptions {
   getState: () => SessionProfile;
   subscribe: (cb: (p: SessionProfile) => void) => () => void;
+  /** Clear `si:session` storage, new session id, re-roll A/B, re-apply — no reload. */
+  onSoftReset: () => void;
   onReset: () => void;
   onTogglePersonalization: (enabled: boolean) => void;
   onForcePersona: (persona: string | null) => void;
@@ -54,7 +56,7 @@ export function mountInspector(opts: InspectorOptions): () => void {
   <div id="si-inspector-header">
     <div>
       <h2>Session Intelligence</h2>
-      <div class="si-muted">Ctrl+Shift+D to toggle</div>
+      <div class="si-muted">Ctrl+Shift+D or ⌘+Shift+D to toggle</div>
     </div>
     <button class="si-btn" id="si-close">Close</button>
   </div>
@@ -75,7 +77,8 @@ export function mountInspector(opts: InspectorOptions): () => void {
   };
 
   const keyHandler = (e: KeyboardEvent) => {
-    if (e.ctrlKey && e.shiftKey && (e.key === "D" || e.key === "d")) {
+    const mod = e.ctrlKey || e.metaKey;
+    if (mod && e.shiftKey && (e.key === "D" || e.key === "d")) {
       e.preventDefault();
       toggle();
     }
@@ -186,11 +189,23 @@ export function mountInspector(opts: InspectorOptions): () => void {
       </div>
 
       <div class="si-card">
+        <h3>Session storage</h3>
+        <p class="si-muted" style="margin:0 0 8px;line-height:1.45;">
+          SI keeps one anonymous profile in <b>sessionStorage</b> under key <code style="font-size:11px;">si:session</code>
+          (not a cookie). Clearing it gives you a new session id and a fresh A/B coin flip.
+        </p>
+        <div class="si-btn-row">
+          <button class="si-btn primary" id="si-soft-reset">Clear session (no reload)</button>
+          <button class="si-btn danger" id="si-hard-reset">Clear session &amp; reload</button>
+        </div>
+      </div>
+
+      <div class="si-card">
         <h3>Controls</h3>
+        <div class="si-muted" style="margin-bottom:8px;">Personalization: <b>${persoOn ? "ON" : "OFF"}</b></div>
         <div class="si-btn-row">
           <button class="si-btn primary" id="si-toggle-perso">${persoOn ? "Disable" : "Enable"} personalization</button>
           <button class="si-btn" id="si-export">Export state</button>
-          <button class="si-btn danger" id="si-reset">Reset session</button>
         </div>
         <div style="margin-top:10px;" class="si-muted">Force persona</div>
         <div class="si-btn-row" id="si-personas"></div>
@@ -213,9 +228,13 @@ export function mountInspector(opts: InspectorOptions): () => void {
       }
     });
 
-    body.querySelector("#si-reset")?.addEventListener("click", () => {
-      opts.onReset();
+    body.querySelector("#si-soft-reset")?.addEventListener("click", () => {
+      opts.onSoftReset();
       render();
+    });
+
+    body.querySelector("#si-hard-reset")?.addEventListener("click", () => {
+      opts.onReset();
     });
 
     const personaRow = body.querySelector("#si-personas") as HTMLDivElement;

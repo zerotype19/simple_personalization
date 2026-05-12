@@ -31,7 +31,12 @@ export function markConversion(type?: string) {
   singleton?.markConversion(type);
 }
 
+/** Clear `si:session`, new anonymous session, new A/B draw, re-score — no page reload. */
+export function softResetSession(): void {
+  singleton?.softResetSession();
+}
+
 export { buildRuleContext, evaluateExpression } from "./rules";
 export { DEFAULT_CONFIG } from "./defaults";
-export { resetProfile } from "./session";
+export { resetProfile, SI_SESSION_STORAGE_KEY } from "./session";
 export { clearTreatments } from "./personalization";

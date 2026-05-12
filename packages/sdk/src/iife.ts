@@ -8,6 +8,7 @@ declare global {
       getState: () => import("@si/shared").SessionProfile;
       subscribe: (cb: (p: import("@si/shared").SessionProfile) => void) => () => void;
       markConversion: (type?: string) => void;
+      softResetSession: typeof api.softResetSession;
     };
     SessionIntelBundle?: {
       bootFromScriptTag: () => Promise<void>;
@@ -31,6 +32,7 @@ export function boot(): void {
         getState: () => rt.getState(),
         subscribe: (cb) => rt.subscribe(cb),
         markConversion: (t?: string) => rt.markConversion(t),
+        softResetSession: () => api.softResetSession(),
       };
     },
   };

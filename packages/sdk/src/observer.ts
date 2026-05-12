@@ -29,7 +29,8 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
 
   const clickHandler = (e: Event) => {
     const target = e.target as HTMLElement | null;
-    if (!target) return;
+    if (!target || target.closest("#si-inspector-root")) return;
+
     const ctaEl = target.closest<HTMLElement>(
       "[data-si-cta], button.primary, a.cta",
     );
@@ -39,6 +40,11 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
         p.signals.cta_clicks++;
         if (role === "finance") p.signals.finance_interactions++;
         if (role === "compare") p.signals.compare_interactions++;
+      });
+    } else if (target.closest("main a[href], main button")) {
+      // Nav links and in-page buttons without data-si-cta still move scores (demo feedback).
+      update((p) => {
+        p.signals.cta_clicks++;
       });
     }
     if (target.closest("[data-si-price]")) {
