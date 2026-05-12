@@ -156,7 +156,7 @@ async function handleCollect(request: Request, env: Env, ctx: ExecutionContext):
         p.summary.journey_stage,
         treatmentId,
         p.converted ? 1 : 0,
-        p.conversion_type,
+        p.conversion_type ?? null,
         p.experiment_assignment ? JSON.stringify(p.experiment_assignment) : null,
         JSON.stringify(p.active_treatments ?? []),
         createdAt,
@@ -170,12 +170,21 @@ async function handleCollect(request: Request, env: Env, ctx: ExecutionContext):
 
 async function handleSummary(env: Env): Promise<Response> {
   const row = await env.SI_DB.prepare(
-    `SELECT
-       COUNT(*) as sessions,
-       SUM(CASE WHEN converted = 1 THEN 1 ELSE 0 END) as conversions,
-       AVG(intent_score) as avg_intent,
-       AVG(engagement_score) as avg_engagement
-     FROM sessions_summary`,
+    `WITH per_session AS (
+       SELECT
+         session_id,
+         MAX(converted) AS converted,
+         AVG(intent_score) AS intent,
+         AVG(engagement_score) AS engagement
+       FROM sessions_summary
+       GROUP BY session_id
+     )
+     SELECT
+       COUNT(*) AS sessions,
+       SUM(CASE WHEN converted = 1 THEN 1 ELSE 0 END) AS conversions,
+       AVG(intent) AS avg_intent,
+       AVG(engagement) AS avg_engagement
+     FROM per_session`,
   ).first<{
     sessions: number | null;
     conversions: number | null;
@@ -199,12 +208,16 @@ async function handleExperiments(env: Env): Promise<Response> {
     `SELECT
        json_extract(experiment_json, '$.experiment_id') as experiment_id,
        json_extract(experiment_json, '$.variant_id') as variant_id,
-       CASE WHEN json_extract(experiment_json, '$.is_control') = 1 THEN 1 ELSE 0 END as is_control,
-       COUNT(*) as sessions,
-       AVG(CASE WHEN json_extract(summary_json, '$.pages') > 0
-            THEN CAST(json_extract(summary_json, '$.cta_clicks') AS REAL) / CAST(json_extract(summary_json, '$.pages') AS REAL)
-            ELSE 0.0 END) as cta_ctr,
-       AVG(CASE WHEN converted = 1 THEN 1.0 ELSE 0.0 END) as conversion_rate,
+       CASE
+         WHEN json_type(experiment_json, '$.is_control') = 'true' THEN 1
+         WHEN CAST(json_extract(experiment_json, '$.is_control') AS INTEGER) = 1 THEN 1
+         ELSE 0
+       END as is_control,
+       COUNT(DISTINCT session_id) as sessions,
+       COALESCE(SUM(CAST(json_extract(summary_json, '$.cta_clicks') AS REAL)), 0)
+         / NULLIF(COALESCE(SUM(CAST(json_extract(summary_json, '$.pages') AS REAL)), 0), 0) as cta_ctr,
+       COUNT(DISTINCT CASE WHEN converted = 1 THEN session_id END) * 1.0
+         / NULLIF(COUNT(DISTINCT session_id), 0) as conversion_rate,
        AVG(engagement_score) as avg_engagement
      FROM sessions_summary
      WHERE experiment_json IS NOT NULL
@@ -295,10 +308,22 @@ function validatePayload(payload: unknown): string | null {
   if (typeof p.origin !== "string") return "invalid_origin";
   if (!p.summary || typeof p.summary !== "object") return "invalid_summary";
   const s = p.summary;
-  if (typeof s.pages !== "number") return "invalid_summary_pages";
-  if (typeof s.intent_score !== "number") return "invalid_summary_intent";
-  if (typeof s.engagement_score !== "number") return "invalid_summary_engagement";
+  const num = (v: unknown) => typeof v === "number" && Number.isFinite(v);
+  if (!num(s.pages) || s.pages < 0) return "invalid_summary_pages";
+  if (!num(s.vdp_views) || s.vdp_views < 0) return "invalid_summary_vdp";
+  if (!num(s.pricing_views) || s.pricing_views < 0) return "invalid_summary_pricing";
+  if (!num(s.finance_interactions) || s.finance_interactions < 0) return "invalid_summary_finance";
+  if (!num(s.compare_interactions) || s.compare_interactions < 0) return "invalid_summary_compare";
+  if (!num(s.cta_clicks) || s.cta_clicks < 0) return "invalid_summary_cta";
+  if (!num(s.max_scroll_depth) || s.max_scroll_depth < 0) return "invalid_summary_scroll";
+  if (!num(s.intent_score)) return "invalid_summary_intent";
+  if (!num(s.urgency_score)) return "invalid_summary_urgency";
+  if (!num(s.engagement_score)) return "invalid_summary_engagement";
   if (typeof s.journey_stage !== "string") return "invalid_summary_stage";
+  if (!s.category_affinity || typeof s.category_affinity !== "object") return "invalid_summary_affinity";
+  for (const v of Object.values(s.category_affinity)) {
+    if (!num(v) || v < 0 || v > 1.001) return "invalid_summary_affinity_value";
+  }
   if (typeof p.converted !== "boolean") return "invalid_converted";
   return null;
 }

@@ -38,7 +38,7 @@ export default function App() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5">
           <div>
             <div className="text-sm font-semibold tracking-wide text-white">Session Intelligence</div>
-            <div className="text-xs text-slate-400">MVP dashboard — experiments + ingestion summary</div>
+            <div className="text-xs text-slate-400">MVP dashboard — unique sessions in D1 + experiment metrics (demo seed + live).</div>
           </div>
         </div>
       </header>
@@ -56,7 +56,7 @@ export default function App() {
         ) : null}
 
         <section className="grid gap-4 md:grid-cols-4">
-          <Metric title="Sessions ingested" value={summary ? String(summary.sessions_ingested) : "—"} />
+          <Metric title="Sessions (unique)" value={summary ? String(summary.sessions_ingested) : "—"} />
           <Metric title="Conversions" value={summary ? String(summary.conversions) : "—"} />
           <Metric title="Avg intent" value={summary ? summary.avg_intent.toFixed(1) : "—"} />
           <Metric title="Avg engagement" value={summary ? summary.avg_engagement.toFixed(1) : "—"} />
@@ -83,7 +83,7 @@ export default function App() {
                         {exp.status}
                       </span>{" "}
                       <span className="text-slate-500">·</span>{" "}
-                      <span className="text-slate-400">{exp.sessions} sessions (demo+live)</span>
+                      <span className="text-slate-400">{exp.sessions} unique sessions (demo + live)</span>
                     </div>
                   </div>
                 </div>
@@ -93,7 +93,7 @@ export default function App() {
                     <thead className="text-xs uppercase tracking-wide text-slate-400">
                       <tr>
                         <th className="py-2 pr-4">Variant</th>
-                        <th className="py-2 pr-4">Sessions</th>
+                        <th className="py-2 pr-4">Sessions (unique)</th>
                         <th className="py-2 pr-4">CTA CTR</th>
                         <th className="py-2 pr-4">Conversion</th>
                         <th className="py-2 pr-4">Avg engagement</th>
