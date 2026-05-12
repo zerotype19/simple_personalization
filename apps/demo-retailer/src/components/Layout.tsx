@@ -46,9 +46,11 @@ export default function Layout() {
         <Outlet />
       </main>
       <footer className="border-t border-slate-800 py-10 text-center text-xs text-slate-500">
-        Fictional dealership for product demo. Press{" "}
-        <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">Ctrl+Shift+D</span> to open
-        Session Intelligence inspector.
+        Fictional dealership for product demo. Open the Session Intelligence inspector with{" "}
+        <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">Ctrl+Shift+D</span>
+        <span className="text-slate-500"> (Windows/Linux) or </span>
+        <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">Control+Shift+D</span>
+        <span className="text-slate-500"> (Mac)</span>.
       </footer>
     </div>
   );
