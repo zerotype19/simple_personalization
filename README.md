@@ -10,6 +10,8 @@ Monorepo implementing the **Session Intelligence** MVP described in the product 
 - `apps/dashboard` — operator dashboard (React + Vite)
 - `worker` — Cloudflare Worker (`GET /config`, `POST /collect`, `GET /dashboard/*`)
 
+**Live Cloudflare (Worker + D1 + Pages):** step-by-step checklist in [`docs/CLOUDFLARE.md`](docs/CLOUDFLARE.md).
+
 ## Prereqs
 
 - Node **20+** and **pnpm** (`corepack enable` recommended)
