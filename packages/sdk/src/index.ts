@@ -40,3 +40,4 @@ export { buildRuleContext, evaluateExpression } from "./rules";
 export { DEFAULT_CONFIG } from "./defaults";
 export { resetProfile, SI_SESSION_STORAGE_KEY } from "./session";
 export { clearTreatments } from "./personalization";
+export { computeClampedScores, mergeAffinityFromHits, recomputeScores } from "./scorer";

@@ -15,10 +15,14 @@
     "cloudflare:up": "bash scripts/cloudflare-up.sh",
     "cloudflare:deploy:worker": "pnpm --filter @si/worker deploy",
     "cloudflare:deploy:pages": "pnpm exec wrangler pages deploy --cwd apps/demo-retailer --branch main --commit-dirty && pnpm exec wrangler pages deploy --cwd apps/dashboard --branch main --commit-dirty",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
+    "happy-dom": "^15.11.7",
     "typescript": "^5.6.3",
+    "vitest": "^2.1.8",
     "wrangler": "^3.114.0"
   },
   "engines": {

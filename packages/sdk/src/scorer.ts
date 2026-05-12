@@ -1,16 +1,17 @@
-import type { JourneyStage, SessionProfile } from "@si/shared";
+import type { JourneyStage, SessionProfile, SessionSignals } from "@si/shared";
 
 function clamp(v: number, min = 0, max = 100): number {
   return Math.max(min, Math.min(max, Math.round(v)));
 }
 
 /**
- * Recompute intent / urgency / engagement / journey stage / category affinity
- * from current signals. All scoring is local, deterministic and explainable.
+ * Clamped intent / urgency / engagement from signals (single source for `recomputeScores` + tests).
  */
-export function recomputeScores(profile: SessionProfile): SessionProfile {
-  const s = profile.signals;
-
+export function computeClampedScores(s: SessionSignals): {
+  intent_score: number;
+  urgency_score: number;
+  engagement_score: number;
+} {
   const intent =
     s.vdp_views * 14 +
     s.pricing_views * 12 +
@@ -34,28 +35,49 @@ export function recomputeScores(profile: SessionProfile): SessionProfile {
     Math.min(s.session_duration_ms / 1000 / 15, 8) * 4 +
     (s.vdp_views > 0 ? 6 : 0);
 
-  profile.intent_score = clamp(intent);
-  profile.urgency_score = clamp(urgency);
-  profile.engagement_score = clamp(engagement);
+  return {
+    intent_score: clamp(intent),
+    urgency_score: clamp(urgency),
+    engagement_score: clamp(engagement),
+  };
+}
 
-  // Category affinity: EMA toward each tag's share of *session* keyword hits
-  // (signals.category_hits). Hits are merged on each route change in runtime with a
-  // decay step so interest can shift (e.g. SUV browse → sedan VDP) without stale mass.
-  const cumulative = s.category_hits;
-  const totalHits = Object.values(cumulative).reduce((a, b) => a + b, 0);
+/**
+ * EMA category affinity from cumulative session keyword hits (same math as `recomputeScores`).
+ */
+export function mergeAffinityFromHits(
+  prevAffinity: Record<string, number>,
+  cumulativeHits: Record<string, number>,
+): Record<string, number> {
+  const next: Record<string, number> = { ...prevAffinity };
+  const totalHits = Object.values(cumulativeHits).reduce((a, b) => a + b, 0);
   if (totalHits > 0) {
-    for (const [tag, hits] of Object.entries(cumulative)) {
+    for (const [tag, hits] of Object.entries(cumulativeHits)) {
       if (hits <= 0) continue;
-      const prev = profile.category_affinity[tag] ?? 0;
+      const prev = next[tag] ?? 0;
       const sessionShare = hits / totalHits;
-      profile.category_affinity[tag] = +(prev * 0.6 + sessionShare * 0.4).toFixed(3);
+      next[tag] = +(prev * 0.6 + sessionShare * 0.4).toFixed(3);
     }
   }
-  for (const tag of Object.keys(profile.category_affinity)) {
-    if (!(tag in cumulative) || (cumulative[tag] ?? 0) <= 0) {
-      delete profile.category_affinity[tag];
+  for (const tag of Object.keys(next)) {
+    if (!(tag in cumulativeHits) || (cumulativeHits[tag] ?? 0) <= 0) {
+      delete next[tag];
     }
   }
+  return next;
+}
+
+/**
+ * Recompute intent / urgency / engagement / journey stage / category affinity
+ * from current signals. All scoring is local, deterministic and explainable.
+ */
+export function recomputeScores(profile: SessionProfile): SessionProfile {
+  const scores = computeClampedScores(profile.signals);
+  profile.intent_score = scores.intent_score;
+  profile.urgency_score = scores.urgency_score;
+  profile.engagement_score = scores.engagement_score;
+
+  profile.category_affinity = mergeAffinityFromHits(profile.category_affinity, profile.signals.category_hits);
 
   profile.journey_stage = pickJourneyStage(profile);
   return profile;

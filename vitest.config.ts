@@ -1,0 +1,15 @@
+import path from "node:path";
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    environment: "happy-dom",
+    include: ["packages/sdk/src/**/*.test.ts", "worker/src/**/*.test.ts"],
+    passWithNoTests: false,
+  },
+  resolve: {
+    alias: {
+      "@si/shared": path.resolve(__dirname, "packages/shared/src/index.ts"),
+    },
+  },
+});

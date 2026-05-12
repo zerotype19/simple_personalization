@@ -1,4 +1,5 @@
 import type { AnalyticsPayload, DashboardSummary, ExperimentReport, VariantReport } from "@si/shared";
+import { clamp01, mergeExperiment } from "./analyticsMath";
 import { DEFAULT_REMOTE_CONFIG } from "./defaultConfig";
 
 type Env = {
@@ -255,53 +256,7 @@ async function handleExperiments(env: Env): Promise<Response> {
   return json({ experiments: merged });
 }
 
-function mergeExperiment(demo: ExperimentReport, liveVariants?: Map<string, VariantReport>): ExperimentReport {
-  if (!liveVariants || liveVariants.size === 0) return demo;
-
-  const mergedVariants = demo.variants.map((v) => {
-    const lv = liveVariants.get(v.id);
-    if (!lv) return v;
-    const sessions = v.sessions + lv.sessions;
-    const cta_ctr = weightedAvg(v.cta_ctr, v.sessions, lv.cta_ctr, lv.sessions);
-    const conversion_rate = weightedAvg(v.conversion_rate, v.sessions, lv.conversion_rate, lv.sessions);
-    const avg_engagement = weightedAvg(v.avg_engagement, v.sessions, lv.avg_engagement, lv.sessions);
-    return { ...v, sessions, cta_ctr, conversion_rate, avg_engagement };
-  });
-
-  const control = mergedVariants.find((x) => x.is_control);
-  const treatment = mergedVariants.find((x) => !x.is_control);
-  const lift_cta =
-    control && treatment && control.cta_ctr > 0 ? (treatment.cta_ctr - control.cta_ctr) / control.cta_ctr : null;
-  const lift_conversion =
-    control && treatment && control.conversion_rate > 0
-      ? (treatment.conversion_rate - control.conversion_rate) / control.conversion_rate
-      : null;
-
-  const withLift = mergedVariants.map((vv) => ({
-    ...vv,
-    lift_cta: vv.is_control ? null : lift_cta,
-    lift_conversion: vv.is_control ? null : lift_conversion,
-  }));
-
-  return {
-    ...demo,
-    sessions: withLift.reduce((a, v) => a + v.sessions, 0),
-    variants: withLift,
-  };
-}
-
-function weightedAvg(a: number, wa: number, b: number, wb: number): number {
-  const denom = wa + wb;
-  if (denom <= 0) return 0;
-  return (a * wa + b * wb) / denom;
-}
-
-function clamp01(x: number): number {
-  if (!Number.isFinite(x)) return 0;
-  return Math.max(0, Math.min(1, x));
-}
-
-function validatePayload(payload: unknown): string | null {
+export function validatePayload(payload: unknown): string | null {
   if (!payload || typeof payload !== "object") return "invalid_payload";
   const p = payload as Partial<AnalyticsPayload>;
   if (typeof p.session_id !== "string" || p.session_id.length < 6) return "invalid_session_id";
