@@ -1,0 +1,19 @@
+name = "session-intelligence-worker"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[vars]
+# Optional: set a shared secret in production and validate `x-si-token` headers.
+SI_ENV = "dev"
+
+# KV is optional for MVP local dev. Uncomment and set a real namespace id when ready.
+# [[kv_namespaces]]
+# binding = "SI_KV"
+# id = "REPLACE_ME"
+
+[[d1_databases]]
+binding = "SI_DB"
+database_name = "session-intelligence"
+database_id = "REPLACE_ME"
+migrations_dir = "db/migrations"
+

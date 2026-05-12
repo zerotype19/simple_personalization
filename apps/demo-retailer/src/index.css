@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+@keyframes si-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.si-pulse {
+  animation: si-pulse 1.6s ease-out infinite;
+}

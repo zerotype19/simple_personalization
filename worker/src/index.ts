@@ -1,0 +1,343 @@
+import type { AnalyticsPayload, DashboardSummary, ExperimentReport, VariantReport } from "@si/shared";
+import { DEFAULT_REMOTE_CONFIG } from "./defaultConfig";
+
+type Env = {
+  SI_DB: D1Database;
+  SI_KV?: KVNamespace;
+  SI_ENV?: string;
+};
+
+const corsHeaders: HeadersInit = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET,POST,OPTIONS",
+  "access-control-allow-headers": "content-type",
+};
+
+function json(data: unknown, init: ResponseInit = {}): Response {
+  return new Response(JSON.stringify(data), {
+    ...init,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      ...(init.headers ?? {}),
+      ...corsHeaders,
+    },
+  });
+}
+
+const DEMO_EXPERIMENTS: ExperimentReport[] = [
+  {
+    id: "exp_personalization_v1",
+    name: "Velocity Personalization v1",
+    status: "running",
+    sessions: 12480,
+    variants: [
+      {
+        id: "control",
+        name: "Control",
+        is_control: true,
+        sessions: 6240,
+        cta_ctr: 0.082,
+        conversion_rate: 0.018,
+        avg_engagement: 61.2,
+        lift_cta: null,
+        lift_conversion: null,
+      },
+      {
+        id: "treatment",
+        name: "Treatment",
+        is_control: false,
+        sessions: 6240,
+        cta_ctr: 0.097,
+        conversion_rate: 0.021,
+        avg_engagement: 64.8,
+        lift_cta: (0.097 - 0.082) / 0.082,
+        lift_conversion: (0.021 - 0.018) / 0.018,
+      },
+    ],
+  },
+];
+
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const url = new URL(request.url);
+
+    if (request.method === "OPTIONS") {
+      return new Response(null, { headers: corsHeaders });
+    }
+
+    try {
+      if (request.method === "GET" && url.pathname === "/config") {
+        return await handleConfig(env);
+      }
+
+      if (request.method === "POST" && url.pathname === "/collect") {
+        return await handleCollect(request, env, ctx);
+      }
+
+      if (request.method === "GET" && url.pathname === "/dashboard/experiments") {
+        return await handleExperiments(env);
+      }
+
+      if (request.method === "GET" && url.pathname === "/dashboard/summary") {
+        return await handleSummary(env);
+      }
+
+      return json({ error: "not_found" }, { status: 404 });
+    } catch (e) {
+      return json({ error: "internal_error", message: String(e) }, { status: 500 });
+    }
+  },
+};
+
+async function handleConfig(env: Env): Promise<Response> {
+  const kv = env.SI_KV;
+  if (kv) {
+    const raw = await kv.get("config:active", { type: "text" });
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        return json(deepMerge(clone(DEFAULT_REMOTE_CONFIG) as any, parsed));
+      } catch {
+        // fall through
+      }
+    }
+  }
+  return json(DEFAULT_REMOTE_CONFIG);
+}
+
+async function handleCollect(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+  if (!(await rateLimit(env, ip))) {
+    return json({ error: "rate_limited" }, { status: 429 });
+  }
+
+  const text = await request.text();
+  if (text.length > 50_000) {
+    return json({ error: "payload_too_large" }, { status: 413 });
+  }
+
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    return json({ error: "invalid_json" }, { status: 400 });
+  }
+
+  const parsed = body as { reason?: unknown; payload?: unknown };
+  if (!parsed || typeof parsed !== "object") return json({ error: "invalid_body" }, { status: 400 });
+  if (typeof parsed.reason !== "string") return json({ error: "invalid_reason" }, { status: 400 });
+
+  const payload = parsed.payload;
+  const err = validatePayload(payload);
+  if (err) return json({ error: err }, { status: 400 });
+
+  const p = payload as AnalyticsPayload;
+  const id = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
+  const treatmentId = p.active_treatments?.[0]?.treatment_id ?? null;
+
+  ctx.waitUntil(
+    env.SI_DB.prepare(
+      `INSERT INTO sessions_summary (
+        id, session_id, origin, ingest_reason, summary_json,
+        intent_score, urgency_score, engagement_score, journey_stage,
+        treatment_id, converted, conversion_type, experiment_json, treatments_json, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        id,
+        p.session_id,
+        p.origin,
+        parsed.reason,
+        JSON.stringify(p.summary),
+        p.summary.intent_score,
+        p.summary.urgency_score,
+        p.summary.engagement_score,
+        p.summary.journey_stage,
+        treatmentId,
+        p.converted ? 1 : 0,
+        p.conversion_type,
+        p.experiment_assignment ? JSON.stringify(p.experiment_assignment) : null,
+        JSON.stringify(p.active_treatments ?? []),
+        createdAt,
+      )
+      .run()
+      .catch(() => undefined),
+  );
+
+  return json({ ok: true });
+}
+
+async function handleSummary(env: Env): Promise<Response> {
+  const row = await env.SI_DB.prepare(
+    `SELECT
+       COUNT(*) as sessions,
+       SUM(CASE WHEN converted = 1 THEN 1 ELSE 0 END) as conversions,
+       AVG(intent_score) as avg_intent,
+       AVG(engagement_score) as avg_engagement
+     FROM sessions_summary`,
+  ).first<{
+    sessions: number | null;
+    conversions: number | null;
+    avg_intent: number | null;
+    avg_engagement: number | null;
+  }>();
+
+  const summary: DashboardSummary = {
+    sessions_ingested: row?.sessions ?? 0,
+    conversions: row?.conversions ?? 0,
+    avg_intent: row?.avg_intent ?? 0,
+    avg_engagement: row?.avg_engagement ?? 0,
+    updated_at: Date.now(),
+  };
+
+  return json(summary);
+}
+
+async function handleExperiments(env: Env): Promise<Response> {
+  const rows = await env.SI_DB.prepare(
+    `SELECT
+       json_extract(experiment_json, '$.experiment_id') as experiment_id,
+       json_extract(experiment_json, '$.variant_id') as variant_id,
+       CASE WHEN json_extract(experiment_json, '$.is_control') = 1 THEN 1 ELSE 0 END as is_control,
+       COUNT(*) as sessions,
+       AVG(CASE WHEN json_extract(summary_json, '$.pages') > 0
+            THEN CAST(json_extract(summary_json, '$.cta_clicks') AS REAL) / CAST(json_extract(summary_json, '$.pages') AS REAL)
+            ELSE 0.0 END) as cta_ctr,
+       AVG(CASE WHEN converted = 1 THEN 1.0 ELSE 0.0 END) as conversion_rate,
+       AVG(engagement_score) as avg_engagement
+     FROM sessions_summary
+     WHERE experiment_json IS NOT NULL
+     GROUP BY 1, 2, 3`,
+  ).all<{
+    experiment_id: string | null;
+    variant_id: string | null;
+    is_control: number | null;
+    sessions: number | null;
+    cta_ctr: number | null;
+    conversion_rate: number | null;
+    avg_engagement: number | null;
+  }>();
+
+  const live = new Map<string, Map<string, VariantReport>>();
+  for (const r of rows.results ?? []) {
+    if (!r.experiment_id || !r.variant_id) continue;
+    const expId = r.experiment_id;
+    if (!live.has(expId)) live.set(expId, new Map());
+    const m = live.get(expId)!;
+    m.set(r.variant_id, {
+      id: r.variant_id,
+      name: r.variant_id,
+      is_control: !!r.is_control,
+      sessions: r.sessions ?? 0,
+      cta_ctr: clamp01(r.cta_ctr ?? 0),
+      conversion_rate: clamp01(r.conversion_rate ?? 0),
+      avg_engagement: r.avg_engagement ?? 0,
+      lift_cta: null,
+      lift_conversion: null,
+    });
+  }
+
+  const merged: ExperimentReport[] = DEMO_EXPERIMENTS.map((demo) => mergeExperiment(demo, live.get(demo.id)));
+  return json({ experiments: merged });
+}
+
+function mergeExperiment(demo: ExperimentReport, liveVariants?: Map<string, VariantReport>): ExperimentReport {
+  if (!liveVariants || liveVariants.size === 0) return demo;
+
+  const mergedVariants = demo.variants.map((v) => {
+    const lv = liveVariants.get(v.id);
+    if (!lv) return v;
+    const sessions = v.sessions + lv.sessions;
+    const cta_ctr = weightedAvg(v.cta_ctr, v.sessions, lv.cta_ctr, lv.sessions);
+    const conversion_rate = weightedAvg(v.conversion_rate, v.sessions, lv.conversion_rate, lv.sessions);
+    const avg_engagement = weightedAvg(v.avg_engagement, v.sessions, lv.avg_engagement, lv.sessions);
+    return { ...v, sessions, cta_ctr, conversion_rate, avg_engagement };
+  });
+
+  const control = mergedVariants.find((x) => x.is_control);
+  const treatment = mergedVariants.find((x) => !x.is_control);
+  const lift_cta =
+    control && treatment && control.cta_ctr > 0 ? (treatment.cta_ctr - control.cta_ctr) / control.cta_ctr : null;
+  const lift_conversion =
+    control && treatment && control.conversion_rate > 0
+      ? (treatment.conversion_rate - control.conversion_rate) / control.conversion_rate
+      : null;
+
+  const withLift = mergedVariants.map((vv) => ({
+    ...vv,
+    lift_cta: vv.is_control ? null : lift_cta,
+    lift_conversion: vv.is_control ? null : lift_conversion,
+  }));
+
+  return {
+    ...demo,
+    sessions: withLift.reduce((a, v) => a + v.sessions, 0),
+    variants: withLift,
+  };
+}
+
+function weightedAvg(a: number, wa: number, b: number, wb: number): number {
+  const denom = wa + wb;
+  if (denom <= 0) return 0;
+  return (a * wa + b * wb) / denom;
+}
+
+function clamp01(x: number): number {
+  if (!Number.isFinite(x)) return 0;
+  return Math.max(0, Math.min(1, x));
+}
+
+function validatePayload(payload: unknown): string | null {
+  if (!payload || typeof payload !== "object") return "invalid_payload";
+  const p = payload as Partial<AnalyticsPayload>;
+  if (typeof p.session_id !== "string" || p.session_id.length < 6) return "invalid_session_id";
+  if (typeof p.origin !== "string") return "invalid_origin";
+  if (!p.summary || typeof p.summary !== "object") return "invalid_summary";
+  const s = p.summary;
+  if (typeof s.pages !== "number") return "invalid_summary_pages";
+  if (typeof s.intent_score !== "number") return "invalid_summary_intent";
+  if (typeof s.engagement_score !== "number") return "invalid_summary_engagement";
+  if (typeof s.journey_stage !== "string") return "invalid_summary_stage";
+  if (typeof p.converted !== "boolean") return "invalid_converted";
+  return null;
+}
+
+async function rateLimit(env: Env, ip: string): Promise<boolean> {
+  const kv = env.SI_KV;
+  if (!kv) return true;
+  const key = `rl:collect:${ip}`;
+  const now = Date.now();
+  const windowMs = 60_000;
+  const max = 120;
+
+  const raw = await kv.get(key);
+  const data = raw ? (JSON.parse(raw) as { t: number; n: number }) : { t: now, n: 0 };
+  if (now - data.t > windowMs) {
+    await kv.put(key, JSON.stringify({ t: now, n: 1 }), { expirationTtl: 120 });
+    return true;
+  }
+  if (data.n >= max) return false;
+  await kv.put(key, JSON.stringify({ t: data.t, n: data.n + 1 }), { expirationTtl: 120 });
+  return true;
+}
+
+function deepMerge<T extends Record<string, any>>(base: T, patch: Record<string, any>): T {
+  for (const key of Object.keys(patch)) {
+    const pv = patch[key];
+    if (pv === undefined) continue;
+    const bv = base[key];
+    if (Array.isArray(pv)) {
+      (base as any)[key] = pv;
+    } else if (pv && typeof pv === "object" && !Array.isArray(pv)) {
+      (base as any)[key] = deepMerge((bv && typeof bv === "object" ? bv : {}) as any, pv as any);
+    } else {
+      (base as any)[key] = pv;
+    }
+  }
+  return base;
+}
+
+function clone<T>(v: T): T {
+  return JSON.parse(JSON.stringify(v)) as T;
+}

@@ -1,0 +1,216 @@
+import type { SDKConfig, SessionProfile } from "@si/shared";
+import { Batcher } from "./batcher";
+import { DEFAULT_CONFIG } from "./defaults";
+import { assignExperiments } from "./experiments";
+import { mountInspector } from "./inspector";
+import { startObserver } from "./observer";
+import { applyTreatment, clearTreatments, selectTreatments } from "./personalization";
+import { chooseRecommendation } from "./recommender";
+import { recomputeScores } from "./scorer";
+import { runRules } from "./rules";
+import { loadOrCreateProfile, persistProfile, resetProfile } from "./session";
+import { inferPageContext } from "./site";
+
+export interface BootOptions {
+  /** Absolute URL to fetch JSON config (GET). */
+  configUrl?: string | null;
+  /** Absolute URL for batched analytics (POST). */
+  collectUrl?: string | null;
+  /** Force-enable inspector even if remote config disables it. */
+  forceInspector?: boolean;
+}
+
+export class SessionIntelRuntime {
+  private profile!: SessionProfile;
+  private config: SDKConfig = structuredClone(DEFAULT_CONFIG);
+  private listeners = new Set<(p: SessionProfile) => void>();
+  private stopObserver: (() => void) | null = null;
+  private batcher: Batcher | null = null;
+  private personalizationEnabled = true;
+  private stopInspector: (() => void) | null = null;
+  private converted = false;
+  private conversionType: string | null = null;
+  private lastContextUrl: string | null = null;
+
+  constructor(private opts: BootOptions = {}) {}
+
+  async boot(): Promise<void> {
+    await this.loadConfig();
+    const ctx = inferPageContext();
+    this.profile = loadOrCreateProfile(ctx.page_type);
+
+    this.profile.experiment_assignment = assignExperiments(
+      this.config.experiments,
+      this.profile,
+    );
+
+    this.lastContextUrl = ctx.url;
+    this.tick(ctx);
+
+    this.stopObserver = startObserver(
+      () => inferPageContext().page_type,
+      (mut) => {
+        mut(this.profile);
+        this.tick(inferPageContext());
+      },
+    );
+
+    this.batcher = new Batcher({
+      endpoint: this.opts.collectUrl ?? this.config.collect_endpoint,
+      getProfile: () => this.profile,
+      isConverted: () => this.converted,
+      conversionType: () => this.conversionType,
+    });
+    this.batcher.start();
+
+    const inspectorOn =
+      this.opts.forceInspector ||
+      this.config.inspector_enabled ||
+      window.location.hostname === "localhost";
+
+    if (inspectorOn) {
+      this.stopInspector = mountInspector({
+        getState: () => this.getState(),
+        subscribe: (cb) => this.subscribe(cb),
+        onReset: () => {
+          resetProfile();
+          clearTreatments();
+          window.location.reload();
+        },
+        onTogglePersonalization: (enabled) => {
+          this.personalizationEnabled = enabled;
+          this.tick(inferPageContext());
+        },
+        onForcePersona: (persona) => {
+          this.profile.persona = persona;
+          this.tick(inferPageContext());
+        },
+        getPersonalizationEnabled: () => this.personalizationEnabled,
+      });
+    }
+
+    // Expose conversion hook for demo forms.
+    window.addEventListener("si:conversion", ((e: CustomEvent) => {
+      this.markConversion(e.detail?.type ?? "lead");
+    }) as EventListener);
+  }
+
+  destroy(): void {
+    this.stopObserver?.();
+    this.stopObserver = null;
+    this.batcher?.stop();
+    this.batcher = null;
+    this.stopInspector?.();
+    this.stopInspector = null;
+  }
+
+  getState(): SessionProfile {
+    return structuredClone(this.profile);
+  }
+
+  subscribe(cb: (p: SessionProfile) => void): () => void {
+    this.listeners.add(cb);
+    cb(this.getState());
+    return () => this.listeners.delete(cb);
+  }
+
+  markConversion(type = "lead"): void {
+    this.converted = true;
+    this.conversionType = type;
+    void this.batcher?.flush("conversion");
+  }
+
+  private emit(): void {
+    const snap = this.getState();
+    this.listeners.forEach((l) => l(snap));
+  }
+
+  private async loadConfig(): Promise<void> {
+    const url = this.opts.configUrl ?? DEFAULT_CONFIG.config_endpoint;
+    if (!url) {
+      this.config = structuredClone(DEFAULT_CONFIG);
+      return;
+    }
+    try {
+      const res = await fetch(url, { credentials: "omit" });
+      if (!res.ok) throw new Error(String(res.status));
+      const remote = (await res.json()) as Partial<SDKConfig>;
+      this.config = deepMerge(structuredClone(DEFAULT_CONFIG), remote);
+    } catch {
+      this.config = structuredClone(DEFAULT_CONFIG);
+    }
+  }
+
+  private tick(ctx: ReturnType<typeof inferPageContext>): void {
+    const isNewPageContext = this.lastContextUrl !== ctx.url;
+    this.lastContextUrl = ctx.url;
+
+    if (isNewPageContext) {
+      // Merge lightweight category hits from this page into rolling signal map.
+      for (const [k, v] of Object.entries(ctx.category_hits)) {
+        this.profile.signals.category_hits[k] =
+          (this.profile.signals.category_hits[k] ?? 0) + v;
+      }
+    }
+
+    recomputeScores(this.profile, ctx);
+
+    const { matches } = runRules(this.config.rules, this.profile);
+    const rec = chooseRecommendation(
+      this.profile,
+      matches.map((m) => m.recommendation),
+    );
+    this.profile.next_best_action = rec;
+
+    // Re-assign experiments if none yet.
+    if (!this.profile.experiment_assignment) {
+      this.profile.experiment_assignment = assignExperiments(
+        this.config.experiments,
+        this.profile,
+      );
+    }
+
+    clearTreatments();
+    this.profile.active_treatments = [];
+
+    if (this.personalizationEnabled) {
+      const picks = selectTreatments(this.config.treatments, this.profile);
+      for (const pick of picks) {
+        const def = this.config.treatments.find((t) => t.id === pick.id);
+        if (!def) continue;
+        const applied = applyTreatment(def, pick.source);
+        if (applied.applied_slots.length) {
+          this.profile.active_treatments.push(applied);
+        }
+      }
+    }
+
+    persistProfile(this.profile);
+    this.emit();
+  }
+}
+
+function deepMerge<T extends Record<string, any>>(base: T, patch: Partial<T>): T {
+  for (const key of Object.keys(patch)) {
+    const pv = patch[key as keyof T];
+    if (pv === undefined) continue;
+    const bv = base[key as keyof T];
+    if (Array.isArray(pv)) {
+      (base as any)[key] = pv;
+    } else if (pv && typeof pv === "object" && !Array.isArray(pv)) {
+      (base as any)[key] = deepMerge(
+        (bv && typeof bv === "object" ? bv : {}) as any,
+        pv as any,
+      );
+    } else {
+      (base as any)[key] = pv;
+    }
+  }
+  return base;
+}
+
+declare global {
+  interface WindowEventMap {
+    "si:conversion": CustomEvent<{ type?: string }>;
+  }
+}
