@@ -51,8 +51,9 @@ function setWranglerDatabaseId(toml, id) {
   if (!/^[\da-f-]{36}$/i.test(id)) {
     throw new Error(`Refusing to write invalid database_id: ${id}`);
   }
-  const next = toml.replace(/database_id\s*=\s*"[^"]*"/, `database_id = "${id}"`);
-  if (next === toml) throw new Error("Could not find database_id line in worker/wrangler.toml");
+  const re = /(\[\[d1_databases\]\][\s\S]*?)database_id\s*=\s*"[^"]*"/;
+  if (!re.test(toml)) throw new Error("Could not find [[d1_databases]] / database_id in worker/wrangler.toml");
+  const next = toml.replace(re, (_, head) => `${head}database_id = "${id}"`);
   fs.writeFileSync(wranglerTomlPath, next);
 }
 
@@ -117,6 +118,20 @@ function wranglerPagesFromRoot(appRelative, inherit = true) {
     const detail = inherit ? "" : `\n${r.stdout || ""}\n${r.stderr || ""}`;
     throw new Error(`wrangler pages deploy ${appRelative} failed (exit ${r.status})${detail}`);
   }
+}
+
+function ensurePagesProject(name) {
+  const r = spawnSync(
+    "pnpm",
+    ["exec", "wrangler", "pages", "project", "create", name, "--production-branch", "main"],
+    {
+      cwd: rootDir,
+      encoding: "utf8",
+      env: process.env,
+      stdio: "pipe",
+    },
+  );
+  if (r.status === 0) console.log(`Ensured Pages project exists: ${name}`);
 }
 
 function findD1Uuid(listJson, databaseName) {
@@ -228,6 +243,10 @@ function main() {
   if (!fs.existsSync(demoDist) || !fs.existsSync(dashDist)) {
     throw new Error("Expected dist/ folders after build");
   }
+
+  console.log("\nEnsuring Cloudflare Pages projects exist…");
+  ensurePagesProject(pagesDemoName);
+  ensurePagesProject(pagesDashName);
 
   console.log(`\nDeploying Pages (${pagesDemoName})…`);
   try {

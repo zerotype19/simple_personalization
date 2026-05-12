@@ -15,11 +15,15 @@ if (!id) {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const wranglerPath = path.join(root, "worker", "wrangler.toml");
 let text = fs.readFileSync(wranglerPath, "utf8");
-const needle = 'database_id = "REPLACE_ME"';
-if (!text.includes(needle)) {
-  console.warn("patch-d1: placeholder not found; wrangler.toml may already be configured.");
+const re = /(\[\[d1_databases\]\][\s\S]*?)database_id\s*=\s*"[^"]*"/;
+if (!re.test(text)) {
+  console.warn("patch-d1: no [[d1_databases]] database_id line found.");
   process.exit(0);
 }
-text = text.replace(needle, `database_id = "${id}"`);
-fs.writeFileSync(wranglerPath, text);
+const next = text.replace(re, (_, head) => `${head}database_id = "${id}"`);
+if (next === text) {
+  console.warn("patch-d1: no change applied.");
+  process.exit(0);
+}
+fs.writeFileSync(wranglerPath, next);
 console.log("patch-d1: updated worker/wrangler.toml with D1_DATABASE_ID.");

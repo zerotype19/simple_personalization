@@ -38,16 +38,17 @@ if [[ -z "$UUID" ]]; then
 fi
 echo "Using database_id: $UUID"
 
-node -e "
-const fs = require('fs');
-const p = '$WORKER_DIR/wrangler.toml';
-const uuid = '$UUID';
-let t = fs.readFileSync(p, 'utf8');
-const next = t.replace(/database_id\\s*=\\s*\\\"[^\\\"]*\\\"/, 'database_id = \\\"' + uuid + '\\\"');
-if (next === t) throw new Error('Could not patch database_id in wrangler.toml');
-fs.writeFileSync(p, next);
-"
-echo "Updated worker/wrangler.toml"
+WORKER_TOML="$WORKER_DIR/wrangler.toml" D1_UUID="$UUID" node <<'NODE'
+const fs = require("fs");
+const p = process.env.WORKER_TOML;
+const uuid = process.env.D1_UUID;
+let t = fs.readFileSync(p, "utf8");
+const re = /(\[\[d1_databases\]\][\s\S]*?)database_id\s*=\s*"[^"]*"/;
+if (!re.test(t)) throw new Error("Could not find [[d1_databases]] / database_id in wrangler.toml");
+const next = t.replace(re, (_, head) => `${head}database_id = "${uuid}"`);
+if (next !== t) fs.writeFileSync(p, next);
+NODE
+echo "Updated worker/wrangler.toml (skipped if database_id already matched)"
 
 echo ""
 echo "========== 3) D1 migrations (remote) =========="
@@ -76,6 +77,13 @@ echo ""
 echo "========== 5) Build demo + dashboard =========="
 pnpm --filter @si/demo-retailer build
 pnpm --filter @si/dashboard build
+
+echo ""
+echo "========== 5b) Cloudflare Pages projects (create if missing) =========="
+DEMO_PROJ="$(grep -m1 '^name = ' "$ROOT/apps/demo-retailer/wrangler.toml" | sed -e 's/^name = "\(.*\)"/\1/')"
+DASH_PROJ="$(grep -m1 '^name = ' "$ROOT/apps/dashboard/wrangler.toml" | sed -e 's/^name = "\(.*\)"/\1/')"
+pnpm exec wrangler pages project create "$DEMO_PROJ" --production-branch=main >/dev/null 2>&1 || true
+pnpm exec wrangler pages project create "$DASH_PROJ" --production-branch=main >/dev/null 2>&1 || true
 
 echo ""
 echo "========== 6) Deploy Pages (demo) =========="

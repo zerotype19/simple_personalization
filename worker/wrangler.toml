@@ -1,6 +1,6 @@
 # Session Intelligence API — Cloudflare Worker + D1.
-# Local: `database_id = "REPLACE_ME"` is OK (Wrangler simulates D1). For production, run
-# `pnpm cloudflare:bootstrap` or paste a real id from `wrangler d1 create session-intelligence`.
+# Local: keep a placeholder UUID below; Wrangler simulates D1. For production, run `pnpm cloudflare:up`
+# or paste the id from `wrangler d1 create session-intelligence`.
 name = "session-intelligence-worker"
 main = "src/index.ts"
 compatibility_date = "2025-05-12"
@@ -19,5 +19,5 @@ SI_ENV = "dev"
 [[d1_databases]]
 binding = "SI_DB"
 database_name = "session-intelligence"
-database_id = "REPLACE_ME"
+database_id = "2c95a884-1363-4ca1-9977-0553054bbf3d"
 migrations_dir = "db/migrations"
