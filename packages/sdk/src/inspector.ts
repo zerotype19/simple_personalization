@@ -1,4 +1,5 @@
 import type { SessionProfile } from "@si/shared";
+import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 
 export interface InspectorOptions {
   getState: () => SessionProfile;
@@ -95,6 +96,7 @@ export function mountInspector(opts: InspectorOptions): () => void {
     const nba = p.next_best_action;
     const exp = p.experiment_assignment;
     const persoOn = opts.getPersonalizationEnabled();
+    const liftPreview = demoLiftPreviewCopy();
 
     body.innerHTML = `
       <div class="si-card">
@@ -182,9 +184,13 @@ export function mountInspector(opts: InspectorOptions): () => void {
 
       <div class="si-card">
         <h3>Lift preview (demo seed)</h3>
+        <p class="si-muted" style="margin:0 0 8px;line-height:1.45;">
+          Same numbers merged into the dashboard experiment table when no live D1 rows exist
+          (<code style="font-size:11px;">@si/shared/demoMetrics</code> + worker <code style="font-size:11px;">mergeExperiment</code>).
+        </p>
         <div class="si-kv">
-          <div>CTA CTR</div><div>8.2% → 9.7% <span class="si-pill">+18%</span></div>
-          <div>Lead submit</div><div>1.8% → 2.1% <span class="si-pill">+17%</span></div>
+          <div>CTA CTR</div><div><span class="si-pill">${liftPreview.ctaLine}</span></div>
+          <div>Lead submit</div><div><span class="si-pill">${liftPreview.leadLine}</span></div>
         </div>
       </div>
 

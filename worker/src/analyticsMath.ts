@@ -94,3 +94,33 @@ export function aggregateDashboardSummary(
     avg_engagement: n > 0 ? engAcc / n : 0,
   };
 }
+
+/**
+ * Mirrors D1 `handleExperiments` CTR for one variant bucket:
+ * `SUM(cta_clicks) / SUM(pages)` over all ingested rows (not session-deduped).
+ */
+export function rollupVariantCtaCtr(rows: Array<{ cta_clicks: number; pages: number }>): number {
+  const sumC = rows.reduce((a, r) => a + (Number.isFinite(r.cta_clicks) ? r.cta_clicks : 0), 0);
+  const sumP = rows.reduce((a, r) => a + (Number.isFinite(r.pages) ? r.pages : 0), 0);
+  if (sumP <= 0) return 0;
+  return sumC / sumP;
+}
+
+/**
+ * Mirrors D1 conversion_rate: distinct sessions with max(converted) ≥ 1,
+ * divided by distinct session count in the bucket.
+ */
+export function rollupVariantConversionRate(rows: Array<{ session_id: string; converted: number }>): number {
+  const perSession = new Map<string, number>();
+  for (const r of rows) {
+    const cur = perSession.get(r.session_id) ?? 0;
+    perSession.set(r.session_id, Math.max(cur, r.converted));
+  }
+  const n = perSession.size;
+  if (n <= 0) return 0;
+  let conversions = 0;
+  for (const v of perSession.values()) {
+    if (v >= 1) conversions += 1;
+  }
+  return conversions / n;
+}

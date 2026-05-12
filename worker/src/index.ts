@@ -1,4 +1,5 @@
 import type { AnalyticsPayload, DashboardSummary, ExperimentReport, VariantReport } from "@si/shared";
+import { getDemoExperimentReports } from "@si/shared/demoMetrics";
 import { clamp01, mergeExperiment } from "./analyticsMath";
 import { DEFAULT_REMOTE_CONFIG } from "./defaultConfig";
 
@@ -25,38 +26,7 @@ function json(data: unknown, init: ResponseInit = {}): Response {
   });
 }
 
-const DEMO_EXPERIMENTS: ExperimentReport[] = [
-  {
-    id: "exp_personalization_v1",
-    name: "Velocity Personalization v1",
-    status: "running",
-    sessions: 12480,
-    variants: [
-      {
-        id: "control",
-        name: "Control",
-        is_control: true,
-        sessions: 6240,
-        cta_ctr: 0.082,
-        conversion_rate: 0.018,
-        avg_engagement: 61.2,
-        lift_cta: null,
-        lift_conversion: null,
-      },
-      {
-        id: "treatment",
-        name: "Treatment",
-        is_control: false,
-        sessions: 6240,
-        cta_ctr: 0.097,
-        conversion_rate: 0.021,
-        avg_engagement: 64.8,
-        lift_cta: (0.097 - 0.082) / 0.082,
-        lift_conversion: (0.021 - 0.018) / 0.018,
-      },
-    ],
-  },
-];
+const DEMO_EXPERIMENTS: ExperimentReport[] = getDemoExperimentReports();
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {

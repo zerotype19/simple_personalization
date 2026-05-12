@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { ExperimentReport, VariantReport } from "@si/shared";
-import { aggregateDashboardSummary, mergeExperiment, weightedAvg } from "../analyticsMath";
+import { getDemoExperimentReports } from "@si/shared/demoMetrics";
+import {
+  aggregateDashboardSummary,
+  mergeExperiment,
+  rollupVariantConversionRate,
+  rollupVariantCtaCtr,
+  weightedAvg,
+} from "../analyticsMath";
 import { validatePayload } from "../index";
 
 describe("weightedAvg (dashboard / experiment merge)", () => {
@@ -156,5 +163,38 @@ describe("validatePayload", () => {
       conversion_type: null,
     };
     expect(validatePayload(payload)).toBe("invalid_summary_affinity_value");
+  });
+});
+
+describe("rollupVariantCtaCtr / rollupVariantConversionRate (D1 experiment parity)", () => {
+  it("computes CTR as sum(cta) / sum(pages)", () => {
+    expect(rollupVariantCtaCtr([])).toBe(0);
+    expect(
+      rollupVariantCtaCtr([
+        { cta_clicks: 2, pages: 10 },
+        { cta_clicks: 3, pages: 10 },
+      ]),
+    ).toBeCloseTo(5 / 20, 10);
+  });
+
+  it("computes conversion as distinct converted sessions / distinct sessions", () => {
+    expect(
+      rollupVariantConversionRate([
+        { session_id: "a", converted: 0 },
+        { session_id: "a", converted: 1 },
+        { session_id: "b", converted: 0 },
+      ]),
+    ).toBeCloseTo(0.5, 10);
+  });
+});
+
+describe("shared demo seed ↔ mergeExperiment", () => {
+  it("matches worker dashboard seed when no live rows are merged", () => {
+    const demo = getDemoExperimentReports()[0]!;
+    const merged = mergeExperiment(demo, new Map());
+    expect(merged.variants).toEqual(demo.variants);
+    const t = merged.variants.find((v) => !v.is_control)!;
+    expect(t.lift_cta).toBeCloseTo((0.097 - 0.082) / 0.082, 10);
+    expect(t.lift_conversion).toBeCloseTo((0.021 - 0.018) / 0.018, 10);
   });
 });
