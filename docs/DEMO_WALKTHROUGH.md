@@ -19,6 +19,7 @@ If your Worker hostname differs, set `SI_WORKER_URL` for the script (see below) 
 1. The **SDK** loads config from the Worker, tracks page types and CTAs, and **POSTs** anonymized summaries to **`/collect`**.
 2. The **dashboard** reads **`/dashboard/summary`** and **`/dashboard/experiments`** from the same Worker (unique sessions, conversions, experiment variants).
 3. A **conversion** is recorded when you submit the demo **Test drive** form (`markConversion("lead_submit")`).
+4. The **colored strip** under the header explains live personalization: A/B control vs treatment, treatments applied from experiment vs **behavioral rules** (clicks, finance, VDP, etc.), and a **Signals** panel with live scores.
 
 ## Before you start
 
@@ -53,7 +54,7 @@ The script only **curl**s the Worker and Pages; it does not drive the browser th
 Do these in order in the **demo** tab. Keep the **dashboard** open in another tab and **refresh** it after steps 6 and 8.
 
 1. **Open the demo**  
-   Go to `https://si-session-demo.pages.dev/` (or your `SI_DEMO_URL`). Wait for the hero; the SDK boots before the app renders.
+   Go to `https://si-session-demo.pages.dev/` (or your `SI_DEMO_URL`). Wait for the hero; the SDK boots before the app renders. Notice the **Session Intelligence** strip under the nav: border color indicates control (amber), experiment-only (indigo), rule-driven (emerald), or both (fuchsia). Open **Signals** to watch counts update as you browse.
 
 2. **Open the Session Intelligence inspector**  
    **Windows/Linux:** `Ctrl+Shift+D`  
