@@ -19,6 +19,7 @@ export function chooseRecommendation(
   if (vertical !== "auto_retail") {
     const siteRec = defaultRecommendationForSite(profile, vertical);
     if (siteRec) return finalizeReasons(siteRec, profile);
+    return null;
   }
 
   const fallback = defaultRecommendation(profile);

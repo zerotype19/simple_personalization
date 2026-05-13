@@ -1,7 +1,7 @@
-import type { AnalyticsPayload, DashboardSummary, ExperimentReport, VariantReport } from "@si/shared";
+import type { AnalyticsPayload, DashboardSummary, ExperimentReport, SDKConfig, VariantReport } from "@si/shared";
 import { getDemoExperimentReports } from "@si/shared/demoMetrics";
 import { clamp01, mergeExperiment } from "./analyticsMath";
-import { DEFAULT_REMOTE_CONFIG } from "./defaultConfig";
+import { GENERIC_HOSTED_SDK_CONFIG, VELOCITY_RETAIL_DEMO_SDK_CONFIG } from "@si/shared";
 
 type Env = {
   SI_DB: D1Database;
@@ -38,7 +38,7 @@ export default {
 
     try {
       if (request.method === "GET" && url.pathname === "/config") {
-        return await handleConfig(env);
+        return await handleConfig(request, env);
       }
 
       if (request.method === "POST" && url.pathname === "/collect") {
@@ -60,20 +60,28 @@ export default {
   },
 };
 
-async function handleConfig(env: Env): Promise<Response> {
+function configBaseForRequest(request: Request): SDKConfig {
+  const url = new URL(request.url);
+  return url.searchParams.get("demo") === "velocity"
+    ? VELOCITY_RETAIL_DEMO_SDK_CONFIG
+    : GENERIC_HOSTED_SDK_CONFIG;
+}
+
+async function handleConfig(request: Request, env: Env): Promise<Response> {
+  const base = configBaseForRequest(request);
   const kv = env.SI_KV;
   if (kv) {
     const raw = await kv.get("config:active", { type: "text" });
     if (raw) {
       try {
         const parsed = JSON.parse(raw) as Record<string, unknown>;
-        return json(deepMerge(clone(DEFAULT_REMOTE_CONFIG) as any, parsed));
+        return json(deepMerge(clone(base) as any, parsed));
       } catch {
         // fall through
       }
     }
   }
-  return json(DEFAULT_REMOTE_CONFIG);
+  return json(base);
 }
 
 async function handleCollect(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {

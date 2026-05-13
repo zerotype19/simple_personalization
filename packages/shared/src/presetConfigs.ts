@@ -1,11 +1,12 @@
-import type { SDKConfig } from "@si/shared";
+import type { SDKConfig } from "./index";
 
 /**
- * Default remote config served by `GET /config`.
- *
- * Keep aligned with `packages/sdk/src/defaults.ts` (SDK local defaults).
+ * Neutral defaults baked into the hosted `si.js` IIFE and returned by `GET /config`
+ * unless the caller opts into the retail demo (see worker `?demo=velocity`).
+ * Treatments use `applies_when: "false"` so third-party sites never get DOM rewrites
+ * from this config alone (auto-retail still uses runtime vertical + optional demo config).
  */
-export const DEFAULT_REMOTE_CONFIG: SDKConfig = {
+export const GENERIC_HOSTED_SDK_CONFIG: SDKConfig = {
   inspector_enabled: true,
   collect_endpoint: null,
   config_endpoint: null,
@@ -17,7 +18,75 @@ export const DEFAULT_REMOTE_CONFIG: SDKConfig = {
   experiments: [
     {
       id: "exp_personalization_v1",
-      name: "Velocity Personalization v1",
+      name: "Session Intelligence baseline experiment",
+      status: "running",
+      audience_when: "true",
+      variants: [
+        { id: "control", name: "Control", weight: 50, treatment_id: null },
+        {
+          id: "treatment",
+          name: "Treatment",
+          weight: 50,
+          treatment_id: "t_high_intent",
+        },
+      ],
+    },
+  ],
+  treatments: [
+    {
+      id: "t_high_intent",
+      name: "Baseline treatment shell (disabled in generic config)",
+      applies_when: "false",
+      selectors: [
+        { slot: "hero-cta", op: "text", value: "Continue" },
+        { slot: "hero-sub", op: "text", value: "Explore the site — we keep this session anonymous." },
+        { slot: "hero-cta", op: "addClass", value: "si-pulse" },
+      ],
+    },
+    {
+      id: "t_payment_sensitive",
+      name: "Offer clarity (disabled in generic config)",
+      applies_when: "false",
+      selectors: [
+        { slot: "hero-sub", op: "text", value: "See pricing and options that match your visit." },
+        { slot: "hero-cta", op: "text", value: "View pricing" },
+      ],
+    },
+    {
+      id: "t_family_buyer",
+      name: "Promo emphasis (disabled in generic config)",
+      applies_when: "false",
+      selectors: [
+        { slot: "promo-title", op: "text", value: "Popular picks for your visit" },
+        { slot: "promo-body", op: "text", value: "We highlight what you engage with most in this session." },
+      ],
+    },
+    {
+      id: "t_luxury_buyer",
+      name: "Premium positioning (disabled in generic config)",
+      applies_when: "false",
+      selectors: [
+        { slot: "hero-sub", op: "text", value: "Premium options are available when intent is high." },
+      ],
+    },
+  ],
+  rules: [],
+};
+
+/** Velocity Motors demo site — opt in via Worker `GET /config?demo=velocity` (demo-retailer build). */
+export const VELOCITY_RETAIL_DEMO_SDK_CONFIG: SDKConfig = {
+  inspector_enabled: true,
+  collect_endpoint: null,
+  config_endpoint: null,
+  thresholds: {
+    high_intent: 70,
+    high_urgency: 60,
+    high_engagement: 65,
+  },
+  experiments: [
+    {
+      id: "exp_personalization_v1",
+      name: "Session Intelligence demo cohort (retail benchmark)",
       status: "running",
       audience_when: "true",
       variants: [

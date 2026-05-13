@@ -1,8 +1,8 @@
 import type { SessionProfile } from "@si/shared";
+import { VELOCITY_RETAIL_DEMO_SDK_CONFIG } from "@si/shared";
 import { useEffect, useMemo, useState } from "react";
 import {
   buildRuleContext,
-  DEFAULT_CONFIG,
   evaluateExpression,
   getState,
   softResetSession,
@@ -96,7 +96,7 @@ function stripVariant(p: SessionProfile): {
 
 function treatmentRuleRows(p: SessionProfile) {
   const ctx = buildRuleContext(p);
-  return DEFAULT_CONFIG.treatments
+  return VELOCITY_RETAIL_DEMO_SDK_CONFIG.treatments
     .filter((t): t is (typeof t & { applies_when: string }) => !!t.applies_when)
     .map((t) => ({
       id: t.id,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { VELOCITY_RETAIL_DEMO_SDK_CONFIG } from "@si/shared";
 import { Batcher } from "../batcher";
-import { DEFAULT_CONFIG } from "../defaults";
 import { chooseRecommendation } from "../recommender";
 import { runRules } from "../rules";
 import { createBlankSignals } from "../session";
@@ -56,7 +56,7 @@ describe("Happy-path click sequence (math-linked recommendations)", () => {
       },
     });
     recomputeScores(p);
-    const { matches } = runRules(DEFAULT_CONFIG.rules, p);
+    const { matches } = runRules(VELOCITY_RETAIL_DEMO_SDK_CONFIG.rules, p);
     const rec = chooseRecommendation(
       p,
       matches.map((m) => m.recommendation),
@@ -80,7 +80,7 @@ describe("Happy-path click sequence (math-linked recommendations)", () => {
     recomputeScores(p);
     expect(p.category_affinity.sedan ?? 0).toBeGreaterThanOrEqual(0.36);
 
-    const { matches } = runRules(DEFAULT_CONFIG.rules, p);
+    const { matches } = runRules(VELOCITY_RETAIL_DEMO_SDK_CONFIG.rules, p);
     const rec = chooseRecommendation(
       p,
       matches.map((m) => m.recommendation),
@@ -104,7 +104,7 @@ describe("Happy-path click sequence (math-linked recommendations)", () => {
       },
     });
     recomputeScores(p);
-    const picks = selectTreatments(DEFAULT_CONFIG.treatments, p);
+    const picks = selectTreatments(VELOCITY_RETAIL_DEMO_SDK_CONFIG.treatments, p);
     const ids = picks.map((x) => x.id);
     expect(ids).toContain("t_high_intent");
     expect(ids).toContain("t_payment_sensitive");

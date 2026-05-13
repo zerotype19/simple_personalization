@@ -8,7 +8,7 @@ import { workerUrl } from "./workerUrl";
 
 async function main() {
   await boot({
-    configUrl: workerUrl("/config"),
+    configUrl: workerUrl("/config?demo=velocity"),
     collectUrl: workerUrl("/collect"),
     forceInspector: true,
   });

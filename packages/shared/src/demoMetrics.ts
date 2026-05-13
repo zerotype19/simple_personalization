@@ -10,7 +10,7 @@ export function getDemoExperimentReports(): ExperimentReport[] {
   return [
     {
       id: "exp_personalization_v1",
-      name: "Velocity Personalization v1",
+      name: "Session Intelligence demo cohort (retail benchmark)",
       status: "running",
       sessions: 12480,
       variants: [

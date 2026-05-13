@@ -301,7 +301,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         <h3>Active personalization</h3>
         <div class="si-muted si-muted--mb6">Personalization: <b>${persoOn ? "ON" : "OFF"}</b>${
           !isAuto
-            ? "<br/><span class=\"si-muted\">Observe-only on non-retail sites: no Velocity demo DOM rewrites.</span>"
+            ? "<br/><span class=\"si-muted\">Observe-only on non-retail sites: no demo-site DOM rewrites.</span>"
             : ""
         }</div>
         ${
@@ -337,7 +337,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
             isAuto
               ? `Same numbers merged into the dashboard experiment table when no live D1 rows exist
           (<code class="si-code">@si/shared/demoMetrics</code> + worker <code class="si-code">mergeExperiment</code>).`
-              : "Lift numbers below are calibrated for the Velocity retail demo dashboard. Treat them as illustrative when this tag runs on other verticals."
+              : "Lift numbers below use the seeded retail benchmark in the repo. Treat them as illustrative when this tag runs on other verticals."
           }
         </p>
         <div class="si-kv">

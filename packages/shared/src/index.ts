@@ -227,3 +227,5 @@ export const DEFAULT_THRESHOLDS = {
   high_urgency: 60,
   high_engagement: 65,
 } as const;
+
+export { GENERIC_HOSTED_SDK_CONFIG, VELOCITY_RETAIL_DEMO_SDK_CONFIG } from "./presetConfigs";

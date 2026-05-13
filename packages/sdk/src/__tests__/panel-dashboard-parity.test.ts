@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { VELOCITY_RETAIL_DEMO_SDK_CONFIG } from "@si/shared";
 import { chooseRecommendation } from "../recommender";
-import { DEFAULT_CONFIG } from "../defaults";
 import { runRules } from "../rules";
 import { createBlankSignals } from "../session";
 import { recomputeScores } from "../scorer";
@@ -16,7 +16,7 @@ describe("Panel ↔ runtime ↔ collect summary (QA parity)", () => {
       },
     });
     recomputeScores(p);
-    const { profile, matches } = runRules(DEFAULT_CONFIG.rules, p);
+    const { profile, matches } = runRules(VELOCITY_RETAIL_DEMO_SDK_CONFIG.rules, p);
     expect(matches.some((m) => m.rule.id === "r_payment_sensitive")).toBe(true);
     expect(profile.persona).toBe("payment_sensitive");
     const pay = matches.find((m) => m.rule.id === "r_payment_sensitive")!;
