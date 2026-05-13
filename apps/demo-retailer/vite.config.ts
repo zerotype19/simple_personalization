@@ -29,6 +29,10 @@ export default defineConfig({
   plugins: [assertHostedSnippetWhenWorkerEnv(), react()],
   resolve: {
     alias: [
+      {
+        find: "@si/shared/contextBrain",
+        replacement: path.resolve(rootDir, "../../packages/shared/src/contextBrain/index.ts"),
+      },
       { find: "@si/shared/demoMetrics", replacement: path.resolve(rootDir, "../../packages/shared/src/demoMetrics.ts") },
       { find: "@si/sdk", replacement: path.resolve(rootDir, "../../packages/sdk/src/index.ts") },
       { find: "@si/shared", replacement: path.resolve(rootDir, "../../packages/shared/src/index.ts") },

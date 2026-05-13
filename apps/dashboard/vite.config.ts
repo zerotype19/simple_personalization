@@ -9,6 +9,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      "@si/shared/contextBrain": path.resolve(
+        rootDir,
+        "../../packages/shared/src/contextBrain/index.ts",
+      ),
       "@si/shared": path.resolve(rootDir, "../../packages/shared/src/index.ts"),
     },
   },
