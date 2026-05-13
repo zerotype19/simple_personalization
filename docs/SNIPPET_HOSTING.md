@@ -8,6 +8,18 @@ The demo Pages app can ship a **second entrypoint**: `public/si.js` — the Sess
 
 Use your real demo domain if it differs (custom domain on the `si-session-demo` Pages project).
 
+## Friendly check in the browser
+
+Raw **`/si.js`** in a tab often looks like **nothing useful** (blank chrome or a huge block of minified code). That does **not** mean the file failed.
+
+- Open **`https://optiview.ai/snippet-health.html`** (same origin as the snippet). It runs a **`HEAD /si.js`** check and prints status + `Content-Type`. You want **200** and a type containing **`javascript`**.
+- Or from a terminal: `curl -sI https://optiview.ai/si.js | grep -i content-type` → should mention **javascript**, not **html**.
+
+## “Redirects” you may see (normal)
+
+- **`http://optiview.ai/...` → `https://optiview.ai/...`** (301): always use **`https://`** in your tag `src`.
+- **`https://www.optiview.ai/...` → `https://optiview.ai/...`** (301): prefer the **apex** URL in the snippet, or follow the redirect once; the final response should still be the script.
+
 ## How it gets built
 
 During `pnpm --filter @si/demo-retailer build`, if **`VITE_SI_WORKER_URL`** is set (no trailing slash — same value you use for the Velocity Motors demo and for Cloudflare Pages env), the build:

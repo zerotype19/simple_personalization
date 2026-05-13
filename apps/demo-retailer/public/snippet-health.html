@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session Intelligence — snippet check</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 42rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow: auto;
+      }
+      .ok {
+        color: #15803d;
+      }
+      .bad {
+        color: #b91c1c;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Snippet file check</h1>
+    <p>
+      This page runs on the same origin as your hosted tag. It fetches <code>/si.js</code> with
+      <code>HEAD</code> and shows the status and <code>Content-Type</code>. If you see HTML instead
+      of JavaScript, the SPA fallback is still winning (rebuild + redeploy with
+      <code>VITE_SI_WORKER_URL</code> set — see <code>docs/SNIPPET_HOSTING.md</code>).
+    </p>
+    <pre id="out">Checking…</pre>
+    <p>
+      <strong>Note:</strong> Opening <code>/si.js</code> directly in a browser tab often looks like
+      “nothing” or a wall of minified code — that is normal. Use this page or DevTools → Network on a
+      real site that includes the tag.
+    </p>
+    <script>
+      (async () => {
+        const el = document.getElementById("out");
+        try {
+          const r = await fetch("/si.js", { method: "HEAD" });
+          const ct = r.headers.get("content-type") || "";
+          const ok = r.ok && /javascript/i.test(ct);
+          el.innerHTML =
+            (ok ? '<span class="ok">OK</span>' : '<span class="bad">Unexpected</span>') +
+            "\n\n" +
+            "HTTP " +
+            r.status +
+            "\n" +
+            "content-type: " +
+            ct +
+            "\n" +
+            "content-length: " +
+            (r.headers.get("content-length") || "—");
+        } catch (e) {
+          el.textContent = "Fetch failed: " + String(e);
+        }
+      })();
+    </script>
+  </body>
+</html>
