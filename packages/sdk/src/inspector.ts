@@ -2,6 +2,12 @@ import type { SessionProfile } from "@si/shared";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
+import {
+  liveSignalSectionTitle,
+  siteContextTitle,
+  topicAffinitySectionTitle,
+  verticalDisplayName,
+} from "./siteIntelligence/panelLabelMapper";
 
 /** Set only in the hosted IIFE build (`SI_PUBLIC_INSPECTOR_CSS_URL`); empty in ESM. */
 declare const __SI_EMBED_INSPECTOR_CSS_URL__: string;
@@ -24,6 +30,13 @@ const PERSONAS = [
   "payment_sensitive",
   "high_intent",
 ];
+
+function escHtml(s: string): string {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/"/g, "&quot;");
+}
 
 /**
  * Populate `el` from an HTML string without using live-document `innerHTML`
@@ -212,14 +225,45 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const exp = p.experiment_assignment;
     const persoOn = opts.getPersonalizationEnabled();
     const liftPreview = demoLiftPreviewCopy();
+    const sc = p.site_context;
+    const isAuto = sc.vertical === "auto_retail";
+    const themes = sc.scan.content_themes.slice(0, 4).map(escHtml).join(", ") || "—";
+    const termsPreview = sc.scan.top_terms.slice(0, 8).map(escHtml).join(", ") || "—";
+    const signalRows = Object.entries(p.dynamic_signals)
+      .map(
+        ([k, val]) =>
+          `<div>${escHtml(k)}</div><div class="si-metric">${escHtml(String(val))}</div>`,
+      )
+      .join("");
+    const affinityRows = Object.entries(p.category_affinity)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(
+        ([k, v]) =>
+          `<div>${escHtml(k.replace(/_/g, " "))}</div><div class="si-metric">${(v * 100).toFixed(0)}%</div>`,
+      )
+      .join("");
 
     const html = `
       <div class="si-card">
+        <h3>${siteContextTitle()}</h3>
+        <div class="si-kv">
+          <div>Domain</div><div class="si-metric si-metric--break">${escHtml(sc.domain)}</div>
+          <div>Site name</div><div class="si-metric">${escHtml(sc.site_name ?? "—")}</div>
+          <div>Detected type</div><div><span class="si-pill">${escHtml(verticalDisplayName(sc.vertical))}</span></div>
+          <div>Type confidence</div><div class="si-metric">${Math.round(sc.vertical_confidence)}%</div>
+          <div>Page kind</div><div><span class="si-pill">${escHtml(sc.page_kind)}</span></div>
+          <div>Content themes</div><div class="si-muted">${themes}</div>
+          <div>Top terms (sample)</div><div class="si-muted">${termsPreview}</div>
+        </div>
+      </div>
+
+      <div class="si-card">
         <h3>Session profile</h3>
         <div class="si-kv">
-          <div>Session ID</div><div class="si-metric si-metric--break">${p.session_id}</div>
+          <div>Session ID</div><div class="si-metric si-metric--break">${escHtml(p.session_id)}</div>
           <div>Journey stage</div><div><span class="si-pill">${p.journey_stage}</span></div>
-          <div>Page type</div><div><span class="si-pill">${p.page_type}</span></div>
+          <div>Page type (signals)</div><div><span class="si-pill">${p.page_type}</span></div>
           <div>Persona</div><div><span class="si-pill">${p.persona ?? "auto"}</span></div>
           <div>Intent</div><div class="si-metric">${p.intent_score}</div>
           <div>Urgency</div><div class="si-metric">${p.urgency_score}</div>
@@ -228,32 +272,17 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       </div>
 
       <div class="si-card">
-        <h3>Live signals</h3>
+        <h3>${escHtml(liveSignalSectionTitle(sc.vertical))}</h3>
         <div class="si-kv">
-          <div>Pages</div><div class="si-metric">${p.signals.pages_viewed}</div>
-          <div>VDP views</div><div class="si-metric">${p.signals.vdp_views}</div>
-          <div>Pricing views</div><div class="si-metric">${p.signals.pricing_views}</div>
-          <div>Finance interactions</div><div class="si-metric">${p.signals.finance_interactions}</div>
-          <div>Compare interactions</div><div class="si-metric">${p.signals.compare_interactions}</div>
-          <div>CTA clicks</div><div class="si-metric">${p.signals.cta_clicks}</div>
-          <div>Max scroll</div><div class="si-metric">${p.signals.max_scroll_depth}%</div>
-          <div>Return visit</div><div class="si-metric">${p.signals.return_visit ? "yes" : "no"}</div>
-          <div>Duration</div><div class="si-metric">${Math.round(p.signals.session_duration_ms / 1000)}s</div>
+          ${signalRows}
         </div>
       </div>
 
       <div class="si-card">
-        <h3>Category affinity</h3>
-        <div class="si-muted">${Object.keys(p.category_affinity).length ? "" : "No strong affinity yet"}</div>
+        <h3>${escHtml(topicAffinitySectionTitle(sc.vertical))}</h3>
+        <div class="si-muted">${Object.keys(p.category_affinity).length ? "" : "No strong signals yet — keep browsing."}</div>
         <div class="si-kv si-kv--tight">
-          ${Object.entries(p.category_affinity)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 8)
-            .map(
-              ([k, v]) =>
-                `<div>${k}</div><div class="si-metric">${(v * 100).toFixed(0)}%</div>`,
-            )
-            .join("")}
+          ${affinityRows}
         </div>
       </div>
 
@@ -261,22 +290,26 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         <h3>Recommendation</h3>
         ${
           nba
-            ? `<div class="si-nba-body">${nba.next_best_action}</div>
+            ? `<div class="si-nba-body">${escHtml(nba.next_best_action)}</div>
                <div class="si-muted si-nba-conf">Confidence: <span class="si-metric">${(nba.confidence * 100).toFixed(0)}%</span></div>
-               <ul class="si-reason">${nba.reason.map((r) => `<li>${r}</li>`).join("")}</ul>`
+               <ul class="si-reason">${nba.reason.map((r) => `<li>${escHtml(r)}</li>`).join("")}</ul>`
             : `<div class="si-muted">No recommendation yet — keep browsing.</div>`
         }
       </div>
 
       <div class="si-card">
         <h3>Active personalization</h3>
-        <div class="si-muted si-muted--mb6">Personalization: <b>${persoOn ? "ON" : "OFF"}</b></div>
+        <div class="si-muted si-muted--mb6">Personalization: <b>${persoOn ? "ON" : "OFF"}</b>${
+          !isAuto
+            ? "<br/><span class=\"si-muted\">Observe-only on non-retail sites: no Velocity demo DOM rewrites.</span>"
+            : ""
+        }</div>
         ${
           p.active_treatments.length
             ? p.active_treatments
                 .map(
                   (t) =>
-                    `<div class="si-treat-row"><span class="si-pill">${t.source}</span> <code>${t.treatment_id}</code><div class="si-muted">slots: ${t.applied_slots.join(", ") || "—"}</div></div>`,
+                    `<div class="si-treat-row"><span class="si-pill">${t.source}</span> <code>${escHtml(t.treatment_id)}</code><div class="si-muted">slots: ${t.applied_slots.map(escHtml).join(", ") || "—"}</div></div>`,
                 )
                 .join("")
             : `<div class="si-muted">No active treatments.</div>`
@@ -288,9 +321,9 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         ${
           exp
             ? `<div class="si-kv">
-                 <div>Experiment</div><div><code>${exp.experiment_id}</code></div>
-                 <div>Variant</div><div><span class="si-pill">${exp.variant_id}</span></div>
-                 <div>Treatment</div><div><code>${exp.treatment_id ?? "none"}</code></div>
+                 <div>Experiment</div><div><code>${escHtml(exp.experiment_id)}</code></div>
+                 <div>Variant</div><div><span class="si-pill">${escHtml(exp.variant_id)}</span></div>
+                 <div>Treatment</div><div><code>${escHtml(exp.treatment_id ?? "none")}</code></div>
                  <div>Holdout</div><div class="si-metric">${exp.is_control ? "yes (control)" : "no"}</div>
                </div>`
             : `<div class="si-muted">No experiment running.</div>`
@@ -300,8 +333,12 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       <div class="si-card">
         <h3>Lift preview (demo seed)</h3>
         <p class="si-muted si-muted--block">
-          Same numbers merged into the dashboard experiment table when no live D1 rows exist
-          (<code class="si-code">@si/shared/demoMetrics</code> + worker <code class="si-code">mergeExperiment</code>).
+          ${
+            isAuto
+              ? `Same numbers merged into the dashboard experiment table when no live D1 rows exist
+          (<code class="si-code">@si/shared/demoMetrics</code> + worker <code class="si-code">mergeExperiment</code>).`
+              : "Lift numbers below are calibrated for the Velocity retail demo dashboard. Treat them as illustrative when this tag runs on other verticals."
+          }
         </p>
         <div class="si-kv">
           <div>CTA CTR</div><div><span class="si-pill">${liftPreview.ctaLine}</span></div>

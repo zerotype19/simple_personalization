@@ -20,7 +20,7 @@ describe("computeClampedScores", () => {
       2 * 14 + 1 * 12 + 1 * 11 + 0 * 9 + 4 * 6 + 0 + Math.min(3, 8) * 2;
     expect(rawIntent).toBe(28 + 12 + 11 + 24 + 6);
 
-    const scores = computeClampedScores(s);
+    const scores = computeClampedScores(s, "auto_retail");
     expect(scores.intent_score).toBe(Math.min(100, Math.max(0, Math.round(rawIntent))));
     expect(scores.intent_score).toBe(81);
   });
@@ -34,7 +34,7 @@ describe("computeClampedScores", () => {
     s.compare_interactions = 10;
     s.cta_clicks = 20;
     s.return_visit = true;
-    const scores = computeClampedScores(s);
+    const scores = computeClampedScores(s, "auto_retail");
     expect(scores.intent_score).toBe(100);
   });
 });
@@ -61,7 +61,7 @@ describe("recomputeScores + inspector fields", () => {
       },
     });
     recomputeScores(p);
-    const again = computeClampedScores(p.signals);
+    const again = computeClampedScores(p.signals, p.site_context.vertical);
     expect(p.intent_score).toBe(again.intent_score);
     expect(p.urgency_score).toBe(again.urgency_score);
     expect(p.engagement_score).toBe(again.engagement_score);

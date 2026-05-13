@@ -50,6 +50,8 @@ export class Batcher {
         engagement_score: p.engagement_score,
         journey_stage: p.journey_stage,
         category_affinity: { ...p.category_affinity },
+        site_vertical: p.site_context.vertical,
+        page_kind: p.site_context.page_kind,
       },
       experiment_assignment: p.experiment_assignment,
       active_treatments: p.active_treatments,

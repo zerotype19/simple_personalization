@@ -1,5 +1,15 @@
 import type { ExperimentAssignment, SessionProfile } from "@si/shared";
-import { createBlankSignals } from "../session";
+import { createBlankSignals, defaultSiteContext } from "../session";
+
+/** Dealer-shaped defaults so unit tests stay aligned with auto-retail rules unless overrides set another vertical. */
+function testAutoSiteContext() {
+  return {
+    ...defaultSiteContext(),
+    vertical: "auto_retail" as const,
+    vertical_confidence: 95,
+    page_kind: "Inventory / VDP",
+  };
+}
 
 export function minimalProfile(overrides: Partial<SessionProfile> = {}): SessionProfile {
   const now = Date.now();
@@ -18,11 +28,15 @@ export function minimalProfile(overrides: Partial<SessionProfile> = {}): Session
     active_treatments: [],
     next_best_action: null,
     persona: null,
+    site_context: testAutoSiteContext(),
+    dynamic_signals: {},
   };
   return {
     ...base,
     ...overrides,
     signals: { ...base.signals, ...(overrides.signals ?? {}) },
+    site_context: { ...base.site_context, ...(overrides.site_context ?? {}) },
+    dynamic_signals: { ...base.dynamic_signals, ...(overrides.dynamic_signals ?? {}) },
   };
 }
 

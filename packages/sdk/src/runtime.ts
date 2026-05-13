@@ -11,6 +11,12 @@ import { runRules } from "./rules";
 import { loadOrCreateProfile, persistProfile, resetProfile } from "./session";
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
 import { inferPageContext } from "./site";
+import {
+  buildDynamicSignals,
+  classifyPageKind,
+  classifyVertical,
+  runSiteScan,
+} from "./siteIntelligence";
 
 export interface BootOptions {
   /** Absolute URL to fetch JSON config (GET). */
@@ -178,7 +184,25 @@ export class SessionIntelRuntime {
   private tick(): void {
     const urlNow = window.location.pathname + window.location.search;
     const isNewPageContext = this.lastContextUrl !== urlNow;
-    const ctx = inferPageContext({ minimal: !isNewPageContext });
+
+    const scan = isNewPageContext ? runSiteScan() : this.profile.site_context.scan;
+    const { vertical, confidence } = classifyVertical(scan, window.location.pathname);
+    const ctx = inferPageContext({
+      minimal: !isNewPageContext,
+      vertical,
+      scan,
+    });
+
+    this.profile.site_context = {
+      domain: scan.domain,
+      site_name: scan.site_name,
+      vertical,
+      vertical_confidence: confidence,
+      page_kind: classifyPageKind(window.location.pathname, scan, ctx.page_type),
+      scan,
+    };
+    this.profile.page_type = ctx.page_type;
+    this.profile.dynamic_signals = buildDynamicSignals(vertical, this.profile.signals, scan);
 
     if (isNewPageContext) {
       // Decay prior page keyword mass so a later sedan VDP can overtake an early SUV browse.
@@ -219,7 +243,7 @@ export class SessionIntelRuntime {
     clearTreatments();
     this.profile.active_treatments = [];
 
-    if (this.personalizationEnabled) {
+    if (this.personalizationEnabled && this.profile.site_context.vertical === "auto_retail") {
       const picks = selectTreatments(this.config.treatments, this.profile);
       for (const pick of picks) {
         const def = this.config.treatments.find((t) => t.id === pick.id);

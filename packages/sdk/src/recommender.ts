@@ -1,4 +1,5 @@
 import type { Recommendation, SessionProfile } from "@si/shared";
+import { defaultRecommendationForSite } from "./siteIntelligence/dynamicRecommendationEngine";
 
 /**
  * Choose the highest-confidence rule-driven recommendation, falling back to
@@ -13,6 +14,12 @@ export function chooseRecommendation(
     .map((r) => finalizeReasons(r, profile))
     .sort((a, b) => b.confidence - a.confidence);
   if (fromRules.length) return fromRules[0];
+
+  const vertical = profile.site_context.vertical;
+  if (vertical !== "auto_retail") {
+    const siteRec = defaultRecommendationForSite(profile, vertical);
+    if (siteRec) return finalizeReasons(siteRec, profile);
+  }
 
   const fallback = defaultRecommendation(profile);
   return fallback ? finalizeReasons(fallback, profile) : null;

@@ -10,6 +10,38 @@ export type PageType =
   | "test_drive"
   | "other";
 
+/** Inferred site category for generic hosted-snippet behavior (no publisher config). */
+export type SiteVertical =
+  | "auto_retail"
+  | "ecommerce"
+  | "b2b_saas"
+  | "publisher_content"
+  | "lead_generation"
+  | "professional_services"
+  | "nonprofit"
+  | "unknown";
+
+/** Lightweight scan summary (no raw page dump — derived tokens only). */
+export interface SiteScanSummary {
+  domain: string;
+  site_name: string | null;
+  page_title: string;
+  top_terms: string[];
+  primary_ctas: string[];
+  content_themes: string[];
+}
+
+/** What the SDK believes about the host site this session. */
+export interface SiteContext {
+  domain: string;
+  site_name: string | null;
+  vertical: SiteVertical;
+  /** 0–100 heuristic confidence for `vertical`. */
+  vertical_confidence: number;
+  page_kind: string;
+  scan: SiteScanSummary;
+}
+
 export interface SessionScores {
   intent_score: number;
   urgency_score: number;
@@ -32,6 +64,13 @@ export interface SessionProfile extends SessionScores {
   active_treatments: ActiveTreatment[];
   next_best_action: Recommendation | null;
   persona: string | null;
+  /** Inferred host context (hosted tag; no config). */
+  site_context: SiteContext;
+  /**
+   * Human-readable metrics for the inspector (labels depend on `site_context.vertical`).
+   * Values are counts or short strings (e.g. "74%").
+   */
+  dynamic_signals: Record<string, string>;
 }
 
 export interface SessionSignals {
@@ -145,6 +184,9 @@ export interface AnalyticsPayload {
     engagement_score: number;
     journey_stage: JourneyStage;
     category_affinity: CategoryAffinity;
+    /** Present when the SDK inferred host context (hosted tag). */
+    site_vertical?: SiteVertical;
+    page_kind?: string;
   };
   experiment_assignment: ExperimentAssignment | null;
   active_treatments: ActiveTreatment[];

@@ -3,6 +3,8 @@ import type {
   PageType,
   SessionProfile,
   SessionSignals,
+  SiteContext,
+  SiteScanSummary,
 } from "@si/shared";
 import { detectReturnVisit, safeGetJSON, safeSetJSON } from "./storage";
 
@@ -16,6 +18,29 @@ function generateId(): string {
   const a = Math.random().toString(36).slice(2, 10);
   const b = Math.random().toString(36).slice(2, 10);
   return `${a}-${b}-${Date.now().toString(36)}`;
+}
+
+function emptySiteScan(): SiteScanSummary {
+  return {
+    domain: typeof window !== "undefined" ? window.location.hostname : "",
+    site_name: null,
+    page_title: typeof document !== "undefined" ? document.title : "",
+    top_terms: [],
+    primary_ctas: [],
+    content_themes: [],
+  };
+}
+
+export function defaultSiteContext(): SiteContext {
+  const scan = emptySiteScan();
+  return {
+    domain: scan.domain,
+    site_name: scan.site_name,
+    vertical: "unknown",
+    vertical_confidence: 0,
+    page_kind: "Unknown",
+    scan,
+  };
 }
 
 export function createBlankSignals(): SessionSignals {
@@ -38,6 +63,8 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
   if (existing) {
     existing.updated_at = Date.now();
     existing.page_type = initialPageType;
+    if (!existing.site_context) existing.site_context = defaultSiteContext();
+    if (!existing.dynamic_signals) existing.dynamic_signals = {};
     return existing;
   }
   const session_id = generateId();
@@ -57,6 +84,8 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     active_treatments: [],
     next_best_action: null,
     persona: null,
+    site_context: defaultSiteContext(),
+    dynamic_signals: {},
   };
   safeSetJSON(SESSION_KEY, profile);
   return profile;

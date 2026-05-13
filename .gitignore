@@ -27,3 +27,4 @@ dist/
 
 # Generated drop-in snippet (baked Worker URLs); see apps/demo-retailer/scripts/prepare-hosted-snippet.mjs
 apps/demo-retailer/public/si.js
+apps/demo-retailer/public/si-inspector.css

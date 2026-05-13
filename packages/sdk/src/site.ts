@@ -1,4 +1,5 @@
-import type { PageType } from "@si/shared";
+import type { PageType, SiteScanSummary, SiteVertical } from "@si/shared";
+import { topicAffinityHitsFromScan } from "./siteIntelligence/dynamicSignalModel";
 
 const URL_PATTERNS: Array<{ type: PageType; re: RegExp }> = [
   { type: "inventory", re: /(inventory|listing|browse|new-cars|used-cars|search)/i },
@@ -191,11 +192,23 @@ export function extractCategoryHits(): Record<string, number> {
   return hits;
 }
 
-export function inferPageContext(opts?: { minimal?: boolean }): PageContext {
+export function inferPageContext(opts?: {
+  minimal?: boolean;
+  vertical?: SiteVertical;
+  scan?: SiteScanSummary | null;
+}): PageContext {
   const page_type = classifyPageType();
   const url = window.location.pathname + window.location.search;
   const title = document.title;
-  const category_hits = opts?.minimal ? {} : extractCategoryHits();
+  let category_hits: Record<string, number> = {};
+  if (!opts?.minimal) {
+    const v = opts?.vertical ?? "auto_retail";
+    if (v === "auto_retail") {
+      category_hits = extractCategoryHits();
+    } else if (opts?.scan) {
+      category_hits = topicAffinityHitsFromScan(opts.scan);
+    }
+  }
   const has_pricing = !!document.querySelector(
     "[data-si-price], .price, .pricing, [itemprop='price']",
   );
