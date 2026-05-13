@@ -51,3 +51,7 @@ export function boot(): void {
     },
   };
 }
+
+/** Hosted `si.js`: register `bootFromScriptTag` then run it (footer cannot run after `exports.boot` in the IIFE bundle). */
+boot();
+void window.SessionIntelBundle?.bootFromScriptTag?.();

@@ -71,8 +71,5 @@ export default defineConfig([
     define: embedDefines(),
     esbuildPlugins: [inlineInspectorPanelTxt()],
     outExtension: () => ({ js: ".js" }),
-    footer: {
-      js: "window.SessionIntelBundle && window.SessionIntelBundle.bootFromScriptTag && window.SessionIntelBundle.bootFromScriptTag();",
-    },
   },
 ]);
