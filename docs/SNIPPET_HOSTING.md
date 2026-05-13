@@ -61,7 +61,7 @@ window.SessionIntel?.getState?.();
 
 In **Network**, filter **`si-inspector`** — you want **`si-inspector.css`** **200** alongside **`si.js`**.
 
-Sites that ship **SES / lockdown** (`lockdown-install.js`, “Removing unpermitted intrinsics”) or **Trusted Types** often block third-party **`element.innerHTML`**. The inspector avoids live-document **`innerHTML`** by parsing markup with **`DOMParser`** instead; if you still see **`[Session Intelligence] inspector could not start`**, open the **Issues** tab and check CSP / Trusted Types for **`style-src`** and any **`require-trusted-types-for`** lines.
+Sites that ship **SES / lockdown** (`lockdown-install.js`, “Removing unpermitted intrinsics”) or **Trusted Types** often block third-party **`element.innerHTML`**. The **launcher and drawer shell** are built with **`document.createElement` / `appendChild`** only (no `innerHTML`, no `DOMParser` on the shell). The **panel body** still uses **`DOMParser` + `replaceChildren`** to render cards; if lockdown runs first and tames or blocks that path, you may see the **SI** button and header but a short **“sandbox blocked rendering”** message in the body instead of full metrics — or **`[Session Intelligence] inspector could not start`** if an earlier step fails (for example stylesheet injection). Prefer loading **`si.js` before `lockdown()`** on the host when you need the full inspector on a hardened page. Open the **Issues** tab and check CSP / Trusted Types for **`style-src`** and any **`require-trusted-types-for`** lines.
 
 ## How it gets built
 

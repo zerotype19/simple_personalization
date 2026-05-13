@@ -71,18 +71,62 @@ function installInspectorStyles(root: HTMLElement): { mode: "link" | "inline"; h
   return { mode: "inline", href: null };
 }
 
-const INSPECTOR_SHELL_HTML = `
-<button type="button" id="si-inspector-launcher" aria-label="Toggle Session Intelligence panel" title="Session Intelligence">SI</button>
-<div id="si-inspector-panel" aria-hidden="true">
-  <div id="si-inspector-header">
-    <div>
-      <h2>Session Intelligence</h2>
-      <div class="si-muted">Click <b>SI</b> (corner) or <b>Ctrl+Shift+\`</b> / <b>⌘+Shift+\`</b> (backtick key) to toggle. <span class="si-csp-chrome-hint">(Ctrl+Shift+D is reserved in Chrome for bookmarks.)</span></div>
-    </div>
-    <button class="si-btn" id="si-close">Close</button>
-  </div>
-  <div id="si-inspector-body"></div>
-</div>`;
+/**
+ * Build launcher + panel with only DOM APIs (no `innerHTML`, no `DOMParser`).
+ * SES `lockdown()` / Trusted Types on hosts often block HTML injection paths for third-party scripts.
+ */
+function appendInspectorShell(root: HTMLElement): void {
+  const launcher = document.createElement("button");
+  launcher.type = "button";
+  launcher.id = "si-inspector-launcher";
+  launcher.setAttribute("aria-label", "Toggle Session Intelligence panel");
+  launcher.title = "Session Intelligence";
+  launcher.textContent = "SI";
+
+  const panel = document.createElement("div");
+  panel.id = "si-inspector-panel";
+  panel.setAttribute("aria-hidden", "true");
+
+  const header = document.createElement("div");
+  header.id = "si-inspector-header";
+
+  const headerMain = document.createElement("div");
+  const h2 = document.createElement("h2");
+  h2.textContent = "Session Intelligence";
+
+  const hint = document.createElement("div");
+  hint.className = "si-muted";
+  hint.append("Click ");
+  const bSi = document.createElement("b");
+  bSi.textContent = "SI";
+  hint.append(bSi, " (corner) or ");
+  const bWin = document.createElement("b");
+  bWin.textContent = "Ctrl+Shift+`";
+  hint.append(bWin, " / ");
+  const bMac = document.createElement("b");
+  bMac.textContent = "⌘+Shift+`";
+  hint.append(bMac, " (backtick key) to toggle. ");
+  const chromeHint = document.createElement("span");
+  chromeHint.className = "si-csp-chrome-hint";
+  chromeHint.textContent = "(Ctrl+Shift+D is reserved in Chrome for bookmarks.)";
+  hint.append(chromeHint);
+
+  headerMain.append(h2, hint);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "si-btn";
+  closeBtn.id = "si-close";
+  closeBtn.textContent = "Close";
+
+  header.append(headerMain, closeBtn);
+
+  const panelBody = document.createElement("div");
+  panelBody.id = "si-inspector-body";
+
+  panel.append(header, panelBody);
+  root.append(launcher, panel);
+}
 
 export function mountInspector(opts: InspectorOptions): () => void {
   try {
@@ -99,7 +143,7 @@ export function mountInspector(opts: InspectorOptions): () => void {
 function mountInspectorImpl(opts: InspectorOptions): () => void {
   const root = document.createElement("div");
   root.id = "si-inspector-root";
-  replaceChildrenFromHtml(root, INSPECTOR_SHELL_HTML);
+  appendInspectorShell(root);
   const sheet = installInspectorStyles(root);
   logSiDebug("inspector styles installed", { mode: sheet.mode, companion: sheet.href });
 
@@ -170,6 +214,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const liftPreview = demoLiftPreviewCopy();
 
     const html = `
+      <div class="si-card">
         <h3>Session profile</h3>
         <div class="si-kv">
           <div>Session ID</div><div class="si-metric si-metric--break">${p.session_id}</div>
@@ -287,7 +332,21 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         <div class="si-btn-row" id="si-personas"></div>
       </div>
     `;
-    replaceChildrenFromHtml(body, html);
+    try {
+      replaceChildrenFromHtml(body, html);
+    } catch (e) {
+      console.error(
+        "[Session Intelligence] inspector panel render blocked (SES lockdown, Trusted Types, or DOMParser).",
+        e,
+      );
+      body.replaceChildren();
+      const p = document.createElement("p");
+      p.className = "si-muted";
+      p.textContent =
+        "This page's sandbox blocked rendering the full inspector. SI may still be tracking. Try loading si.js before lockdown(), or use data-inspector on the script tag for remote debugging.";
+      body.appendChild(p);
+      return;
+    }
 
     const togglePerso = body.querySelector("#si-toggle-perso") as HTMLButtonElement;
     togglePerso.addEventListener("click", () => {
