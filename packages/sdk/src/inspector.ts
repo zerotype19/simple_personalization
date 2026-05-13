@@ -25,6 +25,17 @@ const PERSONAS = [
   "high_intent",
 ];
 
+/**
+ * Populate `el` from an HTML string without using live-document `innerHTML`
+ * (Trusted Types / hardened pages often block third-party `innerHTML`).
+ */
+function replaceChildrenFromHtml(el: HTMLElement, html: string): void {
+  const parsed = new DOMParser().parseFromString(html.trim(), "text/html");
+  const frag = document.createDocumentFragment();
+  for (const n of Array.from(parsed.body.childNodes)) frag.appendChild(n);
+  el.replaceChildren(frag);
+}
+
 /** `…/si.js` → `…/si-inspector.css`, or baked `SI_PUBLIC_INSPECTOR_CSS_URL` for the hosted snippet. */
 function resolveSiCompanionStylesheetHref(): string | null {
   const baked =
@@ -74,9 +85,21 @@ const INSPECTOR_SHELL_HTML = `
 </div>`;
 
 export function mountInspector(opts: InspectorOptions): () => void {
+  try {
+    return mountInspectorImpl(opts);
+  } catch (e) {
+    console.error(
+      "[Session Intelligence] inspector could not start (Trusted Types, CSP DOM sinks, or another embed error). Analytics may still run.",
+      e,
+    );
+    return () => {};
+  }
+}
+
+function mountInspectorImpl(opts: InspectorOptions): () => void {
   const root = document.createElement("div");
   root.id = "si-inspector-root";
-  root.innerHTML = INSPECTOR_SHELL_HTML;
+  replaceChildrenFromHtml(root, INSPECTOR_SHELL_HTML);
   const sheet = installInspectorStyles(root);
   logSiDebug("inspector styles installed", { mode: sheet.mode, companion: sheet.href });
 
@@ -146,8 +169,7 @@ export function mountInspector(opts: InspectorOptions): () => void {
     const persoOn = opts.getPersonalizationEnabled();
     const liftPreview = demoLiftPreviewCopy();
 
-    body.innerHTML = `
-      <div class="si-card">
+    const html = `
         <h3>Session profile</h3>
         <div class="si-kv">
           <div>Session ID</div><div class="si-metric si-metric--break">${p.session_id}</div>
@@ -265,6 +287,7 @@ export function mountInspector(opts: InspectorOptions): () => void {
         <div class="si-btn-row" id="si-personas"></div>
       </div>
     `;
+    replaceChildrenFromHtml(body, html);
 
     const togglePerso = body.querySelector("#si-toggle-perso") as HTMLButtonElement;
     togglePerso.addEventListener("click", () => {

@@ -61,6 +61,8 @@ window.SessionIntel?.getState?.();
 
 In **Network**, filter **`si-inspector`** — you want **`si-inspector.css`** **200** alongside **`si.js`**.
 
+Sites that ship **SES / lockdown** (`lockdown-install.js`, “Removing unpermitted intrinsics”) or **Trusted Types** often block third-party **`element.innerHTML`**. The inspector avoids live-document **`innerHTML`** by parsing markup with **`DOMParser`** instead; if you still see **`[Session Intelligence] inspector could not start`**, open the **Issues** tab and check CSP / Trusted Types for **`style-src`** and any **`require-trusted-types-for`** lines.
+
 ## How it gets built
 
 During `pnpm --filter @si/demo-retailer build`, if **`VITE_SI_WORKER_URL`** is set (no trailing slash — same value you use for the Velocity Motors demo and for Cloudflare Pages env), the build:
