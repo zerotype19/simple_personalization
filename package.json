@@ -14,7 +14,7 @@
     "cloudflare:bootstrap": "node scripts/cloudflare-bootstrap.mjs",
     "cloudflare:up": "bash scripts/cloudflare-up.sh",
     "cloudflare:deploy:worker": "pnpm --filter @si/worker run deploy",
-    "cloudflare:deploy:pages": "pnpm exec wrangler pages deploy --cwd apps/demo-retailer --branch main --commit-dirty && pnpm exec wrangler pages deploy --cwd apps/dashboard --branch main --commit-dirty",
+    "cloudflare:deploy:pages": "bash scripts/deploy-pages.sh",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",
     "test:watch": "vitest"

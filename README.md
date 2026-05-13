@@ -90,6 +90,27 @@ window.SessionIntel.getState();
 window.SessionIntel.subscribe((state) => console.log(state));
 ```
 
+### Hosted one-line snippet (webmasters: `src` only)
+
+To ship a single URL such as `https://personalizeme.ai/si.js` with **no** `data-config` / `data-collect` on the customer page, bake your Worker endpoints into the IIFE at build time. Attributes on the tag still **override** these defaults.
+
+```bash
+SI_PUBLIC_WORKER_URL="https://YOUR_WORKER_HOST" \
+SI_PUBLIC_FORCE_INSPECTOR=1 \
+pnpm --filter @si/sdk build
+```
+
+That sets default `GET ${SI_PUBLIC_WORKER_URL}/config` and `POST ${SI_PUBLIC_WORKER_URL}/collect`. Alternatively set full URLs: `SI_PUBLIC_CONFIG_URL` and `SI_PUBLIC_COLLECT_URL` (they win over `SI_PUBLIC_WORKER_URL`).
+
+Webmasters then add:
+
+```html
+<script async src="https://personalizeme.ai/si.js"></script>
+```
+
+- **On-site panel:** set `SI_PUBLIC_FORCE_INSPECTOR=1` so the Session Intelligence inspector opens without `data-inspector` or `?si_debug=1` (omit that env for a silent embed).
+- **Your aggregate “data panel” (dashboard):** traffic still appears there as long as `POST /collect` reaches your Worker; each batch includes `origin` (the publisher site) for attribution.
+
 ## Privacy notes (MVP)
 
 - No fingerprinting APIs are used.

@@ -4,6 +4,8 @@ Use this when you want a **real** `*.workers.dev` Worker and hosted UIs—not lo
 
 **Hosted demo narrative + script:** after a successful deploy, use [DEMO_WALKTHROUGH.md](./DEMO_WALKTHROUGH.md) and run `./scripts/demo-walkthrough.sh` from the repo root (`--open` opens demo + dashboard on macOS).
 
+**Hosted drop-in tag for third-party sites** (`https://<your-demo-domain>/si.js`): see [SNIPPET_HOSTING.md](./SNIPPET_HOSTING.md).
+
 ## One command (Wrangler CLI only)
 
 **1.** Log in once (browser opens):
@@ -56,7 +58,7 @@ This script: checks auth, finds or creates the D1 database named in `worker/wran
 
 **GitHub secrets:** `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `SI_WORKER_URL` (Worker HTTPS origin, no trailing slash; same as `VITE_SI_WORKER_URL` for builds).
 
-**Root scripts:** `pnpm cloudflare:deploy:worker` and `pnpm cloudflare:deploy:pages` (build both apps with `VITE_SI_WORKER_URL` first, then `deploy:pages`).
+**Root scripts:** `pnpm cloudflare:deploy:worker` and `pnpm cloudflare:deploy:pages` (runs `scripts/deploy-pages.sh`: requires **`VITE_SI_WORKER_URL`** or **`SI_WORKER_URL`** in the environment, builds demo + dashboard, then uploads both Pages projects).
 
 ### What you still set up manually in Cloudflare
 
