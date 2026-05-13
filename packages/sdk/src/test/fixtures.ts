@@ -1,5 +1,6 @@
 import type { ExperimentAssignment, SessionProfile } from "@si/shared";
 import { createBlankSignals, defaultSiteContext } from "../session";
+import { emptySiteEnvironmentSnapshot } from "../siteEnvironment";
 
 /** Dealer-shaped defaults so unit tests stay aligned with auto-retail rules unless overrides set another vertical. */
 function testAutoSiteContext() {
@@ -30,6 +31,7 @@ export function minimalProfile(overrides: Partial<SessionProfile> = {}): Session
     persona: null,
     site_context: testAutoSiteContext(),
     dynamic_signals: {},
+    site_environment: emptySiteEnvironmentSnapshot(),
   };
   return {
     ...base,
@@ -37,6 +39,7 @@ export function minimalProfile(overrides: Partial<SessionProfile> = {}): Session
     signals: { ...base.signals, ...(overrides.signals ?? {}) },
     site_context: { ...base.site_context, ...(overrides.site_context ?? {}) },
     dynamic_signals: { ...base.dynamic_signals, ...(overrides.dynamic_signals ?? {}) },
+    site_environment: { ...base.site_environment, ...(overrides.site_environment ?? {}) },
   };
 }
 

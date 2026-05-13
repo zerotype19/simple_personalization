@@ -13,10 +13,10 @@ import { logSiDebug, urlHasSiDebug } from "./si-debug";
 import { inferPageContext } from "./site";
 import {
   buildDynamicSignals,
-  classifyPageKind,
   classifyVertical,
   runSiteScan,
 } from "./siteIntelligence";
+import { buildSiteEnvironment, humanGenericPageLabel } from "./siteEnvironment";
 
 export interface BootOptions {
   /** Absolute URL to fetch JSON config (GET). */
@@ -193,12 +193,21 @@ export class SessionIntelRuntime {
       scan,
     });
 
+    const env = buildSiteEnvironment({
+      pathname: window.location.pathname,
+      scan,
+      vertical,
+      verticalConfidencePct: confidence,
+      pageType: ctx.page_type,
+    });
+    this.profile.site_environment = env;
+
     this.profile.site_context = {
       domain: scan.domain,
       site_name: scan.site_name,
       vertical,
       vertical_confidence: confidence,
-      page_kind: classifyPageKind(window.location.pathname, scan, ctx.page_type),
+      page_kind: `${humanGenericPageLabel(env.page.generic_kind)} · ~${Math.round(env.page.confidence * 100)}%`,
       scan,
     };
     this.profile.page_type = ctx.page_type;

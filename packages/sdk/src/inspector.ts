@@ -227,6 +227,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const liftPreview = demoLiftPreviewCopy();
     const sc = p.site_context;
     const isAuto = sc.vertical === "auto_retail";
+    const env = p.site_environment;
+    const envSignals = escHtml(env.page.signals_used.join(" · ") || "—");
     const themes = sc.scan.content_themes.slice(0, 4).map(escHtml).join(", ") || "—";
     const termsPreview = sc.scan.top_terms.slice(0, 8).map(escHtml).join(", ") || "—";
     const signalRows = Object.entries(p.dynamic_signals)
@@ -255,6 +257,26 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <div>Page kind</div><div><span class="si-pill">${escHtml(sc.page_kind)}</span></div>
           <div>Content themes</div><div class="si-muted">${themes}</div>
           <div>Top terms (sample)</div><div class="si-muted">${termsPreview}</div>
+        </div>
+      </div>
+
+      <div class="si-card">
+        <h3>Environment inference</h3>
+        <p class="si-muted si-muted--block">${escHtml(env.ladder.detail)}</p>
+        <div class="si-kv">
+          <div>Ladder</div><div><span class="si-pill">Level ${env.ladder.level} — ${escHtml(env.ladder.label)}</span></div>
+          <div>Inferred site type</div><div class="si-metric si-metric--break">${escHtml(env.site.site_type)}</div>
+          <div>Site confidence</div><div class="si-metric">${Math.round(env.site.confidence * 100)}%</div>
+          <div>Generic page kind</div><div class="si-metric">${escHtml(env.page.generic_kind.replace(/_/g, " "))}</div>
+          <div>Page confidence</div><div class="si-metric">${Math.round(env.page.confidence * 100)}%</div>
+          <div>Page signals</div><div class="si-muted">${envSignals}</div>
+          <div>Likely objective</div><div class="si-metric si-metric--break">${escHtml(env.conversion.primary_objective)}</div>
+          <div>Secondary</div><div class="si-muted">${escHtml(env.conversion.secondary_objective ?? "—")}</div>
+          <div>Objective confidence</div><div class="si-metric">${Math.round(env.conversion.confidence * 100)}%</div>
+          <div>Conversion elements</div><div class="si-muted">${escHtml(env.conversion.detected_elements.join(", ") || "—")}</div>
+          <div>Page object</div><div class="si-muted">${escHtml(env.object.object_type)} — ${escHtml(env.object.object_name ?? "—")}</div>
+          <div>Topic cluster</div><div class="si-muted">${escHtml(env.object.topic_cluster ?? "—")}</div>
+          <div>Platform guess</div><div><span class="si-pill">${escHtml(env.site.platform_guess)}</span></div>
         </div>
       </div>
 

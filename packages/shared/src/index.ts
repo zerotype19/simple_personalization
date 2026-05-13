@@ -21,6 +21,76 @@ export type SiteVertical =
   | "nonprofit"
   | "unknown";
 
+/** Generic page archetype (orthogonal to auto `PageType`). */
+export type GenericPageKind =
+  | "homepage"
+  | "category_page"
+  | "product_detail_page"
+  | "article_page"
+  | "pricing_page"
+  | "lead_form_page"
+  | "cart_page"
+  | "checkout_page"
+  | "account_page"
+  | "search_results_page"
+  | "support_page"
+  | "unknown";
+
+export type PlatformGuess = "shopify" | "wordpress" | "webflow" | "squarespace" | "unknown";
+
+/** 1 = observe, 2 = recommend, 3 = safe personalization eligible, 4 = strong (publisher opt-in only). */
+export type PersonalizationLadderLevel = 1 | 2 | 3 | 4;
+
+export interface SiteFingerprint {
+  domain: string;
+  /** Composite label, e.g. `b2b_saas_content` or `ecommerce`. */
+  site_type: string;
+  /** 0–1 heuristic confidence in `site_type`. */
+  confidence: number;
+  primary_topics: string[];
+  detected_ctas: string[];
+  /** High-level inferred business goal for this host. */
+  likely_objective: string;
+  platform_guess: PlatformGuess;
+}
+
+export interface PageEnvironmentInference {
+  generic_kind: GenericPageKind;
+  /** 0–1 confidence in `generic_kind`. */
+  confidence: number;
+  signals_used: string[];
+}
+
+export interface PageObjectHint {
+  object_type: string;
+  object_name: string | null;
+  category: string | null;
+  topic_cluster: string | null;
+}
+
+export interface ConversionObjectiveInference {
+  primary_objective: string;
+  secondary_objective: string | null;
+  detected_elements: string[];
+  /** 0–1 confidence in conversion read. */
+  confidence: number;
+}
+
+export interface ConfidenceLadder {
+  level: PersonalizationLadderLevel;
+  label: string;
+  detail: string;
+}
+
+/** Probabilistic environment inference (zero-config site intelligence). */
+export interface SiteEnvironmentSnapshot {
+  site: SiteFingerprint;
+  page: PageEnvironmentInference;
+  object: PageObjectHint;
+  conversion: ConversionObjectiveInference;
+  ladder: ConfidenceLadder;
+}
+
 /** Lightweight scan summary (no raw page dump — derived tokens only). */
 export interface SiteScanSummary {
   domain: string;
@@ -71,6 +141,11 @@ export interface SessionProfile extends SessionScores {
    * Values are counts or short strings (e.g. "74%").
    */
   dynamic_signals: Record<string, string>;
+  /**
+   * Site / page / conversion inference with confidence (hosted tag; no publisher config).
+   * Populated each tick from DOM + URL + scan tokens only.
+   */
+  site_environment: SiteEnvironmentSnapshot;
 }
 
 export interface SessionSignals {
@@ -187,6 +262,9 @@ export interface AnalyticsPayload {
     /** Present when the SDK inferred host context (hosted tag). */
     site_vertical?: SiteVertical;
     page_kind?: string;
+    inferred_site_type?: string;
+    inferred_generic_page?: GenericPageKind;
+    personalization_ladder?: PersonalizationLadderLevel;
   };
   experiment_assignment: ExperimentAssignment | null;
   active_treatments: ActiveTreatment[];

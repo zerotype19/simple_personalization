@@ -7,6 +7,7 @@ import type {
   SiteScanSummary,
 } from "@si/shared";
 import { detectReturnVisit, safeGetJSON, safeSetJSON } from "./storage";
+import { emptySiteEnvironmentSnapshot } from "./siteEnvironment";
 
 /** sessionStorage key for the persisted SessionProfile (not a cookie). */
 export const SI_SESSION_STORAGE_KEY = "si:session";
@@ -65,6 +66,7 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     existing.page_type = initialPageType;
     if (!existing.site_context) existing.site_context = defaultSiteContext();
     if (!existing.dynamic_signals) existing.dynamic_signals = {};
+    if (!existing.site_environment) existing.site_environment = emptySiteEnvironmentSnapshot();
     return existing;
   }
   const session_id = generateId();
@@ -86,6 +88,7 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     persona: null,
     site_context: defaultSiteContext(),
     dynamic_signals: {},
+    site_environment: emptySiteEnvironmentSnapshot(),
   };
   safeSetJSON(SESSION_KEY, profile);
   return profile;
