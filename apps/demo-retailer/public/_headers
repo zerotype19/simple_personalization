@@ -1,3 +1,6 @@
 # Shorter cache for the third-party snippet so publishers pick up fixes quickly (Pages merges with asset defaults).
 /si.js
   Cache-Control: public, max-age=120, must-revalidate
+
+/si-inspector.css
+  Cache-Control: public, max-age=120, must-revalidate

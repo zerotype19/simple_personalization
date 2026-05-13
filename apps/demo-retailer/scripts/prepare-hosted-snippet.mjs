@@ -27,6 +27,8 @@ if (!worker) {
   );
   try {
     if (existsSync(outFile)) unlinkSync(outFile);
+    const cssOut = path.join(appDir, "public", "si-inspector.css");
+    if (existsSync(cssOut)) unlinkSync(cssOut);
   } catch {
     /* ignore */
   }
@@ -52,3 +54,12 @@ if (!existsSync(sdkDist)) {
 mkdirSync(path.join(appDir, "public"), { recursive: true });
 copyFileSync(sdkDist, outFile);
 console.log("[prepare-hosted-snippet] Wrote", path.relative(root, outFile));
+
+const inspectorCssSrc = path.join(root, "packages", "sdk", "src", "inspector-panel.txt");
+const inspectorCssOut = path.join(appDir, "public", "si-inspector.css");
+if (existsSync(inspectorCssSrc)) {
+  copyFileSync(inspectorCssSrc, inspectorCssOut);
+  console.log("[prepare-hosted-snippet] Wrote", path.relative(root, inspectorCssOut));
+} else {
+  console.warn("[prepare-hosted-snippet] Missing inspector CSS source:", inspectorCssSrc);
+}

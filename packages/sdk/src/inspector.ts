@@ -1,5 +1,6 @@
 import type { SessionProfile } from "@si/shared";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
+import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
 
 export interface InspectorOptions {
   getState: () => SessionProfile;
@@ -20,60 +21,55 @@ const PERSONAS = [
   "high_intent",
 ];
 
-export function mountInspector(opts: InspectorOptions): () => void {
-  const root = document.createElement("div");
-  root.id = "si-inspector-root";
-  root.innerHTML = `
-<style>
-  #si-inspector-root * { box-sizing: border-box; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-  #si-inspector-panel {
-    position: fixed; top: 0; right: 0; height: 100vh; width: min(420px, 100vw);
-    background: #0b0f14; color: #e6edf3; border-left: 1px solid #1f2937;
-    transform: translateX(100%); transition: transform 0.25s ease; z-index: 2147483000;
-    display: flex; flex-direction: column; box-shadow: -8px 0 30px rgba(0,0,0,0.35);
+/** `…/si.js` → `…/si-inspector.css` so hosts can allow styles without `style-src 'unsafe-inline'`. */
+function resolveSiCompanionStylesheetHref(): string | null {
+  if (typeof document === "undefined") return null;
+  const scripts = document.querySelectorAll("script[src]");
+  for (let i = 0; i < scripts.length; i++) {
+    const el = scripts[i] as HTMLScriptElement;
+    const src = el.src;
+    if (!src || !/\/si\.js([?#]|$)/i.test(src)) continue;
+    try {
+      return new URL("si-inspector.css", src).href;
+    } catch {
+      /* ignore */
+    }
   }
-  #si-inspector-panel.open { transform: translateX(0); }
-  #si-inspector-header {
-    padding: 14px 16px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  return null;
+}
+
+function installInspectorStyles(root: HTMLElement): void {
+  const href = resolveSiCompanionStylesheetHref();
+  if (href) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    root.prepend(link);
+    return;
   }
-  #si-inspector-header h2 { margin: 0; font-size: 14px; letter-spacing: 0.02em; font-weight: 600; }
-  #si-inspector-body { overflow: auto; padding: 12px 14px 18px; flex: 1; }
-  .si-card { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
-  .si-card h3 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; font-weight: 600; }
-  .si-kv { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; font-size: 12px; }
-  .si-kv div:nth-child(odd) { color: #9ca3af; }
-  .si-pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #1f2937; font-size: 11px; }
-  .si-btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  button.si-btn {
-    background: #1f2937; color: #e5e7eb; border: 1px solid #374151; border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer;
-  }
-  button.si-btn.primary { background: #2563eb; border-color: #1d4ed8; }
-  button.si-btn.danger { background: #7f1d1d; border-color: #991b1b; }
-  .si-metric { font-variant-numeric: tabular-nums; }
-  .si-reason { font-size: 12px; color: #cbd5e1; margin: 6px 0 0; padding-left: 16px; }
-  .si-muted { color: #9ca3af; font-size: 12px; }
-  #si-inspector-launcher {
-    position: fixed; bottom: 14px; left: 14px; z-index: 2147482999;
-    width: 42px; height: 42px; border-radius: 10px; padding: 0; margin: 0;
-    background: #111827; color: #e5e7eb; border: 1px solid #374151;
-    font-size: 12px; font-weight: 700; letter-spacing: -0.03em; line-height: 1;
-    cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  }
-  #si-inspector-launcher:hover { background: #1f2937; border-color: #4b5563; }
-  #si-inspector-launcher:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
-</style>
+  const style = document.createElement("style");
+  style.textContent = INSPECTOR_PANEL_CSS;
+  root.prepend(style);
+}
+
+const INSPECTOR_SHELL_HTML = `
 <button type="button" id="si-inspector-launcher" aria-label="Toggle Session Intelligence panel" title="Session Intelligence">SI</button>
 <div id="si-inspector-panel" aria-hidden="true">
   <div id="si-inspector-header">
     <div>
       <h2>Session Intelligence</h2>
-      <div class="si-muted">Click <b>SI</b> (corner) or <b>Ctrl+Shift+\`</b> / <b>⌘+Shift+\`</b> (backtick key) to toggle. <span style="opacity:.75">(Ctrl+Shift+D is reserved in Chrome for bookmarks.)</span></div>
+      <div class="si-muted">Click <b>SI</b> (corner) or <b>Ctrl+Shift+\`</b> / <b>⌘+Shift+\`</b> (backtick key) to toggle. <span class="si-csp-chrome-hint">(Ctrl+Shift+D is reserved in Chrome for bookmarks.)</span></div>
     </div>
     <button class="si-btn" id="si-close">Close</button>
   </div>
   <div id="si-inspector-body"></div>
 </div>`;
+
+export function mountInspector(opts: InspectorOptions): () => void {
+  const root = document.createElement("div");
+  root.id = "si-inspector-root";
+  root.innerHTML = INSPECTOR_SHELL_HTML;
+  installInspectorStyles(root);
 
   /** Async scripts in `<head>` often run before `document.body` exists; append after DOMContentLoaded. */
   let pendingDomAttach: (() => void) | null = null;
@@ -144,7 +140,7 @@ export function mountInspector(opts: InspectorOptions): () => void {
       <div class="si-card">
         <h3>Session profile</h3>
         <div class="si-kv">
-          <div>Session ID</div><div class="si-metric" style="grid-column: span 1; word-break: break-all;">${p.session_id}</div>
+          <div>Session ID</div><div class="si-metric si-metric--break">${p.session_id}</div>
           <div>Journey stage</div><div><span class="si-pill">${p.journey_stage}</span></div>
           <div>Page type</div><div><span class="si-pill">${p.page_type}</span></div>
           <div>Persona</div><div><span class="si-pill">${p.persona ?? "auto"}</span></div>
@@ -172,7 +168,7 @@ export function mountInspector(opts: InspectorOptions): () => void {
       <div class="si-card">
         <h3>Category affinity</h3>
         <div class="si-muted">${Object.keys(p.category_affinity).length ? "" : "No strong affinity yet"}</div>
-        <div class="si-kv" style="margin-top:8px;">
+        <div class="si-kv si-kv--tight">
           ${Object.entries(p.category_affinity)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 8)
@@ -188,8 +184,8 @@ export function mountInspector(opts: InspectorOptions): () => void {
         <h3>Recommendation</h3>
         ${
           nba
-            ? `<div style="font-size:13px;line-height:1.4;">${nba.next_best_action}</div>
-               <div class="si-muted" style="margin-top:6px;">Confidence: <span class="si-metric">${(nba.confidence * 100).toFixed(0)}%</span></div>
+            ? `<div class="si-nba-body">${nba.next_best_action}</div>
+               <div class="si-muted si-nba-conf">Confidence: <span class="si-metric">${(nba.confidence * 100).toFixed(0)}%</span></div>
                <ul class="si-reason">${nba.reason.map((r) => `<li>${r}</li>`).join("")}</ul>`
             : `<div class="si-muted">No recommendation yet — keep browsing.</div>`
         }
@@ -197,13 +193,13 @@ export function mountInspector(opts: InspectorOptions): () => void {
 
       <div class="si-card">
         <h3>Active personalization</h3>
-        <div class="si-muted" style="margin-bottom:6px;">Personalization: <b>${persoOn ? "ON" : "OFF"}</b></div>
+        <div class="si-muted si-muted--mb6">Personalization: <b>${persoOn ? "ON" : "OFF"}</b></div>
         ${
           p.active_treatments.length
             ? p.active_treatments
                 .map(
                   (t) =>
-                    `<div style="font-size:12px;margin-bottom:6px;"><span class="si-pill">${t.source}</span> <code>${t.treatment_id}</code><div class="si-muted">slots: ${t.applied_slots.join(", ") || "—"}</div></div>`,
+                    `<div class="si-treat-row"><span class="si-pill">${t.source}</span> <code>${t.treatment_id}</code><div class="si-muted">slots: ${t.applied_slots.join(", ") || "—"}</div></div>`,
                 )
                 .join("")
             : `<div class="si-muted">No active treatments.</div>`
@@ -226,9 +222,9 @@ export function mountInspector(opts: InspectorOptions): () => void {
 
       <div class="si-card">
         <h3>Lift preview (demo seed)</h3>
-        <p class="si-muted" style="margin:0 0 8px;line-height:1.45;">
+        <p class="si-muted si-muted--block">
           Same numbers merged into the dashboard experiment table when no live D1 rows exist
-          (<code style="font-size:11px;">@si/shared/demoMetrics</code> + worker <code style="font-size:11px;">mergeExperiment</code>).
+          (<code class="si-code">@si/shared/demoMetrics</code> + worker <code class="si-code">mergeExperiment</code>).
         </p>
         <div class="si-kv">
           <div>CTA CTR</div><div><span class="si-pill">${liftPreview.ctaLine}</span></div>
@@ -238,8 +234,8 @@ export function mountInspector(opts: InspectorOptions): () => void {
 
       <div class="si-card">
         <h3>Session storage</h3>
-        <p class="si-muted" style="margin:0 0 8px;line-height:1.45;">
-          SI keeps one anonymous profile in <b>sessionStorage</b> under key <code style="font-size:11px;">si:session</code>
+        <p class="si-muted si-muted--block">
+          SI keeps one anonymous profile in <b>sessionStorage</b> under key <code class="si-code">si:session</code>
           (not a cookie). Clearing it gives you a new session id and a fresh A/B coin flip.
         </p>
         <div class="si-btn-row">
@@ -250,12 +246,12 @@ export function mountInspector(opts: InspectorOptions): () => void {
 
       <div class="si-card">
         <h3>Controls</h3>
-        <div class="si-muted" style="margin-bottom:8px;">Personalization: <b>${persoOn ? "ON" : "OFF"}</b></div>
+        <div class="si-muted si-muted--mb8">Personalization: <b>${persoOn ? "ON" : "OFF"}</b></div>
         <div class="si-btn-row">
           <button class="si-btn primary" id="si-toggle-perso">${persoOn ? "Disable" : "Enable"} personalization</button>
           <button class="si-btn" id="si-export">Export state</button>
         </div>
-        <div style="margin-top:10px;" class="si-muted">Force persona</div>
+        <div class="si-muted si-muted--persona">Force persona</div>
         <div class="si-btn-row" id="si-personas"></div>
       </div>
     `;

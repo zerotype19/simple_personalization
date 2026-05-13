@@ -1,4 +1,22 @@
+import { readFileSync } from "node:fs";
 import { defineConfig } from "tsup";
+import type { Plugin } from "esbuild";
+
+/** `.css` is handled by tsup/PostCSS and breaks our string bundle; `.txt` + this plugin inlines CSS text for the inspector fallback `<style>`. */
+function inlineInspectorPanelTxt(): Plugin {
+  return {
+    name: "inline-inspector-panel-txt",
+    setup(build) {
+      build.onLoad({ filter: /inspector-panel\.txt$/ }, (args) => {
+        const text = readFileSync(args.path, "utf8");
+        return {
+          contents: `export default ${JSON.stringify(text)};`,
+          loader: "js",
+        };
+      });
+    },
+  };
+}
 
 /** Injected into `sdk.iife.js` only — enables a one-line `<script src="https://cdn/.../sdk.iife.js">` for webmasters. */
 function embedDefines() {
@@ -28,6 +46,7 @@ export default defineConfig([
     platform: "browser",
     splitting: false,
     treeshake: true,
+    esbuildPlugins: [inlineInspectorPanelTxt()],
   },
   {
     entry: { "sdk.iife": "src/iife.ts" },
@@ -43,6 +62,7 @@ export default defineConfig([
     splitting: false,
     treeshake: true,
     define: embedDefines(),
+    esbuildPlugins: [inlineInspectorPanelTxt()],
     outExtension: () => ({ js: ".js" }),
     footer: {
       js: "window.SessionIntelBundle && window.SessionIntelBundle.bootFromScriptTag && window.SessionIntelBundle.bootFromScriptTag();",

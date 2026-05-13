@@ -10,6 +10,18 @@ Place the tag **at the end of `<body>`** when you can (still `async` is fine). S
 
 Use your real demo domain if it differs (custom domain on the `si-session-demo` Pages project).
 
+## Content Security Policy (CSP)
+
+Strict sites often block **inline** `<style>` and `style="..."` attributes. The hosted snippet loads **`https://YOUR_DEMO_DOMAIN/si-inspector.css`** next to **`si.js`** (same directory URL) via `<link rel="stylesheet">` when it finds a script whose `src` ends with **`/si.js`**. If no such tag exists (e.g. SDK bundled another way), it falls back to injecting a `<style>` with bundled CSS — that path needs **`style-src 'unsafe-inline'`** or equivalent.
+
+Typical allowlist for **`https://optiview.ai/si.js`** on a publisher site:
+
+- **`script-src`**: include **`https://optiview.ai`** (and **`'unsafe-inline'`** only if you still use other inline scripts).
+- **`connect-src`**: include your **Worker** origin (same base as `VITE_SI_WORKER_URL`) for **`/config`** and **`/collect`**.
+- **`style-src`**: include **`https://optiview.ai`** so the linked **`si-inspector.css`** can load.
+
+Chrome’s **“CSP blocks eval”** message usually points at **some other script** on the page (analytics, tag managers, A/B tools). The Session Intelligence IIFE does **not** rely on `eval()`. If DevTools attributes it to `script-src`, expand the stack or **Initiator** column to see which file triggered it.
+
 ## Friendly check in the browser
 
 Raw **`/si.js`** in a tab often looks like **nothing useful** (blank chrome or a huge block of minified code). That does **not** mean the file failed.
@@ -28,6 +40,7 @@ Raw **`/si.js`** in a tab often looks like **nothing useful** (blank chrome or a
 - Keyboard shortcut: **Ctrl+Shift+Backtick** (the key labeled **\` \~**, usually above Tab), or **⌘+Shift+Backtick** on Mac. Some layouts use the same chord on the **IntlBackslash** key position instead.
 - Append **`?si_debug=1`** to the URL on first load to mount the inspector and **open the drawer immediately** (full page reload so the query string is present when the SDK boots).
 - **Verify you have the current `si.js`:** the minified file should contain the substring **`si-inspector-launcher`**. If you only see **`Ctrl+Shift+D`** in the inspector hint and no launcher string, your browser or a CDN is still serving an **older** copy — hard-refresh, wait out cache, or append **`?v=2`** to the script URL once to bust cache.
+- With a strict **`style-src`**, ensure **`https://optiview.ai`** (or your snippet host) is allowed and that **`/si-inspector.css`** returns **200** in the Network tab. If the stylesheet is blocked or 404, the **SI** control may be effectively invisible.
 
 ## How it gets built
 
@@ -35,6 +48,7 @@ During `pnpm --filter @si/demo-retailer build`, if **`VITE_SI_WORKER_URL`** is s
 
 1. Runs `pnpm --filter @si/sdk build` with `SI_PUBLIC_WORKER_URL` set to that origin.
 2. Copies `packages/sdk/dist/sdk.iife.js` to `apps/demo-retailer/public/si.js` (Vite emits it at **`/si.js`** on the deployed site).
+3. Copies `packages/sdk/src/inspector-panel.txt` (CSS text) to **`public/si-inspector.css`** so the inspector can load styles without inline CSS when CSP allows that origin in `style-src`.
 
 If `VITE_SI_WORKER_URL` is unset (typical local `vite` with proxy), **`si.js` is not produced** and any old `public/si.js` is removed so you do not ship a stale snippet.
 
