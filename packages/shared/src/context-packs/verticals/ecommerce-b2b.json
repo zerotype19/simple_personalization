@@ -1,0 +1,8 @@
+{
+  "id": "ecommerce_b2b",
+  "label": "E-commerce (B2B)",
+  "likely_objectives": ["purchase", "quote_request", "account_signup", "catalog_browse"],
+  "page_kinds": ["homepage", "category", "product_detail", "quote_cart", "checkout"],
+  "archetypes": ["procurement_researcher", "budget_owner", "reorder_buyer"],
+  "concept_pack_ids": ["commerce_shopping", "lead_generation"]
+}

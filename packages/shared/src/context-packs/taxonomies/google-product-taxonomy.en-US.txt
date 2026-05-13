@@ -1,0 +1,24 @@
+# Slim excerpt of Google Product Taxonomy (top levels). Full file: https://www.google.com/basepages/producttype/taxonomy.en-US.txt
+# Used for lightweight commerce/category cues in the SDK.
+Animals & Pet Supplies
+Apparel & Accessories
+Arts & Entertainment
+Baby & Toddler
+Business & Industrial
+Cameras & Optics
+Electronics
+Food, Beverages & Tobacco
+Furniture
+Hardware
+Health & Beauty
+Home & Garden
+Luggage & Bags
+Mature
+Media
+Office Supplies
+Religious & Ceremonial
+Software
+Sporting Goods
+Toys & Games
+Vehicles & Parts
+General Merchandise

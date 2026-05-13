@@ -1,0 +1,8 @@
+{
+  "id": "b2b_saas",
+  "label": "B2B SaaS / product marketing",
+  "likely_objectives": ["demo_request", "trial_start", "lead_capture", "product_education"],
+  "page_kinds": ["homepage", "pricing", "product_page", "case_study", "article", "lead_form"],
+  "archetypes": ["strategic_researcher", "implementation_evaluator", "economic_buyer", "high_intent_lead"],
+  "concept_pack_ids": ["marketing_operations", "lead_generation", "content_engagement"]
+}

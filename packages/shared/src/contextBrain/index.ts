@@ -1,0 +1,1 @@
+export { computeConceptAffinity } from "./mapConcepts";

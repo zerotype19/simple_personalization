@@ -1,0 +1,13 @@
+[
+  { "id": "Product", "label": "Product" },
+  { "id": "Offer", "label": "Offer" },
+  { "id": "Article", "label": "Article" },
+  { "id": "NewsArticle", "label": "News article" },
+  { "id": "BlogPosting", "label": "Blog posting" },
+  { "id": "Organization", "label": "Organization" },
+  { "id": "Service", "label": "Service" },
+  { "id": "FAQPage", "label": "FAQ page" },
+  { "id": "WebPage", "label": "Web page" },
+  { "id": "CollectionPage", "label": "Collection page" },
+  { "id": "ItemList", "label": "Item list" }
+]

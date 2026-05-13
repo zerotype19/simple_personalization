@@ -1,0 +1,8 @@
+{
+  "id": "publisher",
+  "label": "Publisher / content",
+  "likely_objectives": ["content_depth", "newsletter_signup", "subscription", "ad_engagement"],
+  "page_kinds": ["homepage", "article", "category", "author", "tag"],
+  "archetypes": ["casual_reader", "deep_reader", "topic_loyalist", "newsletter_prospect"],
+  "concept_pack_ids": ["content_engagement", "marketing_operations"]
+}

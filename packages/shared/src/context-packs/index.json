@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "description": "Bundled context packs for Session Intelligence (no network).",
+  "taxonomies": [
+    "taxonomies/schema-org-types.json",
+    "taxonomies/iab-content-taxonomy.json",
+    "taxonomies/google-product-taxonomy.en-US.txt"
+  ],
+  "verticals": [
+    "verticals/b2b-saas.json",
+    "verticals/ecommerce-b2c.json",
+    "verticals/ecommerce-b2b.json",
+    "verticals/publisher.json",
+    "verticals/professional-services.json",
+    "verticals/auto-retail.json"
+  ],
+  "concepts": [
+    "concepts/marketing-operations.json",
+    "concepts/commerce-shopping.json",
+    "concepts/lead-generation.json",
+    "concepts/content-engagement.json"
+  ],
+  "stopwords": ["stopwords/global.json", "stopwords/site-boilerplate.json"]
+}

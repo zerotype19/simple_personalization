@@ -1,0 +1,33 @@
+{
+  "version": "3.0-slim",
+  "tiers": [
+    { "id": "IAB1", "name": "Automotive", "examples": ["vehicles", "auto", "dealership"] },
+    { "id": "IAB2", "name": "Books & Literature", "examples": ["books", "authors"] },
+    { "id": "IAB3", "name": "Business & Finance", "examples": ["business", "finance", "markets"] },
+    { "id": "IAB4", "name": "Careers", "examples": ["jobs", "hiring", "careers"] },
+    { "id": "IAB5", "name": "Education", "examples": ["courses", "learning", "training"] },
+    { "id": "IAB6", "name": "Events & Attractions", "examples": ["events", "tickets"] },
+    { "id": "IAB7", "name": "Family & Parenting", "examples": ["family", "parenting"] },
+    { "id": "IAB8", "name": "Fine Art", "examples": ["art", "gallery"] },
+    { "id": "IAB9", "name": "Food & Drink", "examples": ["recipes", "restaurants"] },
+    { "id": "IAB10", "name": "Healthy Living", "examples": ["health", "wellness", "fitness"] },
+    { "id": "IAB11", "name": "Hobbies & Interests", "examples": ["hobbies", "crafts"] },
+    { "id": "IAB12", "name": "Home & Garden", "examples": ["home", "garden", "diy"] },
+    { "id": "IAB13", "name": "Medical Health", "examples": ["medical", "clinical"] },
+    { "id": "IAB14", "name": "Movies", "examples": ["movies", "cinema"] },
+    { "id": "IAB15", "name": "Music & Audio", "examples": ["music", "podcast"] },
+    { "id": "IAB16", "name": "News & Politics", "examples": ["news", "politics"] },
+    { "id": "IAB17", "name": "Personal Finance", "examples": ["budget", "investing"] },
+    { "id": "IAB18", "name": "Pets", "examples": ["pets", "veterinary"] },
+    { "id": "IAB19", "name": "Pop Culture", "examples": ["celebrity", "entertainment"] },
+    { "id": "IAB20", "name": "Real Estate", "examples": ["homes", "mortgage"] },
+    { "id": "IAB21", "name": "Religion & Spirituality", "examples": ["faith", "spirituality"] },
+    { "id": "IAB22", "name": "Science", "examples": ["science", "research"] },
+    { "id": "IAB23", "name": "Shopping", "examples": ["shopping", "retail", "commerce"] },
+    { "id": "IAB24", "name": "Sports", "examples": ["sports", "teams"] },
+    { "id": "IAB25", "name": "Style & Fashion", "examples": ["fashion", "style"] },
+    { "id": "IAB26", "name": "Technology & Computing", "examples": ["software", "saas", "cloud"] },
+    { "id": "IAB27", "name": "Travel", "examples": ["travel", "hotels", "flights"] },
+    { "id": "IAB28", "name": "Video Gaming", "examples": ["games", "gaming"] }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "commerce_shopping",
+  "label": "Commerce & shopping",
+  "concepts": [
+    {
+      "id": "product_discovery",
+      "label": "Product discovery",
+      "terms": ["product", "products", "sku", "variant", "variants", "collection", "catalog", "browse", "shop", "new arrivals"]
+    },
+    {
+      "id": "price_promo_sensitivity",
+      "label": "Price & promo sensitivity",
+      "terms": ["price", "pricing", "sale", "discount", "coupon", "promo", "promotion", "clearance", "deal", "offers", "msrp"]
+    },
+    {
+      "id": "cart_checkout_intent",
+      "label": "Cart & checkout intent",
+      "terms": ["cart", "bag", "basket", "checkout", "shipping", "delivery", "returns", "warranty", "add to cart", "buy now"]
+    },
+    {
+      "id": "trust_reviews",
+      "label": "Trust & reviews",
+      "terms": ["review", "reviews", "rating", "ratings", "trust", "verified", "authentic", "guarantee", "secure"]
+    }
+  ]
+}

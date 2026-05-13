@@ -1,0 +1,26 @@
+{
+  "id": "content_engagement",
+  "label": "Content engagement",
+  "concepts": [
+    {
+      "id": "deep_reading",
+      "label": "Deep reading",
+      "terms": ["article", "articles", "post", "posts", "guide", "guides", "longform", "essay", "story", "series", "chapter"]
+    },
+    {
+      "id": "newsletter_audience",
+      "label": "Newsletter & audience growth",
+      "terms": ["newsletter", "subscribe", "subscription", "digest", "email list", "mailing list", "updates", "inbox"]
+    },
+    {
+      "id": "topic_loyalty",
+      "label": "Topic loyalty",
+      "terms": ["related", "recommended", "read more", "continue reading", "series", "topic", "topics", "tag", "tags", "category"]
+    },
+    {
+      "id": "share_distribution",
+      "label": "Share & distribution",
+      "terms": ["share", "sharing", "social", "distribute", "syndication", "repost", "amplify"]
+    }
+  ]
+}

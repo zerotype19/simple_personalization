@@ -1,0 +1,21 @@
+{
+  "id": "lead_generation",
+  "label": "Lead generation",
+  "concepts": [
+    {
+      "id": "demo_request_intent",
+      "label": "Demo / talk-to-sales intent",
+      "terms": ["demo", "book", "schedule", "talk to sales", "contact sales", "request", "consultation", "call", "meeting", "walkthrough"]
+    },
+    {
+      "id": "form_readiness",
+      "label": "Form & conversion readiness",
+      "terms": ["form", "submit", "get started", "get a quote", "contact us", "rfp", "proposal", "assessment", "audit"]
+    },
+    {
+      "id": "proof_credibility",
+      "label": "Proof & credibility",
+      "terms": ["case study", "case studies", "customers", "clients", "logo", "logos", "testimonial", "testimonials", "roi", "results"]
+    }
+  ]
+}

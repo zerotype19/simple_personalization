@@ -1,0 +1,8 @@
+{
+  "id": "ecommerce_b2c",
+  "label": "E-commerce (consumer)",
+  "likely_objectives": ["purchase", "cart_add", "browse", "email_capture"],
+  "page_kinds": ["homepage", "category", "product_detail", "cart", "checkout"],
+  "archetypes": ["browser", "category_explorer", "deal_seeker", "cart_ready_shopper"],
+  "concept_pack_ids": ["commerce_shopping"]
+}

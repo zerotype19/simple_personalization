@@ -23,6 +23,7 @@ export function minimalProfile(overrides: Partial<SessionProfile> = {}): Session
     engagement_score: 0,
     journey_stage: "discovery",
     category_affinity: {},
+    concept_affinity: {},
     page_type: "home",
     signals: createBlankSignals(),
     experiment_assignment: null,

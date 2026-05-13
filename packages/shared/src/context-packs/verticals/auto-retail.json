@@ -1,0 +1,8 @@
+{
+  "id": "auto_retail",
+  "label": "Auto retail",
+  "likely_objectives": ["vehicle_inquiry", "test_drive", "financing", "trade_in"],
+  "page_kinds": ["inventory", "vdp", "finance", "compare"],
+  "archetypes": ["researcher", "family_buyer", "luxury_buyer", "payment_sensitive", "high_intent"],
+  "concept_pack_ids": ["commerce_shopping", "lead_generation"]
+}

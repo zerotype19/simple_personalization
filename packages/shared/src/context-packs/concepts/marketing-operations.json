@@ -1,0 +1,36 @@
+{
+  "id": "marketing_operations",
+  "label": "Marketing & operating rhythm",
+  "concepts": [
+    {
+      "id": "quarterly_planning",
+      "label": "Quarterly planning",
+      "terms": ["quarter", "quarterly", "planning", "qbr", "q1", "q2", "q3", "q4", "fiscal", "okrs", "okr", "objectives", "key results"]
+    },
+    {
+      "id": "team_operating_rhythm",
+      "label": "Team operating rhythm",
+      "terms": ["team", "teams", "alignment", "ritual", "rituals", "cadence", "operating", "rhythm", "rhythmic", "standup", "sync", "operating model", "operating system"]
+    },
+    {
+      "id": "measurement_learning",
+      "label": "Measurement & learning",
+      "terms": ["signal", "signals", "learning", "test", "testing", "experiment", "experiments", "scorecard", "measurement", "analytics", "iterate", "iteration", "feedback loop"]
+    },
+    {
+      "id": "implementation_readiness",
+      "label": "Implementation readiness",
+      "terms": ["implementation", "rollout", "adoption", "change management", "playbook", "runbook", "enablement", "onboarding", "roll-out"]
+    },
+    {
+      "id": "marketing_workflow",
+      "label": "Marketing workflow",
+      "terms": ["workflow", "workflows", "pipeline", "pipelines", "brief", "briefs", "campaign", "campaigns", "calendar", "intake", "handoff", "handoffs"]
+    },
+    {
+      "id": "leadership_alignment",
+      "label": "Leadership alignment",
+      "terms": ["leadership", "executive", "stakeholder", "stakeholders", "sponsor", "buy-in", "buyin", "governance", "prioritization", "portfolio"]
+    }
+  ]
+}

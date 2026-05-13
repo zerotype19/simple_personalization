@@ -13,6 +13,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@si/shared/contextBrain": path.resolve(
+        __dirname,
+        "packages/shared/src/contextBrain/index.ts",
+      ),
       "@si/shared/demoMetrics": path.resolve(__dirname, "packages/shared/src/demoMetrics.ts"),
       "@si/shared": path.resolve(__dirname, "packages/shared/src/index.ts"),
     },

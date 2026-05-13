@@ -1,4 +1,5 @@
 import type { SDKConfig, SessionProfile } from "@si/shared";
+import { computeConceptAffinity } from "@si/shared/contextBrain";
 import { Batcher } from "./batcher";
 import { DEFAULT_CONFIG } from "./defaults";
 import { assignExperiments } from "./experiments";
@@ -233,6 +234,11 @@ export class SessionIntelRuntime {
     this.lastContextUrl = ctx.url;
 
     recomputeScores(this.profile);
+    this.profile.concept_affinity = computeConceptAffinity(
+      vertical,
+      scan,
+      this.profile.category_affinity,
+    );
 
     const { matches } = runRules(this.config.rules, this.profile);
     const rec = chooseRecommendation(

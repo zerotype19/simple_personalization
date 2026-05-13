@@ -1,6 +1,7 @@
 import type { SessionProfile } from "@si/shared";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
+import { buildSafePersonalizationPlan } from "./contextBrain/safePersonalizationPlan";
 import { archetypePersonasForVertical } from "./recommendation/archetypes";
 import { buildInferenceCertaintyBands, describeConversionSurfaces } from "./recommendation/inferenceCertainty";
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
@@ -218,8 +219,9 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const nba = p.next_best_action;
     const exp = p.experiment_assignment;
     const persoOn = opts.getPersonalizationEnabled();
-    const liftPreview = demoLiftPreviewCopy();
     const sc = p.site_context;
+    const liftPreview = demoLiftPreviewCopy(sc.vertical);
+    const safePlanLines = buildSafePersonalizationPlan(p);
     const isAuto = sc.vertical === "auto_retail";
     const env = p.site_environment;
     const envSignals = escHtml(env.page.signals_used.join(" · ") || "—");
@@ -231,14 +233,25 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           `<div>${escHtml(k)}</div><div class="si-metric">${escHtml(String(val))}</div>`,
       )
       .join("");
-    const affinityRows = Object.entries(p.category_affinity)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(
-        ([k, v]) =>
-          `<div>${escHtml(k.replace(/_/g, " "))}</div><div class="si-metric">${(v * 100).toFixed(0)}%</div>`,
-      )
-      .join("");
+    const conceptAff = p.concept_affinity ?? {};
+    const affinityRows = isAuto
+      ? Object.entries(p.category_affinity)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 8)
+          .map(
+            ([k, v]) =>
+              `<div>${escHtml(k.replace(/_/g, " "))}</div><div class="si-metric">${(v * 100).toFixed(0)}%</div>`,
+          )
+          .join("")
+      : Object.entries(conceptAff)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 8)
+          .map(
+            ([k, v]) =>
+              `<div>${escHtml(k)}</div><div class="si-metric">${(v * 100).toFixed(0)}%</div>`,
+          )
+          .join("");
+    const affinityEmpty = isAuto ? Object.keys(p.category_affinity).length === 0 : Object.keys(conceptAff).length === 0;
 
     const certainty = buildInferenceCertaintyBands(p);
     const surfaceList = describeConversionSurfaces(p);
@@ -333,7 +346,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
 
       <div class="si-card">
         <h3>${escHtml(topicAffinitySectionTitle(sc.vertical))}</h3>
-        <div class="si-muted">${Object.keys(p.category_affinity).length ? "" : "No strong signals yet — keep browsing."}</div>
+        <div class="si-muted">${affinityEmpty ? "No strong signals yet — keep browsing." : ""}</div>
         <div class="si-kv si-kv--tight">
           ${affinityRows}
         </div>
@@ -356,6 +369,16 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
             : `<div class="si-muted">No recommendation yet — keep browsing.</div>`
         }
       </div>
+
+      ${
+        !isAuto && safePlanLines.length
+          ? `<div class="si-card">
+        <h3>Recommended safe personalization</h3>
+        <p class="si-muted si-muted--block">What the tag would recommend next on this host. The snippet stays observe-only here — no DOM rewrites until you opt in.</p>
+        <ul class="si-reason">${safePlanLines.map((line) => `<li>${escHtml(line)}</li>`).join("")}</ul>
+      </div>`
+          : ""
+      }
 
       <div class="si-card">
         <h3>What we know vs. what we are unsure about</h3>
@@ -407,12 +430,12 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
             isAuto
               ? `Same numbers merged into the dashboard experiment table when no live D1 rows exist
           (<code class="si-code">@si/shared/demoMetrics</code> + worker <code class="si-code">mergeExperiment</code>).`
-              : "Lift numbers below use the seeded retail benchmark in the repo. Treat them as illustrative when this tag runs on other verticals."
+              : `${escHtml(liftPreview.cohortLabel)} — vertical-specific seeded rates for the inspector; the worker dashboard still merges against the retail demo pool unless live D1 rows exist.`
           }
         </p>
         <div class="si-kv">
-          <div>CTA CTR</div><div><span class="si-pill">${liftPreview.ctaLine}</span></div>
-          <div>Lead submit</div><div><span class="si-pill">${liftPreview.leadLine}</span></div>
+          <div>${escHtml(liftPreview.ctaMetricLabel)}</div><div><span class="si-pill">${escHtml(liftPreview.ctaLine)}</span></div>
+          <div>${escHtml(liftPreview.leadMetricLabel)}</div><div><span class="si-pill">${escHtml(liftPreview.leadLine)}</span></div>
         </div>
       </div>
 

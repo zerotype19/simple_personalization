@@ -22,7 +22,7 @@ export function liveSignalSectionTitle(vertical: SiteVertical): string {
 
 export function topicAffinitySectionTitle(vertical: SiteVertical): string {
   if (vertical === "auto_retail") return "Category affinity";
-  return "Topic affinity";
+  return "Business concepts";
 }
 
 export function siteContextTitle(): string {
