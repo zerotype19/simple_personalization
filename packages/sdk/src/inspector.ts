@@ -74,7 +74,19 @@ export function mountInspector(opts: InspectorOptions): () => void {
   </div>
   <div id="si-inspector-body"></div>
 </div>`;
-  document.body.appendChild(root);
+
+  /** Async scripts in `<head>` often run before `document.body` exists; append after DOMContentLoaded. */
+  let pendingDomAttach: (() => void) | null = null;
+  const appendRootToDocument = () => {
+    const host = document.body ?? document.documentElement;
+    host.appendChild(root);
+  };
+  if (document.body) {
+    appendRootToDocument();
+  } else {
+    pendingDomAttach = appendRootToDocument;
+    document.addEventListener("DOMContentLoaded", pendingDomAttach, { once: true });
+  }
 
   const panel = root.querySelector("#si-inspector-panel") as HTMLElement;
   const body = root.querySelector("#si-inspector-body") as HTMLElement;
@@ -300,6 +312,10 @@ export function mountInspector(opts: InspectorOptions): () => void {
   return () => {
     unsub();
     window.removeEventListener("keydown", keyHandler, true);
+    if (pendingDomAttach) {
+      document.removeEventListener("DOMContentLoaded", pendingDomAttach);
+      pendingDomAttach = null;
+    }
     root.remove();
   };
 }

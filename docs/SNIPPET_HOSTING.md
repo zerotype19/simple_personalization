@@ -6,6 +6,8 @@ The demo Pages app can ship a **second entrypoint**: `public/si.js` — the Sess
 <script async src="https://optiview.ai/si.js"></script>
 ```
 
+Place the tag **at the end of `<body>`** when you can (still `async` is fine). Scripts in `<head>` can execute **before `document.body` exists**; the SDK now waits for `DOMContentLoaded` in that case, but end-of-body is the most compatible pattern for embeds.
+
 Use your real demo domain if it differs (custom domain on the `si-session-demo` Pages project).
 
 ## Friendly check in the browser
@@ -25,6 +27,7 @@ Raw **`/si.js`** in a tab often looks like **nothing useful** (blank chrome or a
 - After the script loads, look for the **SI** button at the **bottom-left** of the viewport — it toggles the Session Intelligence drawer. **Do not use Ctrl+Shift+D** in Chrome/Edge: that is reserved for **bookmark all tabs** and will not open our panel.
 - Keyboard shortcut: **Ctrl+Shift+Backtick** (the key labeled **\` \~**, usually above Tab), or **⌘+Shift+Backtick** on Mac. Some layouts use the same chord on the **IntlBackslash** key position instead.
 - Append **`?si_debug=1`** to the URL on first load to mount the inspector and **open the drawer immediately** (full page reload so the query string is present when the SDK boots).
+- **Verify you have the current `si.js`:** the minified file should contain the substring **`si-inspector-launcher`**. If you only see **`Ctrl+Shift+D`** in the inspector hint and no launcher string, your browser or a CDN is still serving an **older** copy — hard-refresh, wait out cache, or append **`?v=2`** to the script URL once to bust cache.
 
 ## How it gets built
 
