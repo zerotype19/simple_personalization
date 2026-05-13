@@ -48,11 +48,13 @@ export default function Layout() {
         <Outlet />
       </main>
       <footer className="border-t border-slate-800 py-10 text-center text-xs text-slate-500">
-        Fictional dealership for product demo. Open the Session Intelligence inspector with{" "}
-        <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">Ctrl+Shift+D</span>
+        Fictional dealership for product demo. Open the Session Intelligence inspector with the{" "}
+        <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">SI</span> button (lower-left)
+        or{" "}
+        <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">Ctrl+Shift+`</span>
         <span className="text-slate-500"> / </span>
-        <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">⌘+Shift+D</span>
-        <span className="text-slate-500"> (Mac)</span>.
+        <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">⌘+Shift+`</span>
+        <span className="text-slate-500"> (Mac, backtick key)</span>.
       </footer>
     </div>
   );

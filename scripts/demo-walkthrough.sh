@@ -68,7 +68,7 @@ echo ""
 echo "--- Manual steps (do in browser; full detail: docs/DEMO_WALKTHROUGH.md) ---"
 cat <<STEPS
   1. Open ${SI_DEMO_URL} — wait for home to load (SDK boots to Worker).
-  2. Open inspector: Ctrl+Shift+D (Win/Linux) or Control+Shift+D (Mac).
+  2. Open inspector: click SI (lower-left) or Ctrl+Shift+` / ⌘+Shift+` (backtick key; avoid Ctrl+Shift+D — Chrome bookmarks).
   3. Browse: Home → Inventory → a vehicle (VDP) → Finance; optional Compare / Trade-in.
   4. Open ${SI_DASH_URL} — refresh; note Sessions (unique) and other metrics.
   5. In demo: Test drive → Submit demo lead (conversion). Dismiss alert.

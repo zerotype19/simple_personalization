@@ -57,7 +57,8 @@ Do these in order in the **demo** tab. Keep the **dashboard** open in another ta
    Go to `https://si-session-demo.pages.dev/` (or your `SI_DEMO_URL`). Wait for the hero; the SDK boots before the app renders. Notice the **Session Intelligence** strip under the nav: border color indicates control (amber), experiment-only (indigo), rule-driven (emerald), or both (fuchsia). Open **Signals** to watch counts update as you browse.
 
 2. **Open the Session Intelligence inspector**  
-   **Windows/Linux:** `Ctrl+Shift+D` · **Mac:** `⌘+Shift+D` (Command) or `Ctrl+Shift+D`  
+   Click the **SI** chip (lower-left) or press **Ctrl+Shift+Backtick** (the **\` \~** key, usually above Tab). On Mac, **⌘+Shift+Backtick** works too.  
+   *(Chrome reserves **Ctrl+Shift+D** for “bookmark all tabs,” so we do not use D.)*  
    Confirm the inspector opens (forced on in this demo via `forceInspector: true` in `main.tsx`). In the inspector, use **Session storage → Clear session (no reload)** to wipe `sessionStorage` key `si:session` and get a new anonymous session + fresh A/B assignment without reloading the tab. **Clear session & reload** does the same then refreshes the page.
 
 3. **Home**  

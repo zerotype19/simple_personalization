@@ -2,7 +2,7 @@
 
 Automated checks live in `pnpm test` (Vitest): shared `demoMetrics`, worker `analyticsMath` + `validatePayload`, SDK scoring, click-path, observer, and `panel-dashboard-parity.test.ts`. Use this document for **manual** QA and traceability.
 
-## Session Intelligence inspector (⌘/Ctrl+Shift+D)
+## Session Intelligence inspector (SI chip · Ctrl+Shift+`)
 
 | UI block | Field | Source in code | Sent to `/collect`? | Dashboard |
 |----------|--------|------------------|---------------------|-----------|

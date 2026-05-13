@@ -20,6 +20,12 @@ Raw **`/si.js`** in a tab often looks like **nothing useful** (blank chrome or a
 - **`http://optiview.ai/...` → `https://optiview.ai/...`** (301): always use **`https://`** in your tag `src`.
 - **`https://www.optiview.ai/...` → `https://optiview.ai/...`** (301): prefer the **apex** URL in the snippet, or follow the redirect once; the final response should still be the script.
 
+## Inspector on third-party sites (e.g. rhythm90.io)
+
+- After the script loads, look for the **SI** button at the **bottom-left** of the viewport — it toggles the Session Intelligence drawer. **Do not use Ctrl+Shift+D** in Chrome/Edge: that is reserved for **bookmark all tabs** and will not open our panel.
+- Keyboard shortcut: **Ctrl+Shift+Backtick** (the key labeled **\` \~**, usually above Tab), or **⌘+Shift+Backtick** on Mac. Some layouts use the same chord on the **IntlBackslash** key position instead.
+- Append **`?si_debug=1`** to the URL on first load to mount the inspector and **open the drawer immediately** (full page reload so the query string is present when the SDK boots).
+
 ## How it gets built
 
 During `pnpm --filter @si/demo-retailer build`, if **`VITE_SI_WORKER_URL`** is set (no trailing slash — same value you use for the Velocity Motors demo and for Cloudflare Pages env), the build:
@@ -61,7 +67,7 @@ Use any HTML you control (second Pages project, local static server, CMS “cust
   <body>
     <h1>External install test</h1>
     <p>Open DevTools → Network and watch for requests to your Worker <code>/collect</code>.</p>
-    <!-- Optional: append ?si_debug=1 to this page URL to force the inspector and open the drawer immediately (⌘/Ctrl+Shift+D still toggles). -->
+    <!-- Optional: append ?si_debug=1 to this page URL to force the inspector and open the drawer immediately (SI chip or Ctrl+Shift+` still toggles). -->
     <script async src="https://optiview.ai/si.js"></script>
   </body>
 </html>

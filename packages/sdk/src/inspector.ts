@@ -52,12 +52,23 @@ export function mountInspector(opts: InspectorOptions): () => void {
   .si-metric { font-variant-numeric: tabular-nums; }
   .si-reason { font-size: 12px; color: #cbd5e1; margin: 6px 0 0; padding-left: 16px; }
   .si-muted { color: #9ca3af; font-size: 12px; }
+  #si-inspector-launcher {
+    position: fixed; bottom: 14px; left: 14px; z-index: 2147482999;
+    width: 42px; height: 42px; border-radius: 10px; padding: 0; margin: 0;
+    background: #111827; color: #e5e7eb; border: 1px solid #374151;
+    font-size: 12px; font-weight: 700; letter-spacing: -0.03em; line-height: 1;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  }
+  #si-inspector-launcher:hover { background: #1f2937; border-color: #4b5563; }
+  #si-inspector-launcher:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
 </style>
+<button type="button" id="si-inspector-launcher" aria-label="Toggle Session Intelligence panel" title="Session Intelligence">SI</button>
 <div id="si-inspector-panel" aria-hidden="true">
   <div id="si-inspector-header">
     <div>
       <h2>Session Intelligence</h2>
-      <div class="si-muted">Ctrl+Shift+D or ⌘+Shift+D to toggle</div>
+      <div class="si-muted">Click <b>SI</b> (corner) or <b>Ctrl+Shift+\`</b> / <b>⌘+Shift+\`</b> (backtick key) to toggle. <span style="opacity:.75">(Ctrl+Shift+D is reserved in Chrome for bookmarks.)</span></div>
     </div>
     <button class="si-btn" id="si-close">Close</button>
   </div>
@@ -68,24 +79,43 @@ export function mountInspector(opts: InspectorOptions): () => void {
   const panel = root.querySelector("#si-inspector-panel") as HTMLElement;
   const body = root.querySelector("#si-inspector-body") as HTMLElement;
   const closeBtn = root.querySelector("#si-close") as HTMLButtonElement;
+  const launcher = root.querySelector("#si-inspector-launcher") as HTMLButtonElement;
+  launcher.setAttribute("aria-expanded", "false");
 
   let open = false;
   const toggle = () => {
     open = !open;
     panel.classList.toggle("open", open);
     panel.setAttribute("aria-hidden", open ? "false" : "true");
+    launcher.setAttribute("aria-expanded", open ? "true" : "false");
     if (open) render();
   };
 
-  const keyHandler = (e: KeyboardEvent) => {
-    const mod = e.ctrlKey || e.metaKey;
-    if (mod && e.shiftKey && (e.key === "D" || e.key === "d")) {
-      e.preventDefault();
-      toggle();
-    }
+  const typingTarget = (t: EventTarget | null) => {
+    if (!(t instanceof HTMLElement)) return false;
+    if (t.isContentEditable) return true;
+    const n = t.nodeName;
+    if (n === "INPUT" || n === "TEXTAREA" || n === "SELECT") return true;
+    return !!t.closest("input, textarea, select, [contenteditable='true']");
   };
-  window.addEventListener("keydown", keyHandler);
+
+  /** Chrome / Edge reserve Ctrl+Shift+D for “bookmark all tabs”; use backtick + optional SI launcher. */
+  const keyHandler = (e: KeyboardEvent) => {
+    if (typingTarget(e.target)) return;
+    const mod = e.ctrlKey || e.metaKey;
+    if (!mod || !e.shiftKey) return;
+    const backtickish = e.code === "Backquote" || e.code === "IntlBackslash";
+    if (!backtickish) return;
+    e.preventDefault();
+    e.stopPropagation();
+    toggle();
+  };
+  window.addEventListener("keydown", keyHandler, true);
   closeBtn.addEventListener("click", toggle);
+  launcher.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    toggle();
+  });
 
   const unsub = opts.subscribe(() => {
     if (open) render();
@@ -258,17 +288,18 @@ export function mountInspector(opts: InspectorOptions): () => void {
     personaRow.appendChild(clear);
   }
 
-  /** `?si_debug=1` mounts the inspector; also open the drawer immediately (otherwise it stays off-screen until ⌘/Ctrl+Shift+D). */
+  /** `?si_debug=1` mounts the inspector; also open the drawer immediately (otherwise use the SI chip or Ctrl+Shift+`). */
   if (window.location.search.includes("si_debug=1")) {
     open = true;
     panel.classList.add("open");
     panel.setAttribute("aria-hidden", "false");
+    launcher.setAttribute("aria-expanded", "true");
     render();
   }
 
   return () => {
     unsub();
-    window.removeEventListener("keydown", keyHandler);
+    window.removeEventListener("keydown", keyHandler, true);
     root.remove();
   };
 }
