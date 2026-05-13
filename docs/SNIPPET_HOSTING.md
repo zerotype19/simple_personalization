@@ -61,7 +61,7 @@ Use any HTML you control (second Pages project, local static server, CMS “cust
   <body>
     <h1>External install test</h1>
     <p>Open DevTools → Network and watch for requests to your Worker <code>/collect</code>.</p>
-    <!-- Optional: append ?si_debug=1 to this page URL to force the inspector if the bundle was built without VITE_SI_SNIPPET_FORCE_INSPECTOR -->
+    <!-- Optional: append ?si_debug=1 to this page URL to force the inspector and open the drawer immediately (⌘/Ctrl+Shift+D still toggles). -->
     <script async src="https://optiview.ai/si.js"></script>
   </body>
 </html>

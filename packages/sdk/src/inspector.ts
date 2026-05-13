@@ -258,6 +258,14 @@ export function mountInspector(opts: InspectorOptions): () => void {
     personaRow.appendChild(clear);
   }
 
+  /** `?si_debug=1` mounts the inspector; also open the drawer immediately (otherwise it stays off-screen until ⌘/Ctrl+Shift+D). */
+  if (window.location.search.includes("si_debug=1")) {
+    open = true;
+    panel.classList.add("open");
+    panel.setAttribute("aria-hidden", "false");
+    render();
+  }
+
   return () => {
     unsub();
     window.removeEventListener("keydown", keyHandler);
