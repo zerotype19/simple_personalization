@@ -9,6 +9,7 @@ import { chooseRecommendation } from "./recommender";
 import { recomputeScores } from "./scorer";
 import { runRules } from "./rules";
 import { loadOrCreateProfile, persistProfile, resetProfile } from "./session";
+import { logSiDebug, urlHasSiDebug } from "./si-debug";
 import { inferPageContext } from "./site";
 
 export interface BootOptions {
@@ -35,6 +36,11 @@ export class SessionIntelRuntime {
   constructor(private opts: BootOptions = {}) {}
 
   async boot(): Promise<void> {
+    logSiDebug("boot", {
+      forceInspectorOpt: !!this.opts.forceInspector,
+      siDebug: urlHasSiDebug(),
+      hostname: typeof window !== "undefined" ? window.location.hostname : "",
+    });
     await this.loadConfig();
     const ctx = inferPageContext();
     this.profile = loadOrCreateProfile(ctx.page_type);
@@ -63,34 +69,7 @@ export class SessionIntelRuntime {
     });
     this.batcher.start();
 
-    const inspectorOn =
-      this.opts.forceInspector ||
-      this.config.inspector_enabled ||
-      window.location.hostname === "localhost";
-
-    if (inspectorOn) {
-      this.stopInspector = mountInspector({
-        getState: () => this.getState(),
-        subscribe: (cb) => this.subscribe(cb),
-        onSoftReset: () => {
-          this.softResetSession();
-        },
-        onReset: () => {
-          resetProfile();
-          clearTreatments();
-          window.location.reload();
-        },
-        onTogglePersonalization: (enabled) => {
-          this.personalizationEnabled = enabled;
-          this.tick();
-        },
-        onForcePersona: (persona) => {
-          this.profile.persona = persona;
-          this.tick();
-        },
-        getPersonalizationEnabled: () => this.personalizationEnabled,
-      });
-    }
+    this.mountInspectorIfNeeded();
 
     // Expose conversion hook for demo forms.
     window.addEventListener("si:conversion", ((e: CustomEvent) => {
@@ -137,6 +116,42 @@ export class SessionIntelRuntime {
     this.profile.experiment_assignment = assignExperiments(this.config.experiments, this.profile);
     this.lastContextUrl = null;
     this.tick();
+  }
+
+  private inspectorWanted(): boolean {
+    return (
+      !!this.opts.forceInspector ||
+      this.config.inspector_enabled === true ||
+      (typeof window !== "undefined" && window.location.hostname === "localhost") ||
+      urlHasSiDebug()
+    );
+  }
+
+  private mountInspectorIfNeeded(): void {
+    if (this.stopInspector != null) return;
+    if (!this.inspectorWanted()) return;
+    logSiDebug("mounting inspector");
+    this.stopInspector = mountInspector({
+      getState: () => this.getState(),
+      subscribe: (cb) => this.subscribe(cb),
+      onSoftReset: () => {
+        this.softResetSession();
+      },
+      onReset: () => {
+        resetProfile();
+        clearTreatments();
+        window.location.reload();
+      },
+      onTogglePersonalization: (enabled) => {
+        this.personalizationEnabled = enabled;
+        this.tick();
+      },
+      onForcePersona: (persona) => {
+        this.profile.persona = persona;
+        this.tick();
+      },
+      getPersonalizationEnabled: () => this.personalizationEnabled,
+    });
   }
 
   private emit(): void {
@@ -218,6 +233,7 @@ export class SessionIntelRuntime {
 
     persistProfile(this.profile);
     this.emit();
+    this.mountInspectorIfNeeded();
   }
 }
 

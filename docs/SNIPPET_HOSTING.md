@@ -38,9 +38,28 @@ Raw **`/si.js`** in a tab often looks like **nothing useful** (blank chrome or a
 
 - After the script loads, look for the **SI** button at the **bottom-left** of the viewport — it toggles the Session Intelligence drawer. **Do not use Ctrl+Shift+D** in Chrome/Edge: that is reserved for **bookmark all tabs** and will not open our panel.
 - Keyboard shortcut: **Ctrl+Shift+Backtick** (the key labeled **\` \~**, usually above Tab), or **⌘+Shift+Backtick** on Mac. Some layouts use the same chord on the **IntlBackslash** key position instead.
-- Append **`?si_debug=1`** to the URL on first load to mount the inspector and **open the drawer immediately** (full page reload so the query string is present when the SDK boots).
+- Append **`?si_debug=1`** to the URL for the inspector and **`[Session Intelligence]`** console logs, and (on first paint) **open the drawer immediately**. Prefer a **full reload** with that query already present when **`si.js`** runs; SPAs that add the query later are picked up on the next SDK **`tick`** (see **Debugging** below). **`sessionStorage.setItem('si:debug','1')` + reload** also works.
 - **Verify you have the current `si.js`:** the minified file should contain the substring **`si-inspector-launcher`**. If you only see **`Ctrl+Shift+D`** in the inspector hint and no launcher string, your browser or a CDN is still serving an **older** copy — hard-refresh, wait out cache, or append **`?v=2`** to the script URL once to bust cache.
 - With a strict **`style-src`**, ensure **`https://optiview.ai`** (or your snippet host) is allowed and that **`/si-inspector.css`** returns **200** in the Network tab. If the stylesheet is blocked or 404, the **SI** control may be effectively invisible.
+
+### Debugging (SPAs, routers, “nothing shows”)
+
+`si.js` runs **once** when the browser first executes it. If your app **client-navigates** to `?si_debug=1` **after** that (router updates the URL without a full reload), the snippet may have already booted **without** seeing the query string. The SDK re-checks on each internal **`tick`** (navigation / signals), but the most reliable approach is still:
+
+- **Hard reload** with `?si_debug=1` already in the bar when the page loads, or
+- **`sessionStorage.setItem('si:debug', '1'); location.reload()`** once — later boots treat that like `?si_debug=1` for the inspector and for **`[Session Intelligence]`** console logs, or
+- **`data-inspector="1"`** on the `<script src="…/si.js">` tag so the inspector is always enabled for that embed.
+
+In **Console**, filter for **`[Session Intelligence]`** (with `si_debug` or `si:debug` as above) to see lines such as **inspector styles installed** (`link` vs inlined fallback) and **inspector root appended**.
+
+Quick checks in the console:
+
+```js
+document.getElementById("si-inspector-root");
+window.SessionIntel?.getState?.();
+```
+
+In **Network**, filter **`si-inspector`** — you want **`si-inspector.css`** **200** alongside **`si.js`**.
 
 ## How it gets built
 

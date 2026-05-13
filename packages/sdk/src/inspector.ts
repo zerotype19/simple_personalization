@@ -1,6 +1,7 @@
 import type { SessionProfile } from "@si/shared";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
+import { logSiDebug, urlHasSiDebug } from "./si-debug";
 
 export interface InspectorOptions {
   getState: () => SessionProfile;
@@ -38,18 +39,19 @@ function resolveSiCompanionStylesheetHref(): string | null {
   return null;
 }
 
-function installInspectorStyles(root: HTMLElement): void {
+function installInspectorStyles(root: HTMLElement): { mode: "link" | "inline"; href: string | null } {
   const href = resolveSiCompanionStylesheetHref();
   if (href) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = href;
     root.prepend(link);
-    return;
+    return { mode: "link", href };
   }
   const style = document.createElement("style");
   style.textContent = INSPECTOR_PANEL_CSS;
   root.prepend(style);
+  return { mode: "inline", href: null };
 }
 
 const INSPECTOR_SHELL_HTML = `
@@ -69,13 +71,15 @@ export function mountInspector(opts: InspectorOptions): () => void {
   const root = document.createElement("div");
   root.id = "si-inspector-root";
   root.innerHTML = INSPECTOR_SHELL_HTML;
-  installInspectorStyles(root);
+  const sheet = installInspectorStyles(root);
+  logSiDebug("inspector styles installed", { mode: sheet.mode, companion: sheet.href });
 
   /** Async scripts in `<head>` often run before `document.body` exists; append after DOMContentLoaded. */
   let pendingDomAttach: (() => void) | null = null;
   const appendRootToDocument = () => {
     const host = document.body ?? document.documentElement;
     host.appendChild(root);
+    logSiDebug("inspector root appended", { hasRoot: !!document.getElementById("si-inspector-root") });
   };
   if (document.body) {
     appendRootToDocument();
@@ -296,8 +300,8 @@ export function mountInspector(opts: InspectorOptions): () => void {
     personaRow.appendChild(clear);
   }
 
-  /** `?si_debug=1` mounts the inspector; also open the drawer immediately (otherwise use the SI chip or Ctrl+Shift+`). */
-  if (window.location.search.includes("si_debug=1")) {
+  /** Debug / SPA: open drawer when `?si_debug=1` or `sessionStorage['si:debug'] === '1'`. */
+  if (urlHasSiDebug()) {
     open = true;
     panel.classList.add("open");
     panel.setAttribute("aria-hidden", "false");

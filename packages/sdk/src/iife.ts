@@ -1,4 +1,5 @@
 import * as api from "./index";
+import { urlHasSiDebug } from "./si-debug";
 
 /** Replaced at IIFE build time via `tsup` `define` (empty strings / false when unset). */
 declare const __SI_EMBED_CONFIG_URL__: string;
@@ -31,7 +32,7 @@ export function boot(): void {
       const forceInspector =
         script?.getAttribute("data-inspector") === "true" ||
         script?.getAttribute("data-inspector") === "1" ||
-        window.location.search.includes("si_debug=1") ||
+        urlHasSiDebug() ||
         __SI_EMBED_FORCE_INSPECTOR__;
       const rt = await api.boot({ configUrl, collectUrl, forceInspector });
       window.SessionIntel = {
