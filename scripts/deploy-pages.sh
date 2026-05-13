@@ -17,6 +17,10 @@ fi
 export VITE_SI_WORKER_URL="${URL%/}"
 echo "Using VITE_SI_WORKER_URL=$VITE_SI_WORKER_URL"
 
+# Canonical origin where /si.js and /si-inspector.css are served (baked into the IIFE).
+export VITE_SI_SNIPPET_ORIGIN="${VITE_SI_SNIPPET_ORIGIN:-https://optiview.ai}"
+echo "Using VITE_SI_SNIPPET_ORIGIN=$VITE_SI_SNIPPET_ORIGIN"
+
 pnpm --filter @si/demo-retailer build
 pnpm --filter @si/dashboard build
 

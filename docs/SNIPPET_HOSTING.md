@@ -12,7 +12,7 @@ Use your real demo domain if it differs (custom domain on the `si-session-demo` 
 
 ## Content Security Policy (CSP)
 
-Strict sites often block **inline** `<style>` and `style="..."` attributes. The hosted snippet loads **`https://YOUR_DEMO_DOMAIN/si-inspector.css`** next to **`si.js`** (same directory URL) via `<link rel="stylesheet">` when it finds a script whose `src` ends with **`/si.js`**. If no such tag exists (e.g. SDK bundled another way), it falls back to injecting a `<style>` with bundled CSS — that path needs **`style-src 'unsafe-inline'`** or equivalent.
+Strict sites often block **inline** `<style>` and `style="..."` attributes. The hosted snippet loads **`https://YOUR_DEMO_DOMAIN/si-inspector.css`** next to **`si.js`**. The IIFE also **bakes** that stylesheet URL at build time (default origin **`https://optiview.ai`**, override with **`VITE_SI_SNIPPET_ORIGIN`**) so the `<link>` is created even if the page has no discoverable **`script[src*="/si.js"]`** (some tag managers or proxies hide the original tag). If no baked URL and no matching script tag exists, it falls back to injecting a `<style>` with bundled CSS — that path needs **`style-src 'unsafe-inline'`** or equivalent.
 
 Typical allowlist for **`https://optiview.ai/si.js`** on a publisher site:
 
@@ -68,10 +68,11 @@ During `pnpm --filter @si/demo-retailer build`, if **`VITE_SI_WORKER_URL`** is s
 1. Runs `pnpm --filter @si/sdk build` with `SI_PUBLIC_WORKER_URL` set to that origin.
 2. Copies `packages/sdk/dist/sdk.iife.js` to `apps/demo-retailer/public/si.js` (Vite emits it at **`/si.js`** on the deployed site).
 3. Copies `packages/sdk/src/inspector-panel.txt` (CSS text) to **`public/si-inspector.css`** so the inspector can load styles without inline CSS when CSP allows that origin in `style-src`.
+4. Sets **`SI_PUBLIC_INSPECTOR_CSS_URL`** for that IIFE build (default **`https://optiview.ai/si-inspector.css`**; override with **`VITE_SI_SNIPPET_ORIGIN`** if your snippet lives on another hostname) so the `<link rel="stylesheet">` is created without relying on DOM `script[src]` scanning.
 
 If `VITE_SI_WORKER_URL` is unset (typical local `vite` with proxy), **`si.js` is not produced** and any old `public/si.js` is removed so you do not ship a stale snippet.
 
-Optional: set **`VITE_SI_SNIPPET_FORCE_INSPECTOR=1`** for that build so the on-page inspector is always on for the snippet bundle (useful for debugging; omit for a silent embed).
+Optional: set **`VITE_SI_SNIPPET_FORCE_INSPECTOR=1`** for that build so the on-page inspector is always on for the snippet bundle (useful for debugging; omit for a silent embed). Optional: **`VITE_SI_SNIPPET_ORIGIN=https://your.custom.domain`** when **`/si.js`** is not served from **`optiview.ai`**.
 
 `public/si.js` is gitignored; production snippets come only from CI or your deploy command with env set.
 

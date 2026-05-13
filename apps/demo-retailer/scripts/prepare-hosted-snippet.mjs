@@ -6,6 +6,9 @@
  *   <script async src="https://YOUR_DEMO_DOMAIN/si.js"></script>
  *
  * Optional: `VITE_SI_SNIPPET_FORCE_INSPECTOR=1` bakes in the on-page inspector for that bundle.
+ *
+ * `VITE_SI_SNIPPET_ORIGIN` (default `https://optiview.ai`) bakes `…/si-inspector.css` into the IIFE
+ * so the companion stylesheet loads even when DOM `script[src]` scanning cannot find `/si.js`.
  */
 import { execSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, unlinkSync } from "node:fs";
@@ -39,6 +42,10 @@ const env = {
   ...process.env,
   SI_PUBLIC_WORKER_URL: worker,
 };
+const snippetOrigin = (process.env.VITE_SI_SNIPPET_ORIGIN ?? "https://optiview.ai")
+  .trim()
+  .replace(/\/+$/, "");
+env.SI_PUBLIC_INSPECTOR_CSS_URL = `${snippetOrigin}/si-inspector.css`;
 if (process.env.VITE_SI_SNIPPET_FORCE_INSPECTOR === "1") {
   env.SI_PUBLIC_FORCE_INSPECTOR = "1";
 }

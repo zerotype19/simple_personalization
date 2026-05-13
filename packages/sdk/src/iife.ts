@@ -34,15 +34,20 @@ export function boot(): void {
         script?.getAttribute("data-inspector") === "1" ||
         urlHasSiDebug() ||
         __SI_EMBED_FORCE_INSPECTOR__;
-      const rt = await api.boot({ configUrl, collectUrl, forceInspector });
-      window.SessionIntel = {
-        boot: api.boot,
-        destroy: api.destroy,
-        getState: () => rt.getState(),
-        subscribe: (cb) => rt.subscribe(cb),
-        markConversion: (t?: string) => rt.markConversion(t),
-        softResetSession: () => api.softResetSession(),
-      };
+      try {
+        const rt = await api.boot({ configUrl, collectUrl, forceInspector });
+        window.SessionIntel = {
+          boot: api.boot,
+          destroy: api.destroy,
+          getState: () => rt.getState(),
+          subscribe: (cb) => rt.subscribe(cb),
+          markConversion: (t?: string) => rt.markConversion(t),
+          softResetSession: () => api.softResetSession(),
+        };
+      } catch (err) {
+        console.error("[Session Intelligence] boot failed", err);
+        throw err;
+      }
     },
   };
 }

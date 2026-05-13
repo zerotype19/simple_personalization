@@ -26,10 +26,12 @@ function embedDefines() {
   const collect =
     process.env.SI_PUBLIC_COLLECT_URL || (workerBase ? `${workerBase}/collect` : "");
   const forceInspector = process.env.SI_PUBLIC_FORCE_INSPECTOR === "1";
+  const inspectorCss = (process.env.SI_PUBLIC_INSPECTOR_CSS_URL ?? "").trim();
   return {
     __SI_EMBED_CONFIG_URL__: JSON.stringify(config),
     __SI_EMBED_COLLECT_URL__: JSON.stringify(collect),
     __SI_EMBED_FORCE_INSPECTOR__: forceInspector ? "true" : "false",
+    __SI_EMBED_INSPECTOR_CSS_URL__: JSON.stringify(inspectorCss),
   } as Record<string, string>;
 }
 
@@ -46,6 +48,11 @@ export default defineConfig([
     platform: "browser",
     splitting: false,
     treeshake: true,
+    define: {
+      __SI_EMBED_INSPECTOR_CSS_URL__: JSON.stringify(
+        (process.env.SI_PUBLIC_INSPECTOR_CSS_URL ?? "").trim(),
+      ),
+    },
     esbuildPlugins: [inlineInspectorPanelTxt()],
   },
   {

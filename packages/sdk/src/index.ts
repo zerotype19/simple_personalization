@@ -7,9 +7,15 @@ export { SessionIntelRuntime };
 
 export async function boot(opts: BootOptions = {}): Promise<SessionIntelRuntime> {
   if (singleton) return singleton;
-  singleton = new SessionIntelRuntime(opts);
-  await singleton.boot();
-  return singleton;
+  const rt = new SessionIntelRuntime(opts);
+  try {
+    await rt.boot();
+    singleton = rt;
+    return singleton;
+  } catch (e) {
+    singleton = null;
+    throw e;
+  }
 }
 
 export function destroy(): void {

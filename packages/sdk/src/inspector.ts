@@ -3,6 +3,9 @@ import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
 
+/** Set only in the hosted IIFE build (`SI_PUBLIC_INSPECTOR_CSS_URL`); empty in ESM. */
+declare const __SI_EMBED_INSPECTOR_CSS_URL__: string;
+
 export interface InspectorOptions {
   getState: () => SessionProfile;
   subscribe: (cb: (p: SessionProfile) => void) => () => void;
@@ -22,8 +25,11 @@ const PERSONAS = [
   "high_intent",
 ];
 
-/** `…/si.js` → `…/si-inspector.css` so hosts can allow styles without `style-src 'unsafe-inline'`. */
+/** `…/si.js` → `…/si-inspector.css`, or baked `SI_PUBLIC_INSPECTOR_CSS_URL` for the hosted snippet. */
 function resolveSiCompanionStylesheetHref(): string | null {
+  const baked =
+    typeof __SI_EMBED_INSPECTOR_CSS_URL__ === "string" ? __SI_EMBED_INSPECTOR_CSS_URL__.trim() : "";
+  if (baked) return baked;
   if (typeof document === "undefined") return null;
   const scripts = document.querySelectorAll("script[src]");
   for (let i = 0; i < scripts.length; i++) {
