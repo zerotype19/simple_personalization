@@ -1,6 +1,8 @@
 import type { SessionProfile } from "@si/shared";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
+import { archetypePersonasForVertical } from "./recommendation/archetypes";
+import { buildInferenceCertaintyBands, describeConversionSurfaces } from "./recommendation/inferenceCertainty";
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
 import {
   liveSignalSectionTitle,
@@ -22,14 +24,6 @@ export interface InspectorOptions {
   onForcePersona: (persona: string | null) => void;
   getPersonalizationEnabled: () => boolean;
 }
-
-const PERSONAS = [
-  "researcher",
-  "family_buyer",
-  "luxury_buyer",
-  "payment_sensitive",
-  "high_intent",
-];
 
 function escHtml(s: string): string {
   return String(s)
@@ -246,6 +240,38 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       )
       .join("");
 
+    const certainty = buildInferenceCertaintyBands(p);
+    const surfaceList = describeConversionSurfaces(p);
+    const howInferredLines = [
+      `${verticalDisplayName(sc.vertical)} (${Math.round(sc.vertical_confidence)}% vertical confidence)`,
+      env.page.signals_used.length
+        ? `Page cues: ${env.page.signals_used.slice(0, 6).join(", ")}`
+        : "Page structure cues are still thin",
+      env.conversion.detected_elements.length
+        ? `Conversion cues: ${env.conversion.detected_elements.join(", ")}`
+        : "Few funnel-specific DOM cues detected",
+      sc.scan.primary_ctas.length
+        ? `Sample CTAs: ${sc.scan.primary_ctas.slice(0, 5).join(" · ")}`
+        : "No strong CTA sample from header/main in this pass",
+      sc.scan.content_themes.length ? `Themes: ${sc.scan.content_themes.slice(0, 5).join(", ")}` : null,
+    ]
+      .filter((x): x is string => !!x)
+      .map(escHtml)
+      .join("<br/>");
+
+    const nbaSurfaceEsc = escHtml(surfaceList.join(", ") || "—");
+    const nbaLevelEsc = nba?.recommended_treatment_level
+      ? escHtml(nba.recommended_treatment_level.replace(/_/g, " "))
+      : "—";
+    const nbaSurfaceTargetEsc = nba?.recommended_surface
+      ? escHtml(nba.recommended_surface.replace(/_/g, " "))
+      : "—";
+    const nbaObjectiveEsc = nba?.objective ? escHtml(nba.objective.replace(/_/g, " ")) : "—";
+
+    const certaintyHigh = certainty.high.map((t) => `<li>${escHtml(t)}</li>`).join("") || "<li>—</li>";
+    const certaintyMed = certainty.medium.map((t) => `<li>${escHtml(t)}</li>`).join("") || "<li>—</li>";
+    const certaintyLow = certainty.low.map((t) => `<li>${escHtml(t)}</li>`).join("") || "<li>—</li>";
+
     const html = `
       <div class="si-card">
         <h3>${siteContextTitle()}</h3>
@@ -281,6 +307,11 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       </div>
 
       <div class="si-card">
+        <h3>How the tag inferred this site</h3>
+        <p class="si-muted si-muted--block">${howInferredLines}</p>
+      </div>
+
+      <div class="si-card">
         <h3>Session profile</h3>
         <div class="si-kv">
           <div>Session ID</div><div class="si-metric si-metric--break">${escHtml(p.session_id)}</div>
@@ -309,14 +340,31 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       </div>
 
       <div class="si-card">
-        <h3>Recommendation</h3>
+        <h3>Objective-aware NBA</h3>
         ${
           nba
             ? `<div class="si-nba-body">${escHtml(nba.next_best_action)}</div>
-               <div class="si-muted si-nba-conf">Confidence: <span class="si-metric">${(nba.confidence * 100).toFixed(0)}%</span></div>
+               <div class="si-kv si-kv--tight si-kv--nba-meta">
+                 <div>Objective</div><div class="si-metric">${nbaObjectiveEsc}</div>
+                 <div>Personalization level</div><div><span class="si-pill">${nbaLevelEsc}</span></div>
+                 <div>Recommended surface</div><div><span class="si-pill">${nbaSurfaceTargetEsc}</span></div>
+                 <div>Detected conversion surfaces</div><div class="si-muted">${nbaSurfaceEsc}</div>
+                 <div>Model confidence</div><div class="si-metric">${(nba.confidence * 100).toFixed(0)}%</div>
+               </div>
+               <div class="si-muted si-muted--mb6">Why now</div>
                <ul class="si-reason">${nba.reason.map((r) => `<li>${escHtml(r)}</li>`).join("")}</ul>`
             : `<div class="si-muted">No recommendation yet — keep browsing.</div>`
         }
+      </div>
+
+      <div class="si-card">
+        <h3>What we know vs. what we are unsure about</h3>
+        <div class="si-muted si-muted--mb6">High confidence</div>
+        <ul class="si-reason">${certaintyHigh}</ul>
+        <div class="si-muted si-muted--mb6">Medium confidence</div>
+        <ul class="si-reason">${certaintyMed}</ul>
+        <div class="si-muted si-muted--mb6">Low confidence / gaps</div>
+        <ul class="si-reason">${certaintyLow}</ul>
       </div>
 
       <div class="si-card">
@@ -387,7 +435,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <button class="si-btn primary" id="si-toggle-perso">${persoOn ? "Disable" : "Enable"} personalization</button>
           <button class="si-btn" id="si-export">Export state</button>
         </div>
-        <div class="si-muted si-muted--persona">Force persona</div>
+        <div class="si-muted si-muted--persona">Force archetype (debug)</div>
         <div class="si-btn-row" id="si-personas"></div>
       </div>
     `;
@@ -433,7 +481,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     });
 
     const personaRow = body.querySelector("#si-personas") as HTMLDivElement;
-    PERSONAS.forEach((persona) => {
+    archetypePersonasForVertical(sc.vertical).forEach((persona) => {
       const b = document.createElement("button");
       b.className = "si-btn";
       b.textContent = persona.replace(/_/g, " ");
@@ -442,7 +490,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     });
     const clear = document.createElement("button");
     clear.className = "si-btn";
-    clear.textContent = "Clear persona";
+    clear.textContent = "Clear archetype";
     clear.addEventListener("click", () => opts.onForcePersona(null));
     personaRow.appendChild(clear);
   }

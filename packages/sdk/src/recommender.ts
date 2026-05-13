@@ -1,9 +1,9 @@
 import type { Recommendation, SessionProfile } from "@si/shared";
-import { defaultRecommendationForSite } from "./siteIntelligence/dynamicRecommendationEngine";
+import { buildObjectiveAwareRecommendation } from "./recommendation/objectiveAwareNba";
 
 /**
  * Choose the highest-confidence rule-driven recommendation, falling back to
- * heuristics derived from scores + affinity if no rules matched.
+ * objective-aware NBA (environment + session), then legacy auto heuristics.
  */
 export function chooseRecommendation(
   profile: SessionProfile,
@@ -15,15 +15,17 @@ export function chooseRecommendation(
     .sort((a, b) => b.confidence - a.confidence);
   if (fromRules.length) return fromRules[0];
 
+  const objectiveRec = finalizeReasons(buildObjectiveAwareRecommendation(profile), profile);
   const vertical = profile.site_context.vertical;
-  if (vertical !== "auto_retail") {
-    const siteRec = defaultRecommendationForSite(profile, vertical);
-    if (siteRec) return finalizeReasons(siteRec, profile);
-    return null;
+
+  if (vertical === "auto_retail") {
+    const legacy = defaultRecommendation(profile);
+    if (legacy && legacy.confidence >= 0.57 && legacy.treatment_hint) {
+      return finalizeReasons(legacy, profile);
+    }
   }
 
-  const fallback = defaultRecommendation(profile);
-  return fallback ? finalizeReasons(fallback, profile) : null;
+  return objectiveRec;
 }
 
 function defaultRecommendation(p: SessionProfile): Recommendation | null {

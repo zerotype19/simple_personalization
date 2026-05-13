@@ -161,11 +161,28 @@ export interface SessionSignals {
   category_hits: CategoryAffinity;
 }
 
+export type RecommendedTreatmentLevel = "observe" | "recommend_only" | "safe_personalization";
+
+export type RecommendedSurface =
+  | "related_content"
+  | "primary_cta"
+  | "lead_form"
+  | "product_grid"
+  | "cart"
+  | "newsletter"
+  | "none";
+
 export interface Recommendation {
   next_best_action: string;
   treatment_hint: string | null;
   confidence: number;
   reason: string[];
+  /** Inferred business objective this NBA optimizes toward (objective-aware path). */
+  objective?: string | null;
+  /** Product ladder: observe → recommend copy only → safe DOM where allowed. */
+  recommended_treatment_level?: RecommendedTreatmentLevel;
+  /** Suggested UI surface for messaging (no auto DOM in zero-config). */
+  recommended_surface?: RecommendedSurface;
 }
 
 export interface RuleDefinition {
