@@ -20,19 +20,38 @@ SI_ENV = "dev"
 SI_DASHBOARD_ORIGINS = "http://localhost:5174,http://127.0.0.1:5174"
 SI_BYPASS_DASHBOARD_AUTH = "0"
 
+# Production: same Worker name as default so custom domains and SI_WORKER_URL stay stable.
+# D1 must be repeated here — Wrangler does not inherit [[d1_databases]] into named environments.
+[env.production]
+name = "session-intelligence-worker"
+
 [env.production.vars]
 SI_DEPLOYMENT_MODE = "production"
 SI_ENV = "production"
 SI_BYPASS_DASHBOARD_AUTH = "0"
 SI_DASHBOARD_ORIGINS = "https://dashboard.optiview.ai"
 
-# Optional pre-production Worker (same codebase). Tune origins for your staging dashboard host.
-# Deploy: wrangler deploy --env staging
+[[env.production.d1_databases]]
+binding = "SI_DB"
+database_name = "session-intelligence"
+database_id = "2c95a884-1363-4ca1-9977-0553054bbf3d"
+migrations_dir = "db/migrations"
+
+# Optional pre-production Worker. Deploy: wrangler deploy --env staging
+[env.staging]
+name = "session-intelligence-worker-staging"
+
 [env.staging.vars]
 SI_DEPLOYMENT_MODE = "staging"
 SI_ENV = "staging"
 SI_BYPASS_DASHBOARD_AUTH = "0"
 SI_DASHBOARD_ORIGINS = "https://dashboard.optiview.ai"
+
+[[env.staging.d1_databases]]
+binding = "SI_DB"
+database_name = "session-intelligence"
+database_id = "2c95a884-1363-4ca1-9977-0553054bbf3d"
+migrations_dir = "db/migrations"
 
 # Optional: remote config overrides + collect rate limits (create KV in dashboard, then set id).
 # [[kv_namespaces]]
