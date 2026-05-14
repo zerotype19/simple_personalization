@@ -64,9 +64,9 @@ export function buildAnonymousVisitorRead(profile: SessionProfile): {
 
   let ctaLine = "";
   if (s.cta_clicks === 0 && s.cta_hover_events >= 3)
-    ctaLine = " They have hovered conversion CTAs multiple times without committing to a click yet.";
-  else if (s.cta_clicks >= 1) ctaLine = " They have already clicked at least one conversion-oriented control.";
-  else ctaLine = " Hard conversion CTAs have not registered clicks in-session yet.";
+    ctaLine = " Multiple primary-CTA hovers, no click yet.";
+  else if (s.cta_clicks >= 1) ctaLine = " Has clicked at least one primary CTA.";
+  else ctaLine = " No primary CTA clicks logged in-session.";
 
   const postureLine = bs
     ? ` Interruption posture: ${bs.activation_readiness.interruption_posture.replace(/_/g, " ")} (readiness ${bs.activation_readiness.score_0_100}/100).`

@@ -1,8 +1,5 @@
 import type { GenericPageKind, NavigationPatternRead, PageJourneyEntry, SessionSignals } from "@si/shared";
-
-function kindLabel(k: GenericPageKind): string {
-  return k.replace(/_/g, " ");
-}
+import { timelineHumanPageLabel } from "../siteEnvironment/genericPageClassifier";
 
 function compactPathForSummary(path: string): string {
   const p = (path.split("?")[0] || "/").trim() || "/";
@@ -28,7 +25,7 @@ export function analyzeNavigationPattern(
           const parts: string[] = [];
           let prev = "";
           for (const s of seq.slice(-14)) {
-            const seg = `${compactPathForSummary(s.path)} (${kindLabel(s.generic_kind)})`;
+            const seg = `${compactPathForSummary(s.path)} (${timelineHumanPageLabel(s.generic_kind, s.path)})`;
             if (seg === prev) continue;
             prev = seg;
             parts.push(seg);

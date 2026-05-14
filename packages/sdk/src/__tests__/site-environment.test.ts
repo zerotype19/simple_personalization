@@ -30,6 +30,8 @@ describe("timelineHumanPageLabel", () => {
     expect(timelineHumanPageLabel("unknown", "/dive-into-rhythm90/manifesto")).toBe("Guide or manifesto page");
     expect(timelineHumanPageLabel("unknown", "/dive-into-rhythm90/overview")).toBe("Learning or onboarding page");
     expect(timelineHumanPageLabel("article_page", "/blog/x")).toBe("Long-form editorial content");
+    expect(timelineHumanPageLabel("unknown", "/about")).toBe("About or company page");
+    expect(timelineHumanPageLabel("unknown", "/the-rhythmic-marketer")).toBe("Article or story page");
   });
 });
 

@@ -13,7 +13,11 @@ import { analyzeReferrer } from "./referrerAnalyzer";
 import { buildTrafficReferralModel } from "./trafficReferralModel";
 import { inferTrafficAcquisition } from "./trafficSourceAnalyzer";
 
-function inferCommercialPhase(p: SessionProfile, nav: NavigationPatternRead): CommercialJourneyPhase {
+function inferCommercialPhase(
+  p: SessionProfile,
+  nav: NavigationPatternRead,
+  engagement: EngagementQualityRead,
+): CommercialJourneyPhase {
   const legacy = p.journey_stage;
   const steps = p.page_journey ?? [];
   if (steps.some((s) => s.generic_kind === "support_page")) return "support_service";
@@ -28,7 +32,12 @@ function inferCommercialPhase(p: SessionProfile, nav: NavigationPatternRead): Co
         st.generic_kind === "cart_page" ||
         st.generic_kind === "checkout_page",
     );
-    if (editorialVertical && p.signals.cta_clicks === 0 && !monetizationStep) return "evaluation";
+    const noHardCommit = p.signals.cta_clicks === 0 && !monetizationStep;
+    if (noHardCommit) {
+      if (editorialVertical) return "evaluation";
+      if (nav.journey_pattern === "content_depth_led") return "evaluation";
+      if (engagement.label === "deep_reader" || engagement.label === "hesitant_converter") return "evaluation";
+    }
     return "conversion_ready";
   }
   if (steps.some((s) => s.generic_kind === "pricing_page" || s.generic_kind === "lead_form_page"))
@@ -179,7 +188,7 @@ export function buildBehaviorSnapshot(p: SessionProfile): BehaviorSnapshot {
 
   const engagement_quality = engagementQuality(p, navigation);
   const activation_readiness = activationReadiness(p);
-  const commercial_journey_phase = inferCommercialPhase(p, navigation);
+  const commercial_journey_phase = inferCommercialPhase(p, navigation, engagement_quality);
   const anonymous_similarity_hint = cohortHint(p, navigation);
 
   const out: BehaviorSnapshot = {

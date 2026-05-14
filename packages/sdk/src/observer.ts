@@ -189,11 +189,11 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
   document.addEventListener("input", throttle(formHandler, 800), { passive: true });
 
   // Track page view per virtual navigation as well as initial load.
-  let lastUrl = window.location.href;
+  let lastPath = window.location.pathname;
   const observePage = () => {
-    const url = window.location.href;
-    if (url === lastUrl) return;
-    lastUrl = url;
+    const path = window.location.pathname;
+    if (path === lastPath) return;
+    lastPath = path;
     update((p) => {
       seedLanding(p);
       const t = getPageType();

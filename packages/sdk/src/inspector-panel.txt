@@ -379,3 +379,111 @@ button.si-btn.danger {
 .si-payload-details[open] summary {
   margin-bottom: 8px;
 }
+
+.si-kv-after {
+  margin-top: 10px;
+}
+.si-journey-kv {
+  margin-top: 10px;
+}
+.si-activation-hero {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+.si-advanced-site {
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+  padding: 8px 10px;
+  background: #0f172a;
+}
+.si-advanced-site summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  list-style: none;
+}
+.si-advanced-site summary::-webkit-details-marker {
+  display: none;
+}
+.si-advanced-site[open] summary {
+  margin-bottom: 8px;
+}
+.si-advanced-site-kv {
+  margin-top: 4px;
+}
+.si-activation-meta {
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+  padding: 8px 10px;
+  background: #0f172a;
+}
+.si-activation-meta summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  list-style: none;
+}
+.si-activation-meta summary::-webkit-details-marker {
+  display: none;
+}
+.si-activation-meta[open] summary {
+  margin-bottom: 8px;
+}
+.si-platform-activation {
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  background: #111827;
+  padding: 10px 12px;
+}
+.si-platform-activation-summary {
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #cbd5e1;
+  font-weight: 500;
+  list-style: none;
+}
+.si-platform-activation-summary::-webkit-details-marker {
+  display: none;
+}
+.si-platform-activation[open] .si-platform-activation-summary {
+  margin-bottom: 10px;
+  color: #94a3b8;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.si-card--platform-inner {
+  margin-bottom: 0;
+}
+.si-drawer-secondary {
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  background: #0c1018;
+  padding: 10px 12px;
+}
+.si-drawer-secondary-summary {
+  cursor: pointer;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  font-weight: 600;
+  list-style: none;
+}
+.si-drawer-secondary-summary::-webkit-details-marker {
+  display: none;
+}
+.si-drawer-secondary[open] .si-drawer-secondary-summary {
+  margin-bottom: 10px;
+}
+.si-drawer-secondary-body {
+  padding-top: 4px;
+}

@@ -138,16 +138,17 @@ export function humanGenericPageLabel(kind: GenericPageKind): string {
     support_page: "Support / docs",
     unknown: "Content page",
   };
-  return map[kind] ?? kind;
+  return map[kind as keyof typeof map] ?? "Content page";
 }
 
 /**
  * Inspector / timeline copy: never “Unknown page”; use path hints when the classifier is weak.
  */
 export function timelineHumanPageLabel(kind: GenericPageKind, pathname: string): string {
-  const p = (pathname.split("?")[0] || "/").toLowerCase();
+  const raw = (pathname.split("?")[0] || "/").trim() || "/";
+  const p = raw.toLowerCase();
 
-  if (kind === "unknown") {
+  const treatAsUnknownHints = (): string => {
     if (/\bchapter\b|\/chapter\d*\/|\/chapters?\//i.test(p)) return "Chapter page";
     if (/\b(part|volume|book|series|framework)\b/i.test(p)) return "Framework or series page";
     if (/\/(blog|posts?|articles?|news|insights|editorial)\b/i.test(p)) return "Editorial content page";
@@ -155,8 +156,14 @@ export function timelineHumanPageLabel(kind: GenericPageKind, pathname: string):
     if (/\/(pricing|plans|subscribe|membership)\b/i.test(p)) return "Plans or subscription page";
     if (/\/(about|team|company|careers)\b/i.test(p)) return "About or company page";
     if (/\/(dive|learn|explore|start)\b/i.test(p)) return "Learning or onboarding page";
+    // Single marketing slug path (e.g. /the-rhythmic-marketer) — still editorial-shaped.
+    if (/^\/[a-z0-9][-a-z0-9]+\/?$/i.test(raw) && raw !== "/") return "Article or story page";
     if (p !== "/" && p.length > 1) return "Content page";
     return "Content page";
+  };
+
+  if (kind === "unknown") {
+    return treatAsUnknownHints();
   }
 
   return humanGenericPageLabel(kind);
