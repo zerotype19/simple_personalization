@@ -1,11 +1,12 @@
 import { useCallback, useState } from "react";
 
-const SNIPPET_HTML = '<script async src="https://optiview.ai/si.js"></script>';
-
 function envUrl(name: string, fallback: string): string {
   const v = import.meta.env[name as keyof ImportMetaEnv] as string | undefined;
   return typeof v === "string" && v.trim() ? v.trim().replace(/\/$/, "") : fallback;
 }
+
+const SNIPPET_ORIGIN = envUrl("VITE_SI_SNIPPET_ORIGIN", "https://cdn.optiview.ai");
+const SNIPPET_HTML = `<script async src="${SNIPPET_ORIGIN}/si.js"></script>`;
 
 export default function WebmasterIntegrationSection() {
   const [copied, setCopied] = useState(false);

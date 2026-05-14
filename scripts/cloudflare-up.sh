@@ -56,7 +56,7 @@ pnpm exec wrangler d1 migrations apply "$DB_NAME" --remote
 
 echo ""
 echo "========== 4) Deploy Worker =========="
-DEPLOY_LOG="$(pnpm exec wrangler deploy 2>&1)"
+DEPLOY_LOG="$(pnpm exec wrangler deploy --env production 2>&1)"
 echo "$DEPLOY_LOG"
 WORKER_URL="$(echo "$DEPLOY_LOG" | grep -Eo 'https://[^[:space:]]+\.workers\.dev' | head -1 || true)"
 if [[ -z "$WORKER_URL" ]]; then

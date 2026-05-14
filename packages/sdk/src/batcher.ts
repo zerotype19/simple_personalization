@@ -6,6 +6,10 @@ interface BatcherOptions {
   getProfile: () => SessionProfile;
   isConverted: () => boolean;
   conversionType: () => string | null;
+  /** When set, POST /collect includes top-level `site_id` (resolved server-side; optional if snippetKey set). */
+  siteId?: string | null;
+  /** When set, POST /collect includes top-level `snippet_key` — preferred public install token. */
+  snippetKey?: string | null;
 }
 
 export class Batcher {
@@ -67,7 +71,12 @@ export class Batcher {
     if (!this.opts.endpoint) return;
     if (Date.now() - this.lastSent < 1000 && reason === "interval") return;
     const payload = this.buildPayload();
-    const body = JSON.stringify({ reason, payload });
+    const envelope: Record<string, unknown> = { reason, payload };
+    const sk = this.opts.snippetKey?.trim();
+    if (sk) envelope.snippet_key = sk;
+    const sid = this.opts.siteId?.trim();
+    if (sid) envelope.site_id = sid;
+    const body = JSON.stringify(envelope);
     this.lastSent = Date.now();
 
     if (useBeacon && navigator.sendBeacon) {

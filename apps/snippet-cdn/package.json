@@ -1,0 +1,9 @@
+{
+  "name": "@si/snippet-cdn",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Static Session Intelligence snippet host (si.js, si-inspector.css, version/health) for Cloudflare Pages.",
+  "scripts": {
+    "build": "node ../../scripts/build-snippet-cdn.mjs"
+  }
+}

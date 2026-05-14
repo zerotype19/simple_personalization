@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy --env production",
+    "deploy:development": "wrangler deploy",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

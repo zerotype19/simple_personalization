@@ -1,0 +1,10 @@
+# Cloudflare Pages — Optiview marketing site (static Vite build).
+# Project name in Pages UI: si-session-marketing
+# Custom domains: optiview.ai, www.optiview.ai
+#
+# Deploy from monorepo root, for example:
+#   pnpm build:marketing
+#   pnpm exec wrangler pages deploy --cwd apps/marketing-site --branch main --commit-dirty
+name = "si-session-marketing"
+compatibility_date = "2025-05-12"
+pages_build_output_dir = "dist"

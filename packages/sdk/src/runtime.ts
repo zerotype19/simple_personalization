@@ -37,6 +37,17 @@ export interface BootOptions {
   collectUrl?: string | null;
   /** Force-enable inspector even if remote config disables it. */
   forceInspector?: boolean;
+  /**
+   * Public site id from `data-si-site` on the embed script — sent as `site_id` on `/collect`
+   * (resolved server-side; optional when `snippetKey` is set).
+   */
+  siteId?: string | null;
+  /**
+   * Public install token from `data-si-key` / `data-si-snippet-key` — sent as `snippet_key` on `/collect`.
+   * Prefer this for broad customer installs; Worker resolves tenant/site and treats `site_id` as display-only
+   * when both are present (must match the key’s site).
+   */
+  snippetKey?: string | null;
 }
 
 export class SessionIntelRuntime {
@@ -85,6 +96,8 @@ export class SessionIntelRuntime {
       getProfile: () => this.profile,
       isConverted: () => this.converted,
       conversionType: () => this.conversionType,
+      siteId: this.opts.siteId ?? null,
+      snippetKey: this.opts.snippetKey ?? null,
     });
     this.batcher.start();
 

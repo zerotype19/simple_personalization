@@ -1,6 +1,26 @@
 # Hosted drop-in snippet (`/si.js`)
 
-The demo Pages app can ship a **second entrypoint**: `public/si.js` — the Session Intelligence IIFE with your Worker’s `/config` and `/collect` URLs **baked in**, so other sites only need:
+## Production: dedicated CDN (`cdn.optiview.ai`)
+
+For B2B installs, prefer a **snippet-only** Pages project (**`si-session-snippet`**) so marketing or demo deploys never overwrite the embed:
+
+```html
+<script async src="https://cdn.optiview.ai/si.js"></script>
+```
+
+For **tenant-aware** `/collect` routing, add the public install token (preferred for broad B2B embeds) and optionally the internal site id:
+
+```html
+<script async src="https://cdn.optiview.ai/si.js" data-si-key="YOUR_PUBLIC_SNIPPET_KEY" data-si-site="YOUR_SITE_ID"></script>
+```
+
+`data-si-key` is an alias for D1 `sites.snippet_key`; `data-si-snippet-key` is accepted as a synonym. The Worker resolves **`snippet_key` before `site_id`**; if both are sent, they must match the same site row.
+
+Build with `pnpm build:snippet` and deploy with `pnpm deploy:snippet` (see [PRODUCTION_HOSTING.md](./PRODUCTION_HOSTING.md)). Artifacts include **`version.json`** and **`health.json`** for ops checks.
+
+## Transitional: same origin as the demo
+
+The demo Pages app (**`si-session-demo`**) can still ship **`/si.js`** on the **same** hostname (for example `https://optiview.ai/si.js`) while you migrate DNS to the CDN project. That path is the Session Intelligence IIFE with your Worker’s `/config` and `/collect` URLs **baked in**, so other sites only need:
 
 ```html
 <script async src="https://optiview.ai/si.js"></script>
@@ -65,14 +85,22 @@ Sites that ship **SES / lockdown** (`lockdown-install.js`, “Removing unpermitt
 
 ## How it gets built
 
+The IIFE is produced by **`scripts/build-snippet-artifacts.mjs`** (invoked from the demo **`prepare-hosted-snippet`** step or from **`pnpm build:snippet`** for the CDN-only `dist`).
+
+### Demo-hosted `/si.js` (transitional)
+
 During `pnpm --filter @si/demo-retailer build`, if **`VITE_SI_WORKER_URL`** is set (no trailing slash — same value you use for the Velocity Motors demo and for Cloudflare Pages env), the build:
 
 1. Runs `pnpm --filter @si/sdk build` with `SI_PUBLIC_WORKER_URL` set to that origin.
 2. Copies `packages/sdk/dist/sdk.iife.js` to `apps/demo-retailer/public/si.js` (Vite emits it at **`/si.js`** on the deployed site).
 3. Copies `packages/sdk/src/inspector-panel.txt` (CSS text) to **`public/si-inspector.css`** so the inspector can load styles without inline CSS when CSP allows that origin in `style-src`.
-4. Sets **`SI_PUBLIC_INSPECTOR_CSS_URL`** for that IIFE build (default **`https://optiview.ai/si-inspector.css`**; override with **`VITE_SI_SNIPPET_ORIGIN`** if your snippet lives on another hostname) so the `<link rel="stylesheet">` is created without relying on DOM `script[src]` scanning.
+4. Sets **`SI_PUBLIC_INSPECTOR_CSS_URL`** for that IIFE build (default from **`VITE_SI_SNIPPET_ORIGIN`**, else **`https://optiview.ai`**) so the `<link rel="stylesheet">` is created without relying on DOM `script[src]` scanning.
 
-If `VITE_SI_WORKER_URL` is unset (typical local `vite` with proxy), **`si.js` is not produced** and any old `public/si.js` is removed so you do not ship a stale snippet.
+### Snippet-only CDN (`pnpm build:snippet`)
+
+From the repo root, with **`VITE_SI_WORKER_URL`** set, **`pnpm build:snippet`** writes **`apps/snippet-cdn/dist/`** only: **`si.js`**, **`si-inspector.css`**, **`version.json`**, **`health.json`**, **`_headers`**. No demo SPA.
+
+If `VITE_SI_WORKER_URL` is unset (typical local `vite` with proxy), **`si.js` is not produced** for the demo and any old `public/si.js` is removed so you do not ship a stale snippet.
 
 Optional: set **`VITE_SI_SNIPPET_FORCE_INSPECTOR=1`** for that build so the on-page inspector is always on for the snippet bundle (useful for debugging; omit for a silent embed). Optional: **`VITE_SI_SNIPPET_ORIGIN=https://your.custom.domain`** when **`/si.js`** is not served from **`optiview.ai`**.
 
@@ -80,13 +108,13 @@ Optional: set **`VITE_SI_SNIPPET_FORCE_INSPECTOR=1`** for that build so the on-p
 
 ## Deploy flow (e.g. optiview.ai)
 
-1. Point your custom domain at the **Pages** project (`si-session-demo`), not the Worker. The Worker stays on `*.workers.dev` (or its own custom hostname).
+1. Point **`cdn.optiview.ai`** at the **snippet** Pages project (`si-session-snippet`) and **`demo.…`** at **`si-session-demo`**. The Worker uses **`api.optiview.ai`** (or `*.workers.dev` during development). See [PRODUCTION_HOSTING.md](./PRODUCTION_HOSTING.md).
 2. **Direct upload (Wrangler, “No Git connection”)** — Cloudflare does **not** build your repo. You must build **on the machine that deploys**, with **`VITE_SI_WORKER_URL`** set, then upload `dist`. From the repo root:
    ```bash
-   export VITE_SI_WORKER_URL="https://session-intelligence-worker.<subdomain>.workers.dev"
+   export VITE_SI_WORKER_URL="https://api.optiview.ai"
    pnpm cloudflare:deploy:pages
    ```
-   That runs `scripts/deploy-pages.sh` (demo + dashboard builds, then `wrangler pages deploy` for both). **`/si.js` is only included if this build runs with the variable set.**
+   That runs `scripts/deploy-pages.sh` (demo + dashboard builds, then `wrangler pages deploy` for both). **`/si.js` on the demo host** is only included if this build runs with the variable set. It does **not** deploy the **snippet CDN** project — use **`pnpm deploy:snippet`** for **`si-session-snippet`**.
 3. **Git-connected Pages** — set **`VITE_SI_WORKER_URL`** under **Settings → Environment variables** for the production build so Cloudflare’s build runner can emit `si.js`. Use a build command like `pnpm install && pnpm --filter @si/demo-retailer build` (not raw `vite build` alone).
 4. Optionally set the same value as a **Pages secret** (useful when Cloudflare builds from Git):  
    `printf '%s' 'https://…workers.dev' | pnpm exec wrangler pages secret put VITE_SI_WORKER_URL --project-name=si-session-demo`
@@ -107,7 +135,7 @@ Use any HTML you control (second Pages project, local static server, CMS “cust
     <h1>External install test</h1>
     <p>Open DevTools → Network and watch for requests to your Worker <code>/collect</code>.</p>
     <!-- Optional: append ?si_debug=1 to this page URL to force the inspector and open the drawer immediately (SI chip or Ctrl+Shift+` still toggles). -->
-    <script async src="https://optiview.ai/si.js"></script>
+    <script async src="https://cdn.optiview.ai/si.js"></script>
   </body>
 </html>
 ```

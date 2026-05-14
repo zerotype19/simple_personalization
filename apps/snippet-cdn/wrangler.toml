@@ -1,0 +1,8 @@
+# Cloudflare Pages — Session Intelligence hosted snippet only (no demo SPA).
+# Custom domain target: cdn.optiview.ai
+# Create the Pages project in the dashboard if needed, then:
+#   VITE_SI_WORKER_URL="https://api.optiview.ai" pnpm build:snippet
+#   pnpm exec wrangler pages deploy --cwd apps/snippet-cdn --branch main --commit-dirty
+name = "si-session-snippet"
+compatibility_date = "2025-05-12"
+pages_build_output_dir = "dist"

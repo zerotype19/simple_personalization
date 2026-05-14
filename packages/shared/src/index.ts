@@ -659,6 +659,65 @@ export interface DashboardSummary {
   updated_at: number;
 }
 
+/** Cloudflare Access + D1 `authorized_users.role` */
+export type DashboardRole = "customer_viewer" | "tenant_admin" | "platform_admin";
+
+export type SiDeploymentMode = "development" | "staging" | "production";
+
+export interface DashboardSiteDTO {
+  id: string;
+  tenant_id: string;
+  domain: string;
+  snippet_key: string;
+  display_name: string;
+}
+
+export interface DashboardMeResponse {
+  email: string;
+  role: DashboardRole;
+  auth_via: "access" | "dev_bypass";
+  sites: DashboardSiteDTO[];
+  deployment_mode: SiDeploymentMode;
+  /** True when Worker has dashboard auth bypass enabled (never in production). */
+  auth_bypass_enabled: boolean;
+}
+
+/** Marketing free-access requests (admin list). */
+export type SignupRequestAdminStatus = "pending" | "reviewed" | "approved" | "rejected";
+
+export interface SignupRequestAdminRow {
+  id: string;
+  created_at: string;
+  name: string;
+  email: string;
+  company: string;
+  website: string;
+  use_case: string;
+  tools: string[];
+  status: SignupRequestAdminStatus;
+}
+
+export interface DashboardAdminSignupsResponse {
+  signups: SignupRequestAdminRow[];
+}
+
+export interface DashboardSessionListRow {
+  session_id: string;
+  origin: string | null;
+  journey_stage: string | null;
+  intent_score: number | null;
+  converted: number;
+  created_at: string;
+}
+
+export interface DashboardInsightsResponse {
+  journey_stages: { stage: string; sessions: number }[];
+  site_verticals: { vertical: string; sessions: number }[];
+  activation_opportunity_hits: { opportunity: string; sessions: number }[];
+  acquisition_sources: { source: string; sessions: number }[];
+  personalization_signal_samples: { session_id: string; snippet: string }[];
+}
+
 export const DEFAULT_THRESHOLDS = {
   high_intent: 70,
   high_urgency: 60,

@@ -1,39 +1,53 @@
-import type { AnalyticsPayload, DashboardSummary, ExperimentReport, SDKConfig, VariantReport } from "@si/shared";
+import type {
+  AnalyticsPayload,
+  DashboardInsightsResponse,
+  DashboardMeResponse,
+  DashboardSessionListRow,
+  DashboardSummary,
+  ExperimentReport,
+  SDKConfig,
+  VariantReport,
+} from "@si/shared";
 import { getDemoExperimentReports } from "@si/shared/demoMetrics";
 import { clamp01, mergeExperiment } from "./analyticsMath";
 import { GENERIC_HOSTED_SDK_CONFIG, VELOCITY_RETAIL_DEMO_SDK_CONFIG } from "@si/shared";
+import {
+  assertSiteAllowedForUser,
+  buildDashboardMe,
+  dashboardCorsHeaders,
+  jsonDashboard,
+  jsonPublic,
+  loadAuthorizedUser,
+  parseDashboardOrigins,
+  publicCorsHeaders,
+  resolveCollectSite,
+  resolveDashboardEmail,
+  type CollectEnvelope,
+  type EnvAccess,
+} from "./access";
+import { handleAdminSignupsList, handleAdminSignupPatch } from "./adminSignups";
+import { handleSignupRequest } from "./signup";
+import { assertProductionSafety, isAuthBypassEnabled, parseDeploymentMode } from "./deploymentSafety";
 
-type Env = {
-  SI_DB: D1Database;
+type Env = EnvAccess & {
   SI_KV?: KVNamespace;
-  SI_ENV?: string;
 };
-
-const corsHeaders: HeadersInit = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET,POST,OPTIONS",
-  "access-control-allow-headers": "content-type",
-};
-
-function json(data: unknown, init: ResponseInit = {}): Response {
-  return new Response(JSON.stringify(data), {
-    ...init,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      ...(init.headers ?? {}),
-      ...corsHeaders,
-    },
-  });
-}
 
 const DEMO_EXPERIMENTS: ExperimentReport[] = getDemoExperimentReports();
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const gate = assertProductionSafety(env);
+    if (gate) return gate;
+
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
+      if (url.pathname.startsWith("/dashboard")) {
+        const h = dashboardCorsHeaders(request, env) ?? publicCorsHeaders();
+        return new Response(null, { headers: h });
+      }
+      return new Response(null, { headers: publicCorsHeaders() });
     }
 
     try {
@@ -45,17 +59,44 @@ export default {
         return await handleCollect(request, env, ctx);
       }
 
-      if (request.method === "GET" && url.pathname === "/dashboard/experiments") {
-        return await handleExperiments(env);
+      if (request.method === "POST" && url.pathname === "/signup-request") {
+        return await handleSignupRequest(request, env);
+      }
+
+      if (request.method === "GET" && url.pathname === "/dashboard/me") {
+        return await handleDashboardMe(request, env);
+      }
+
+      if (request.method === "GET" && url.pathname === "/dashboard/admin/signups") {
+        return await handleAdminSignupsList(request, env);
+      }
+
+      {
+        const adminPatch = url.pathname.match(/^\/dashboard\/admin\/signups\/([^/]+)$/);
+        if (request.method === "PATCH" && adminPatch?.[1]) {
+          return await handleAdminSignupPatch(request, env, adminPatch[1]);
+        }
       }
 
       if (request.method === "GET" && url.pathname === "/dashboard/summary") {
-        return await handleSummary(env);
+        return await handleSummary(request, env);
       }
 
-      return json({ error: "not_found" }, { status: 404 });
+      if (request.method === "GET" && url.pathname === "/dashboard/experiments") {
+        return await handleExperiments(request, env);
+      }
+
+      if (request.method === "GET" && url.pathname === "/dashboard/sessions") {
+        return await handleSessions(request, env);
+      }
+
+      if (request.method === "GET" && url.pathname === "/dashboard/insights") {
+        return await handleInsights(request, env);
+      }
+
+      return jsonPublic({ error: "not_found" }, { status: 404 });
     } catch (e) {
-      return json({ error: "internal_error", message: String(e) }, { status: 500 });
+      return jsonPublic({ error: "internal_error", message: String(e) }, { status: 500 });
     }
   },
 };
@@ -75,79 +116,78 @@ async function handleConfig(request: Request, env: Env): Promise<Response> {
     if (raw) {
       try {
         const parsed = JSON.parse(raw) as Record<string, unknown>;
-        return json(deepMerge(clone(base) as any, parsed));
+        return jsonPublic(deepMerge(clone(base) as any, parsed));
       } catch {
-        // fall through
+        /* fall through */
       }
     }
   }
-  return json(base);
+  return jsonPublic(base);
 }
 
-async function handleCollect(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  if (!(await rateLimit(env, ip))) {
-    return json({ error: "rate_limited" }, { status: 429 });
+type DashboardAuthOk = {
+  email: string;
+  via: "access" | "dev_bypass";
+  user: NonNullable<Awaited<ReturnType<typeof loadAuthorizedUser>>>;
+  siteId: string;
+};
+
+async function requireDashboardSite(request: Request, env: Env): Promise<DashboardAuthOk | Response> {
+  const auth = resolveDashboardEmail(request, env);
+  if (!auth) {
+    return jsonDashboard({ error: "unauthorized", message: "Missing Cloudflare Access identity" }, request, env, {
+      status: 403,
+    });
   }
-
-  const text = await request.text();
-  if (text.length > 50_000) {
-    return json({ error: "payload_too_large" }, { status: 413 });
+  const user = await loadAuthorizedUser(env.SI_DB, auth.email);
+  if (!user) {
+    return jsonDashboard({ error: "forbidden", message: "Email not provisioned in authorized_users" }, request, env, {
+      status: 403,
+    });
   }
-
-  let body: unknown;
-  try {
-    body = JSON.parse(text);
-  } catch {
-    return json({ error: "invalid_json" }, { status: 400 });
+  const siteId =
+    request.headers.get("x-si-site-id")?.trim() ||
+    new URL(request.url).searchParams.get("site_id")?.trim() ||
+    "";
+  if (!siteId) {
+    return jsonDashboard({ error: "site_id_required", message: "Pass site_id query or X-SI-Site-Id header" }, request, env, {
+      status: 400,
+    });
   }
-
-  const parsed = body as { reason?: unknown; payload?: unknown };
-  if (!parsed || typeof parsed !== "object") return json({ error: "invalid_body" }, { status: 400 });
-  if (typeof parsed.reason !== "string") return json({ error: "invalid_reason" }, { status: 400 });
-
-  const payload = parsed.payload;
-  const err = validatePayload(payload);
-  if (err) return json({ error: err }, { status: 400 });
-
-  const p = payload as AnalyticsPayload;
-  const id = crypto.randomUUID();
-  const createdAt = new Date().toISOString();
-  const treatmentId = p.active_treatments?.[0]?.treatment_id ?? null;
-
-  ctx.waitUntil(
-    env.SI_DB.prepare(
-      `INSERT INTO sessions_summary (
-        id, session_id, origin, ingest_reason, summary_json,
-        intent_score, urgency_score, engagement_score, journey_stage,
-        treatment_id, converted, conversion_type, experiment_json, treatments_json, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-      .bind(
-        id,
-        p.session_id,
-        p.origin,
-        parsed.reason,
-        JSON.stringify(p.summary),
-        p.summary.intent_score,
-        p.summary.urgency_score,
-        p.summary.engagement_score,
-        p.summary.journey_stage,
-        treatmentId,
-        p.converted ? 1 : 0,
-        p.conversion_type ?? null,
-        p.experiment_assignment ? JSON.stringify(p.experiment_assignment) : null,
-        JSON.stringify(p.active_treatments ?? []),
-        createdAt,
-      )
-      .run()
-      .catch(() => undefined),
-  );
-
-  return json({ ok: true });
+  const ok = await assertSiteAllowedForUser(env.SI_DB, user, siteId);
+  if (!ok) {
+    return jsonDashboard({ error: "forbidden_site", message: "Site not allowed for this user" }, request, env, {
+      status: 403,
+    });
+  }
+  return { email: auth.email, via: auth.via, user, siteId };
 }
 
-async function handleSummary(env: Env): Promise<Response> {
+async function handleDashboardMe(request: Request, env: Env): Promise<Response> {
+  const auth = resolveDashboardEmail(request, env);
+  if (!auth) {
+    return jsonDashboard({ error: "unauthorized", message: "Missing Cloudflare Access identity" }, request, env, {
+      status: 403,
+    });
+  }
+  const me = await buildDashboardMe(env.SI_DB, auth.email, auth.via);
+  if (!me) {
+    return jsonDashboard({ error: "forbidden", message: "Email not provisioned in authorized_users" }, request, env, {
+      status: 403,
+    });
+  }
+  const body: DashboardMeResponse = {
+    ...me,
+    deployment_mode: parseDeploymentMode(env),
+    auth_bypass_enabled: isAuthBypassEnabled(env.SI_BYPASS_DASHBOARD_AUTH),
+  };
+  return jsonDashboard(body, request, env);
+}
+
+async function handleSummary(request: Request, env: Env): Promise<Response> {
+  const gate = await requireDashboardSite(request, env);
+  if (gate instanceof Response) return gate;
+
   const row = await env.SI_DB.prepare(
     `WITH per_session AS (
        SELECT
@@ -156,6 +196,7 @@ async function handleSummary(env: Env): Promise<Response> {
          AVG(intent_score) AS intent,
          AVG(engagement_score) AS engagement
        FROM sessions_summary
+       WHERE site_id = ?
        GROUP BY session_id
      )
      SELECT
@@ -164,12 +205,14 @@ async function handleSummary(env: Env): Promise<Response> {
        AVG(intent) AS avg_intent,
        AVG(engagement) AS avg_engagement
      FROM per_session`,
-  ).first<{
-    sessions: number | null;
-    conversions: number | null;
-    avg_intent: number | null;
-    avg_engagement: number | null;
-  }>();
+  )
+    .bind(gate.siteId)
+    .first<{
+      sessions: number | null;
+      conversions: number | null;
+      avg_intent: number | null;
+      avg_engagement: number | null;
+    }>();
 
   const summary: DashboardSummary = {
     sessions_ingested: row?.sessions ?? 0,
@@ -179,10 +222,13 @@ async function handleSummary(env: Env): Promise<Response> {
     updated_at: Date.now(),
   };
 
-  return json(summary);
+  return jsonDashboard(summary, request, env);
 }
 
-async function handleExperiments(env: Env): Promise<Response> {
+async function handleExperiments(request: Request, env: Env): Promise<Response> {
+  const gate = await requireDashboardSite(request, env);
+  if (gate instanceof Response) return gate;
+
   const rows = await env.SI_DB.prepare(
     `SELECT
        json_extract(experiment_json, '$.experiment_id') as experiment_id,
@@ -199,17 +245,19 @@ async function handleExperiments(env: Env): Promise<Response> {
          / NULLIF(COUNT(DISTINCT session_id), 0) as conversion_rate,
        AVG(engagement_score) as avg_engagement
      FROM sessions_summary
-     WHERE experiment_json IS NOT NULL
+     WHERE experiment_json IS NOT NULL AND site_id = ?
      GROUP BY 1, 2, 3`,
-  ).all<{
-    experiment_id: string | null;
-    variant_id: string | null;
-    is_control: number | null;
-    sessions: number | null;
-    cta_ctr: number | null;
-    conversion_rate: number | null;
-    avg_engagement: number | null;
-  }>();
+  )
+    .bind(gate.siteId)
+    .all<{
+      experiment_id: string | null;
+      variant_id: string | null;
+      is_control: number | null;
+      sessions: number | null;
+      cta_ctr: number | null;
+      conversion_rate: number | null;
+      avg_engagement: number | null;
+    }>();
 
   const live = new Map<string, Map<string, VariantReport>>();
   for (const r of rows.results ?? []) {
@@ -231,7 +279,141 @@ async function handleExperiments(env: Env): Promise<Response> {
   }
 
   const merged: ExperimentReport[] = DEMO_EXPERIMENTS.map((demo) => mergeExperiment(demo, live.get(demo.id)));
-  return json({ experiments: merged });
+  return jsonDashboard({ experiments: merged }, request, env);
+}
+
+async function handleSessions(request: Request, env: Env): Promise<Response> {
+  const gate = await requireDashboardSite(request, env);
+  if (gate instanceof Response) return gate;
+  const limit = Math.min(100, Math.max(1, Number(new URL(request.url).searchParams.get("limit")) || 40));
+
+  const rows = await env.SI_DB.prepare(
+    `SELECT s.session_id, s.origin, s.journey_stage, s.intent_score, s.converted, s.created_at
+     FROM sessions_summary s
+     INNER JOIN (
+       SELECT session_id, MAX(created_at) AS mx
+       FROM sessions_summary
+       WHERE site_id = ?
+       GROUP BY session_id
+     ) t ON s.session_id = t.session_id AND s.created_at = t.mx
+     WHERE s.site_id = ?
+     ORDER BY s.created_at DESC
+     LIMIT ?`,
+  )
+    .bind(gate.siteId, gate.siteId, limit)
+    .all<DashboardSessionListRow>();
+
+  return jsonDashboard({ sessions: rows.results ?? [] }, request, env);
+}
+
+async function handleInsights(request: Request, env: Env): Promise<Response> {
+  const gate = await requireDashboardSite(request, env);
+  if (gate instanceof Response) return gate;
+
+  const siteId = gate.siteId;
+
+  const stages = await env.SI_DB.prepare(
+    `SELECT json_extract(summary_json, '$.journey_stage') AS stage, COUNT(DISTINCT session_id) AS sessions
+     FROM sessions_summary WHERE site_id = ? AND summary_json IS NOT NULL
+     GROUP BY 1 ORDER BY sessions DESC LIMIT 12`,
+  )
+    .bind(siteId)
+    .all<{ stage: string | null; sessions: number | null }>();
+
+  const verts = await env.SI_DB.prepare(
+    `SELECT json_extract(summary_json, '$.site_vertical') AS vertical, COUNT(DISTINCT session_id) AS sessions
+     FROM sessions_summary WHERE site_id = ? AND summary_json IS NOT NULL
+     GROUP BY 1 ORDER BY sessions DESC LIMIT 12`,
+  )
+    .bind(siteId)
+    .all<{ vertical: string | null; sessions: number | null }>();
+
+  const body: DashboardInsightsResponse = {
+    journey_stages: (stages.results ?? [])
+      .filter((r) => r.stage)
+      .map((r) => ({ stage: String(r.stage), sessions: r.sessions ?? 0 })),
+    site_verticals: (verts.results ?? [])
+      .filter((r) => r.vertical)
+      .map((r) => ({ vertical: String(r.vertical), sessions: r.sessions ?? 0 })),
+    activation_opportunity_hits: [],
+    acquisition_sources: [],
+    personalization_signal_samples: [],
+  };
+
+  return jsonDashboard(body, request, env);
+}
+
+async function handleCollect(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+  if (!(await rateLimit(env, ip))) {
+    return jsonPublic({ error: "rate_limited" }, { status: 429 });
+  }
+
+  const text = await request.text();
+  if (text.length > 50_000) {
+    return jsonPublic({ error: "payload_too_large" }, { status: 413 });
+  }
+
+  let body: unknown;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    return jsonPublic({ error: "invalid_json" }, { status: 400 });
+  }
+
+  const envelope = body as CollectEnvelope;
+  if (!envelope || typeof envelope !== "object") return jsonPublic({ error: "invalid_body" }, { status: 400 });
+  if (typeof envelope.reason !== "string") return jsonPublic({ error: "invalid_reason" }, { status: 400 });
+
+  const payload = envelope.payload;
+  const err = validatePayload(payload);
+  if (err) return jsonPublic({ error: err }, { status: 400 });
+
+  const p = payload as AnalyticsPayload;
+  const siteRes = await resolveCollectSite(env.SI_DB, envelope, p.origin);
+  if (siteRes && "error" in siteRes) {
+    return jsonPublic({ error: siteRes.error }, { status: 400 });
+  }
+  const tenantId = siteRes?.tenant_id ?? null;
+  const siteId = siteRes?.site_id ?? null;
+
+  const id = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
+  const treatmentId = p.active_treatments?.[0]?.treatment_id ?? null;
+
+  ctx.waitUntil(
+    env.SI_DB.prepare(
+      `INSERT INTO sessions_summary (
+        id, session_id, origin, ingest_reason, summary_json,
+        intent_score, urgency_score, engagement_score, journey_stage,
+        treatment_id, converted, conversion_type, experiment_json, treatments_json, created_at,
+        tenant_id, site_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        id,
+        p.session_id,
+        p.origin,
+        envelope.reason,
+        JSON.stringify(p.summary),
+        p.summary.intent_score,
+        p.summary.urgency_score,
+        p.summary.engagement_score,
+        p.summary.journey_stage,
+        treatmentId,
+        p.converted ? 1 : 0,
+        p.conversion_type ?? null,
+        p.experiment_assignment ? JSON.stringify(p.experiment_assignment) : null,
+        JSON.stringify(p.active_treatments ?? []),
+        createdAt,
+        tenantId,
+        siteId,
+      )
+      .run()
+      .catch(() => undefined),
+  );
+
+  return jsonPublic({ ok: true });
 }
 
 export function validatePayload(payload: unknown): string | null {
@@ -299,3 +481,6 @@ function deepMerge<T extends Record<string, any>>(base: T, patch: Record<string,
 function clone<T>(v: T): T {
   return JSON.parse(JSON.stringify(v)) as T;
 }
+
+/** Exported for tests that assert CORS allowlist parsing. */
+export { parseDashboardOrigins };

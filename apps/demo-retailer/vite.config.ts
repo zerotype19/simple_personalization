@@ -6,6 +6,30 @@ import { defineConfig, type Plugin } from "vite";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
+const useCdnHostedSnippet =
+  process.env.VITE_SI_DEMO_USE_HOSTED_SNIPPET === "1" ||
+  process.env.VITE_SI_DEMO_USE_HOSTED_SNIPPET === "true";
+
+const sdkAlias = useCdnHostedSnippet
+  ? path.resolve(rootDir, "src/si-cdn-bridge.ts")
+  : path.resolve(rootDir, "../../packages/sdk/src/index.ts");
+
+function assertCdnSnippetBridgeEnv(): Plugin {
+  return {
+    name: "assert-cdn-snippet-bridge-env",
+    buildStart() {
+      if (!useCdnHostedSnippet) return;
+      const origin = (process.env.VITE_SI_SNIPPET_ORIGIN ?? "").trim();
+      if (!origin) {
+        throw new Error(
+          "VITE_SI_DEMO_USE_HOSTED_SNIPPET is enabled but VITE_SI_SNIPPET_ORIGIN is empty. " +
+            "Set it to your snippet host (e.g. https://cdn.optiview.ai). See docs/PRODUCTION_HOSTING.md.",
+        );
+      }
+    },
+  };
+}
+
 /** Fails fast if Pages/CI runs `vite build` instead of `npm run build` while `VITE_SI_WORKER_URL` is set. */
 function assertHostedSnippetWhenWorkerEnv(): Plugin {
   return {
@@ -26,7 +50,7 @@ function assertHostedSnippetWhenWorkerEnv(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [assertHostedSnippetWhenWorkerEnv(), react()],
+  plugins: [assertCdnSnippetBridgeEnv(), assertHostedSnippetWhenWorkerEnv(), react()],
   resolve: {
     alias: [
       {
@@ -34,7 +58,7 @@ export default defineConfig({
         replacement: path.resolve(rootDir, "../../packages/shared/src/contextBrain/index.ts"),
       },
       { find: "@si/shared/demoMetrics", replacement: path.resolve(rootDir, "../../packages/shared/src/demoMetrics.ts") },
-      { find: "@si/sdk", replacement: path.resolve(rootDir, "../../packages/sdk/src/index.ts") },
+      { find: "@si/sdk", replacement: sdkAlias },
       { find: "@si/shared", replacement: path.resolve(rootDir, "../../packages/shared/src/index.ts") },
     ],
   },

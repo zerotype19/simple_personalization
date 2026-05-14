@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { VELOCITY_RETAIL_DEMO_SDK_CONFIG } from "@si/shared";
 import { Batcher } from "../batcher";
 import { chooseRecommendation } from "../recommender";
@@ -39,6 +39,87 @@ describe("Batcher payload ↔ live profile (dashboard + inspector)", () => {
     expect(payload.summary.pages).toBe(profile.signals.pages_viewed);
     expect(payload.summary.category_affinity).toEqual(profile.category_affinity);
     expect(payload.experiment_assignment).toEqual(profile.experiment_assignment);
+  });
+
+  it("flush JSON includes site_id when Batcher is configured with siteId", async () => {
+    const profile = minimalProfile({
+      experiment_assignment: treatmentAssignment(),
+      signals: {
+        ...createBlankSignals(),
+        pages_viewed: 1,
+        vdp_views: 0,
+        pricing_views: 0,
+        finance_interactions: 0,
+        compare_interactions: 0,
+        cta_clicks: 0,
+        category_hits: {},
+      },
+    });
+    recomputeScores(profile);
+    const fetches: string[] = [];
+    const prev = globalThis.fetch;
+    globalThis.fetch = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+      fetches.push(String(init?.body ?? ""));
+      return new Response("{}", { status: 200 });
+    }) as unknown as typeof fetch;
+
+    const batcher = new Batcher({
+      endpoint: "https://worker.example/collect",
+      getProfile: () => profile,
+      isConverted: () => false,
+      conversionType: () => null,
+      siteId: "st_demo_velocity",
+    });
+    try {
+      await batcher.flush("test");
+      expect(fetches.length).toBe(1);
+      const body = JSON.parse(fetches[0]!) as { site_id?: string; reason: string };
+      expect(body.site_id).toBe("st_demo_velocity");
+      expect(body.reason).toBe("test");
+    } finally {
+      globalThis.fetch = prev;
+    }
+  });
+
+  it("flush JSON includes snippet_key before optional site_id", async () => {
+    const profile = minimalProfile({
+      experiment_assignment: treatmentAssignment(),
+      signals: {
+        ...createBlankSignals(),
+        pages_viewed: 1,
+        vdp_views: 0,
+        pricing_views: 0,
+        finance_interactions: 0,
+        compare_interactions: 0,
+        cta_clicks: 0,
+        category_hits: {},
+      },
+    });
+    recomputeScores(profile);
+    const fetches: string[] = [];
+    const prev = globalThis.fetch;
+    globalThis.fetch = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+      fetches.push(String(init?.body ?? ""));
+      return new Response("{}", { status: 200 });
+    }) as unknown as typeof fetch;
+
+    const batcher = new Batcher({
+      endpoint: "https://worker.example/collect",
+      getProfile: () => profile,
+      isConverted: () => false,
+      conversionType: () => null,
+      snippetKey: "sk_pub_1",
+      siteId: "st_1",
+    });
+    try {
+      await batcher.flush("tick");
+      const body = JSON.parse(fetches[0]!) as { snippet_key?: string; site_id?: string; reason: string };
+      expect(body.snippet_key).toBe("sk_pub_1");
+      expect(body.site_id).toBe("st_1");
+      expect(body.reason).toBe("tick");
+    } finally {
+      globalThis.fetch = prev;
+    }
   });
 });
 

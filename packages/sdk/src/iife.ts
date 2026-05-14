@@ -36,15 +36,27 @@ export function boot(): void {
     bootFromScriptTag: async () => {
       const script = document.currentScript as HTMLScriptElement | null;
       const fromAttr = (name: string) => script?.getAttribute(name)?.trim() || undefined;
+      if (
+        script?.getAttribute("data-si-debug") === "true" ||
+        script?.getAttribute("data-si-debug") === "1"
+      ) {
+        try {
+          window.sessionStorage?.setItem("si:debug", "1");
+        } catch {
+          /* storage blocked */
+        }
+      }
       const configUrl = fromAttr("data-config") || __SI_EMBED_CONFIG_URL__ || undefined;
       const collectUrl = fromAttr("data-collect") || __SI_EMBED_COLLECT_URL__ || undefined;
+      const siteId = fromAttr("data-si-site") || undefined;
+      const snippetKey = fromAttr("data-si-key") || fromAttr("data-si-snippet-key") || undefined;
       const forceInspector =
         script?.getAttribute("data-inspector") === "true" ||
         script?.getAttribute("data-inspector") === "1" ||
         urlHasSiDebug() ||
         __SI_EMBED_FORCE_INSPECTOR__;
       try {
-        const rt = await api.boot({ configUrl, collectUrl, forceInspector });
+        const rt = await api.boot({ configUrl, collectUrl, forceInspector, siteId, snippetKey });
         window.SessionIntel = {
           boot: api.boot,
           destroy: api.destroy,

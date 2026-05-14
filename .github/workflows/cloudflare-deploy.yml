@@ -1,4 +1,4 @@
-# Deploy Worker + D1 migrations + both Pages apps (requires GitHub secrets).
+# Deploy Worker + D1 migrations + Pages (snippet CDN, demo, dashboard) — requires GitHub secrets.
 name: Cloudflare deploy
 
 on:
@@ -18,6 +18,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       VITE_SI_WORKER_URL: ${{ secrets.SI_WORKER_URL }}
+      VITE_SI_SNIPPET_ORIGIN: ${{ secrets.VITE_SI_SNIPPET_ORIGIN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -52,10 +53,24 @@ jobs:
 
       - name: Deploy Worker
         working-directory: worker
-        run: pnpm exec wrangler deploy
+        run: pnpm exec wrangler deploy --env production
 
-      - name: Build Pages assets
+      - name: Build snippet CDN
         run: |
+          export VITE_SI_SNIPPET_ORIGIN="${VITE_SI_SNIPPET_ORIGIN:-https://cdn.optiview.ai}"
+          if [[ -z "${SI_PUBLIC_INSPECTOR_CSS_URL:-}" ]]; then
+            export SI_PUBLIC_INSPECTOR_CSS_URL="${VITE_SI_SNIPPET_ORIGIN%/}/si-inspector.css"
+          fi
+          pnpm build:snippet
+
+      - name: Pages — snippet CDN
+        run: pnpm exec wrangler pages deploy --cwd apps/snippet-cdn --branch main --commit-dirty
+
+      - name: Build Pages assets (demo + dashboard)
+        run: |
+          export VITE_SI_SNIPPET_ORIGIN="${VITE_SI_SNIPPET_ORIGIN:-https://cdn.optiview.ai}"
+          export VITE_SI_DEMO_USE_HOSTED_SNIPPET=1
+          export VITE_SI_DEMO_SNIPPET_INSPECTOR=1
           pnpm --filter @si/demo-retailer build
           pnpm --filter @si/dashboard build
 

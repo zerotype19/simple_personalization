@@ -4,7 +4,7 @@ Use this when you want a **real** `*.workers.dev` Worker and hosted UIs—not lo
 
 **Hosted demo narrative + script:** after a successful deploy, use [DEMO_WALKTHROUGH.md](./DEMO_WALKTHROUGH.md) and run `./scripts/demo-walkthrough.sh` from the repo root (`--open` opens demo + dashboard on macOS).
 
-**Hosted drop-in tag for third-party sites** (`https://<your-demo-domain>/si.js`): see [SNIPPET_HOSTING.md](./SNIPPET_HOSTING.md).
+**Hosted drop-in tag for third-party sites:** prefer **`https://cdn.optiview.ai/si.js`** (Pages project **`si-session-snippet`**). During migration the demo host may still serve **`/si.js`** — see [SNIPPET_HOSTING.md](./SNIPPET_HOSTING.md) and [PRODUCTION_HOSTING.md](./PRODUCTION_HOSTING.md).
 
 ## One command (Wrangler CLI only)
 
@@ -51,6 +51,7 @@ This script: checks auth, finds or creates the D1 database named in `worker/wran
 | File | Role |
 |------|------|
 | `worker/wrangler.toml` | Worker script, D1 binding, `migrations_dir`, optional KV. |
+| `apps/snippet-cdn/wrangler.toml` | Pages project **`si-session-snippet`** — snippet-only static host (`si.js`, CSS, `version.json`, `health.json`). |
 | `apps/demo-retailer/wrangler.toml` | Pages project `si-session-demo`, `pages_build_output_dir = "dist"`. |
 | `apps/dashboard/wrangler.toml` | Pages project `si-session-dashboard`, `pages_build_output_dir = "dist"`. |
 | `scripts/cloudflare-bootstrap.mjs` | Local one-shot: D1 + Worker + builds + Pages. |
@@ -58,7 +59,7 @@ This script: checks auth, finds or creates the D1 database named in `worker/wran
 
 **GitHub secrets:** `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID`, `SI_WORKER_URL` (Worker HTTPS origin, no trailing slash; same as `VITE_SI_WORKER_URL` for builds).
 
-**Root scripts:** `pnpm cloudflare:deploy:worker` and `pnpm cloudflare:deploy:pages` (runs `scripts/deploy-pages.sh`: requires **`VITE_SI_WORKER_URL`** or **`SI_WORKER_URL`** in the environment, builds demo + dashboard, then uploads both Pages projects).
+**Root scripts:** `pnpm deploy:worker`, `pnpm deploy:snippet`, `pnpm deploy:demo`, `pnpm deploy:dashboard`, `pnpm deploy:all`, and legacy `pnpm cloudflare:deploy:pages` (demo + dashboard only, no snippet project). See [PRODUCTION_HOSTING.md](./PRODUCTION_HOSTING.md).
 
 ### What you still set up manually in Cloudflare
 
@@ -137,8 +138,10 @@ Use the same **database name** as in `wrangler.toml` (`session-intelligence`), n
 ## 4. Deploy the Worker
 
 ```bash
-pnpm exec wrangler deploy
+pnpm exec wrangler deploy --env production
 ```
+
+For a **non-production** Worker using default `[vars]` only (development mode, no bypass in git defaults), you can run `pnpm exec wrangler deploy` from `worker/` — see [ENVIRONMENT_MODES.md](./ENVIRONMENT_MODES.md). **Customer-facing production must use `--env production`.**
 
 Wrangler prints the Worker URL. It will look like:
 

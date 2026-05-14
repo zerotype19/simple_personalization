@@ -4,7 +4,7 @@
  * 1) Ensure D1 database exists (create if missing)
  * 2) Write database_id into worker/wrangler.toml
  * 3) Apply D1 migrations --remote
- * 4) wrangler deploy (Worker)
+ * 4) wrangler deploy --env production (Worker)
  * 5) Build demo + dashboard with VITE_SI_WORKER_URL
  * 6) wrangler pages deploy for apps/demo-retailer and apps/dashboard (uses each app’s wrangler.toml)
  *

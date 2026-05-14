@@ -1,0 +1,8 @@
+# Local Worker overrides (gitignored). Copy to worker/.dev.vars and adjust.
+#
+# Required for local dashboard + Worker bypass (wrangler.toml [vars] keep bypass OFF in git).
+#
+SI_DEPLOYMENT_MODE=development
+SI_BYPASS_DASHBOARD_AUTH=1
+SI_DEV_ACCESS_EMAIL=viewer@optiview.local
+SI_DASHBOARD_ORIGINS=http://localhost:5174,http://127.0.0.1:5174
