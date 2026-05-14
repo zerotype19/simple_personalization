@@ -1,20 +1,20 @@
 {
   "id": "b2b_marketing_ops_implementation_evaluator",
   "label": "B2B marketing ops — implementation evaluator",
+  "_validation_rhythm90": "Cold home: no momentum + soft scores → no match. Deep first visit: high scroll + concepts + no CTA → may match. Return + pages: match with playbook + si.playbook_match.",
   "when": {
     "verticals": ["b2b_saas", "lead_generation"],
-    "min_engagement_score": 48,
-    "require_return_visit": true,
+    "min_engagement_score": 46,
     "max_cta_clicks": 0,
-    "min_scroll_depth": 48,
     "min_pages_viewed": 2,
-    "scroll_or_pages_either": true,
+    "min_scroll_depth": 52,
+    "momentum_match": "any_of_return_pages_or_scroll",
     "concept_labels_any": [
       "Implementation readiness",
       "Team operating rhythm",
       "Quarterly planning"
     ],
-    "min_concept_affinity_for_any": 0.18
+    "min_concept_affinity_for_any": 0.17
   },
   "output": {
     "inferred_need": "Figure out how to put this operating model into practice for their team",

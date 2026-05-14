@@ -9,11 +9,11 @@ import playbookJson from "../../../shared/src/context-packs/playbooks/b2b-market
 interface PlaybookWhen {
   verticals: string[];
   min_engagement_score: number;
-  require_return_visit: boolean;
   max_cta_clicks: number;
-  min_scroll_depth: number;
+  /** At least one of return_visit, pages, or scroll must clear these bars (OR). */
   min_pages_viewed: number;
-  scroll_or_pages_either: boolean;
+  min_scroll_depth: number;
+  momentum_match: "any_of_return_pages_or_scroll";
   concept_labels_any: string[];
   min_concept_affinity_for_any: number;
 }
@@ -42,9 +42,18 @@ export interface ActivationPlaybookMatchResult {
   output: PlaybookOutput;
 }
 
+function sessionMomentumOk(profile: SessionProfile, w: PlaybookWhen): boolean {
+  if (w.momentum_match !== "any_of_return_pages_or_scroll") return false;
+  return (
+    profile.signals.return_visit ||
+    profile.signals.pages_viewed >= w.min_pages_viewed ||
+    profile.signals.max_scroll_depth >= w.min_scroll_depth
+  );
+}
+
 /**
- * First shipped playbook: high-engagement returning B2B visitor with planning/implementation
- * signals and no CTA clicks — recommend low-friction activation (guide/checklist).
+ * B2B playbook: session momentum + planning/implementation concepts + no CTA clicks.
+ * Momentum = return visit OR multi-page OR deep scroll (first-visit deep readers can qualify).
  */
 export function tryMatchActivationPlaybook(
   profile: SessionProfile,
@@ -55,14 +64,8 @@ export function tryMatchActivationPlaybook(
   const v = profile.site_context.vertical;
   if (!w.verticals.includes(v)) return null;
   if (profile.engagement_score < w.min_engagement_score) return null;
-  if (w.require_return_visit && !profile.signals.return_visit) return null;
   if (profile.signals.cta_clicks > w.max_cta_clicks) return null;
-
-  const scrollOk = profile.signals.max_scroll_depth >= w.min_scroll_depth;
-  const pagesOk = profile.signals.pages_viewed >= w.min_pages_viewed;
-  if (w.scroll_or_pages_either) {
-    if (!scrollOk && !pagesOk) return null;
-  } else if (!scrollOk || !pagesOk) return null;
+  if (!sessionMomentumOk(profile, w)) return null;
 
   const aff = profile.concept_affinity;
   let bestLabel: string | null = null;
@@ -78,6 +81,10 @@ export function tryMatchActivationPlaybook(
 
   const why: string[] = [];
   if (profile.signals.return_visit) why.push("Return visitor — likely comparing or going deeper");
+  if (profile.signals.pages_viewed >= w.min_pages_viewed)
+    why.push(`Multiple pages viewed (${profile.signals.pages_viewed}) — sustained interest`);
+  if (profile.signals.max_scroll_depth >= w.min_scroll_depth)
+    why.push(`Deep scroll (${profile.signals.max_scroll_depth}%) — reading in depth on this page`);
   if (profile.engagement_score >= w.min_engagement_score)
     why.push(`Meaningful engagement (score ${profile.engagement_score})`);
   why.push(`Strong “${bestLabel}” concept signal on this session`);
