@@ -621,7 +621,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       </div>`
       : "";
 
-    const advancedSiteOpenAttr = urlHasSiDebug() ? " open" : "";
+    /** Keep `<details>` open on each render so subscribe-driven refreshes do not collapse panels. */
+    const advancedSiteOpenAttr = " open";
     const sitePageHtml = `
       <div class="si-panel-section">
         <div class="si-card">
@@ -676,7 +677,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         ? `<div class="si-muted si-muted--mb6">Why this match (${escHtml(ao.playbook.label)})</div>
           <ul class="si-reason">${ao.playbook.why.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
         : "";
-    const activationMetaOpenAttr = urlHasSiDebug() ? " open" : "";
+    const activationMetaOpenAttr = " open";
     const nbaBlockHtml =
       urlHasSiDebug() && nba
         ? `<h4 class="si-subh">Next best action</h4>
@@ -792,7 +793,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const activationPayloadPreviewEsc = escHtml(activationPayloadPreviewBody(activationPayloadJson, 14));
     const activationPayloadFullEsc = escHtml(activationPayloadJson);
 
-    const platformOpenAttr = urlHasSiDebug() ? " open" : "";
+    const platformOpenAttr = " open";
     const platformSectionHtml = `
       <div class="si-panel-section">
         <details class="si-platform-activation"${platformOpenAttr}>
@@ -805,8 +806,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
               <code class="si-code">si:personalization-signal</code> / <code class="si-code">si:activation</code> when the signal meaningfully changes.
             </p>
             <pre class="si-pre si-pre--payload-preview">${activationPayloadPreviewEsc}</pre>
-            <details class="si-payload-details">
-              <summary>Expand full payload</summary>
+            <details class="si-payload-details" open>
+              <summary>Full payload JSON</summary>
               <pre class="si-pre">${activationPayloadFullEsc}</pre>
             </details>
           </div>
@@ -895,7 +896,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <div class="si-btn-row" id="si-personas"></div>
         </div>`;
 
-    const secondaryDrawerOpenAttr = urlHasSiDebug() ? " open" : "";
+    const secondaryDrawerOpenAttr = " open";
     const secondaryDrawerHtml = `
       <div class="si-panel-section">
         <details class="si-drawer-secondary"${secondaryDrawerOpenAttr}>
