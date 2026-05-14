@@ -89,14 +89,15 @@ export function inferActivationOpportunity(input: {
     offer_type = "Contextual guide, offer, consultation, or soft popup depending on vertical";
   }
 
-  const visitorPersona = profile.persona ? profile.persona.replace(/_/g, " ") : null;
+  const visitorPersona =
+    profile.persona && profile.persona !== "auto" ? profile.persona.replace(/_/g, " ") : null;
   const visitor_read = profile.signals.return_visit
     ? `Returning anonymous visitor${visitorPersona ? ` (${visitorPersona})` : ""} — deeper engagement${
         top ? ` with “${top}” standing out` : ""
       }.`
-    : `New anonymous visitor${visitorPersona ? ` (${visitorPersona})` : ""} — orienting to this page${
-        top ? ` with early “${top}” interest` : ""
-      }.`;
+    : `Anonymous visitor — orienting to this page${
+        visitorPersona ? ` (${visitorPersona})` : ""
+      }${top ? ` with early “${top}” interest` : ""}.`;
 
   const evidence: string[] = [];
   if (semantics.schema_types_detected.length)
@@ -109,7 +110,7 @@ export function inferActivationOpportunity(input: {
   const convCtas =
     (scan.cta_text_hard?.length ?? 0) + (scan.cta_text_soft?.length ?? 0) || scan.primary_ctas.length;
   if (convCtas === 0 && semantics.nav_link_sample.length)
-    evidence.push("Navigation sampled; no dominant conversion CTA captured yet");
+    evidence.push("Navigation sampled; no hard conversion CTA label captured in the scan yet");
 
   const reason: string[] = [];
   if (s.return_visit) reason.push("Return visit increases readiness for a softer second ask");
@@ -129,7 +130,7 @@ export function inferActivationOpportunity(input: {
 
   const opportunity_note =
     convCtas === 0
-      ? "Activation opportunity: no dominant conversion CTA detected yet — consider a softer guide or checklist first."
+      ? "Activation opportunity: no hard conversion CTA engagement detected yet — consider a softer guide or checklist first."
       : "Activation opportunity: CTAs are present — align creative to the strongest concept and journey stage.";
 
   const base: ActivationOpportunity = {

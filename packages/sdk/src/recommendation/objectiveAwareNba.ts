@@ -136,8 +136,8 @@ export function buildObjectiveAwareRecommendation(p: SessionProfile): Recommenda
 
   if (treatLevel === "observe") {
     conf = Math.min(conf, 0.52);
-    if (!next.toLowerCase().includes("observe"))
-      next = `${next} (observe mode: confirm signals before heavier asks.)`;
+    if (!next.toLowerCase().includes("signal-only") && !next.toLowerCase().includes("observe"))
+      next = `${next} (Signal-only ladder: confirm engagement before heavier asks.)`;
   } else if (treatLevel === "recommend_only") {
     conf = Math.min(conf, 0.72);
   }

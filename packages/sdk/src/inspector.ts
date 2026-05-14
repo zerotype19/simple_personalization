@@ -38,6 +38,24 @@ function escHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Keeps inspector JSON readable (avoids float artifacts like 0.8921999999999999). */
+function roundJsonFloats(_key: string, value: unknown): unknown {
+  if (typeof value === "number" && Number.isFinite(value) && !Number.isInteger(value)) {
+    return Math.round(value * 100) / 100;
+  }
+  return value;
+}
+
+function formatActivationPayloadJson(profile: SessionProfile): string {
+  return JSON.stringify(profile.activation_payload, roundJsonFloats, 2);
+}
+
+function activationPayloadPreviewBody(json: string, maxLines: number): string {
+  const lines = json.split("\n");
+  if (lines.length <= maxLines) return json;
+  return `${lines.slice(0, maxLines).join("\n")}\n…`;
+}
+
 /**
  * Populate `el` from an HTML string without using live-document `innerHTML`
  * (Trusted Types / hardened pages often block third-party `innerHTML`).
@@ -282,7 +300,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         : "Few funnel-specific DOM cues detected",
       sc.scan.primary_ctas.length
         ? `Sample CTAs: ${sc.scan.primary_ctas.slice(0, 5).join(" · ")}`
-        : pm.cta_layout_summary || "No dominant conversion CTA detected yet.",
+        : pm.cta_layout_summary || "No hard conversion CTA engagement detected yet.",
       sc.scan.content_themes.length ? `Themes: ${sc.scan.content_themes.slice(0, 5).join(", ")}` : null,
     ]
       .filter((x): x is string => !!x)
@@ -435,9 +453,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
 
     const sitePageHtml = `
       <div class="si-panel-section">
-        <div class="si-section-label">Site &amp; page</div>
         <div class="si-card">
-          <h3>Site &amp; page understanding</h3>
+          <h3>Site understanding</h3>
           <p class="si-site-summary">
             <b>Site read:</b> ${escHtml(publicSiteTypeLabel(env.site.site_type))} ·
             <b>Audience:</b> ${escHtml(audienceForVertical(sc.vertical))} ·
@@ -472,7 +489,6 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
 
     const activationSectionHtml = `
       <div class="si-panel-section">
-        <div class="si-section-label">Activation</div>
         <div class="si-card">
           <h3>Activation opportunity</h3>
           <p class="si-muted si-muted--block">${escHtml(ao.visitor_read)}</p>
@@ -563,14 +579,16 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       !isAuto && safePlanLines.length
         ? `<div class="si-card">
         <h3>Recommended safe personalization</h3>
-        <p class="si-muted si-muted--block">Observe-only on this host until you opt in to DOM rewrites.</p>
+        <p class="si-muted si-muted--block">Recommended mode: signal-only / safe activation recommendation. No DOM rewrite active on this host. The ladder pill (<span class="si-pill">${escHtml(env.ladder.label)}</span>) is confidence in what to recommend — not automatic on-page execution.</p>
         <ul class="si-reason">${safePlanLines.map((line) => `<li>${escHtml(line)}</li>`).join("")}</ul>
       </div>`
         : "";
 
     const trafficJourneySectionHtml = `${behaviorWarmupHtml}${trafficIntelHtml}${journeyIntelHtml}`;
 
-    const activationPreview = escHtml(JSON.stringify(p.activation_payload, null, 2));
+    const activationPayloadJson = formatActivationPayloadJson(p);
+    const activationPayloadPreviewEsc = escHtml(activationPayloadPreviewBody(activationPayloadJson, 14));
+    const activationPayloadFullEsc = escHtml(activationPayloadJson);
 
     const platformSectionHtml = `
       <div class="si-panel-section">
@@ -583,7 +601,11 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
             <code class="si-code">pushPersonalizationSignalAll()</code> fans out to common targets and dispatches
             <code class="si-code">si:personalization-signal</code> / <code class="si-code">si:activation</code> when the signal meaningfully changes.
           </p>
-          <pre class="si-pre">${activationPreview}</pre>
+          <pre class="si-pre si-pre--payload-preview">${activationPayloadPreviewEsc}</pre>
+          <details class="si-payload-details">
+            <summary>Expand full payload</summary>
+            <pre class="si-pre">${activationPayloadFullEsc}</pre>
+          </details>
         </div>
       </div>`;
 
@@ -595,7 +617,11 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <h3>Session &amp; experiments</h3>
           <div class="si-kv si-kv--tight">
             <div>Session ID</div><div class="si-metric si-metric--break"><code class="si-code">${escHtml(p.session_id)}</code></div>
-            <div>Persona (debug)</div><div><span class="si-pill">${escHtml(p.persona ?? "auto")}</span></div>
+            ${
+              urlHasSiDebug() || (p.persona && p.persona !== "auto")
+                ? `<div>Persona (debug)</div><div><span class="si-pill">${escHtml(p.persona ?? "auto")}</span></div>`
+                : ""
+            }
             <div>Page type (signals)</div><div><span class="si-pill">${escHtml(p.page_type)}</span></div>
           </div>
         </div>
@@ -603,7 +629,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <h3>Active personalization</h3>
           <div class="si-muted si-muted--mb6">Personalization: <b>${persoOn ? "ON" : "OFF"}</b>${
             !isAuto
-              ? "<br/><span class=\"si-muted\">Observe-only on non-retail sites: no demo-site DOM rewrites.</span>"
+              ? "<br/><span class=\"si-muted\">Signal-only on non-retail demo hosts: no automatic DOM rewrites.</span>"
               : ""
           }</div>
           ${
@@ -671,7 +697,6 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const html = `
       ${heroHtml}
       <div class="si-panel-section">
-        <div class="si-section-label">Traffic &amp; acquisition</div>
         ${trafficJourneySectionHtml}
       </div>
       ${sitePageHtml}

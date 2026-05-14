@@ -34,7 +34,7 @@ export function buildAnonymousVisitorRead(profile: SessionProfile): {
     env.object.object_name?.trim() ||
     "the core offer on this page";
 
-  const returnVisit = s.return_visit ? "a returning " : "an ";
+  const returnVisit = s.return_visit ? "a returning " : "";
   let posture = "anonymous visitor";
   if (bs) {
     if (bs.engagement_quality.label === "deep_reader" || bs.navigation.journey_velocity === "slow")
@@ -43,7 +43,12 @@ export function buildAnonymousVisitorRead(profile: SessionProfile): {
     else if (bs.engagement_quality.label === "rapid_scanner") posture = "fast-moving explorer";
   }
 
-  const p1 = `This appears to be ${returnVisit}${posture} on ${siteLabel} (${vertical}), ${channelClause(profile)}.`;
+  const article = (() => {
+    if (s.return_visit) return "";
+    const first = posture.trim().split(/\s+/)[0] ?? "";
+    return /^[aeiou]/i.test(first) ? "an " : "a ";
+  })();
+  const p1 = `This appears to be ${returnVisit}${article}${posture} on ${siteLabel} (${vertical}), ${channelClause(profile)}.`;
 
   const engage = bs
     ? `Engagement reads as ${bs.engagement_quality.label.replace(/_/g, " ")} with commercial phase “${bs.commercial_journey_phase.replace(

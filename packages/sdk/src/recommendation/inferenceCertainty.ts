@@ -38,9 +38,17 @@ export function buildInferenceCertaintyBands(p: SessionProfile): InferenceCertai
   if (hardCtas >= 2) high.push("High-intent conversion CTAs detected (checkout, demo, quote, …)");
   else if (hardCtas === 1 || convSamples >= 2) medium.push("Conversion-oriented CTA text sampled in header/main");
   else if (convSamples === 1) medium.push("Limited CTA diversity on this page sample");
-  else low.push("No dominant conversion CTA detected yet in the sampled chrome");
+  else low.push("No hard conversion CTA engagement detected yet in the sampled chrome");
 
-  if (env.ladder.level === 1) low.push("Personalization ladder is observe-only until confidence rises");
+  if (env.ladder.level === 1) {
+    low.push("Ladder level 1 — keep recommendations lightweight until site, page, and funnel reads strengthen.");
+  } else if (env.ladder.level === 2) {
+    medium.push("Ladder level 2 — stronger recommendations are reasonable; how you execute still depends on host policy.");
+  } else if (env.ladder.level >= 3) {
+    medium.push(
+      "Ladder level 3+ — model confidence supports safe personalization recommendations; DOM execution is still your opt-in.",
+    );
+  }
 
   return {
     high: [...new Set(high)].slice(0, 6),

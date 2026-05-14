@@ -88,12 +88,13 @@ function activationReadiness(p: SessionProfile): ActivationReadinessRead {
 function cohortHint(p: SessionProfile, nav: NavigationPatternRead): string | null {
   const top = Object.entries(p.concept_affinity).sort((a, b) => b[1] - a[1])[0]?.[0];
   if (!top && !nav.comparison_behavior) return null;
-  const bits: string[] = [];
-  if (nav.comparison_behavior) bits.push("compared options across pages");
-  if (p.signals.pricing_views >= 1 || p.signals.offer_surface_clicks >= 1) bits.push("engaged offer or pricing surfaces");
-  if (top) bits.push(`strong “${top}” concept signal`);
-  if (!bits.length) return null;
-  return `This session resembles anonymous visitors who ${bits.join(", ")} — use for tone, not identity.`;
+  const traits: string[] = [];
+  if (nav.comparison_behavior) traits.push("cross-page comparison behavior");
+  if (p.signals.pricing_views >= 1 || p.signals.offer_surface_clicks >= 1)
+    traits.push("pricing or offer-surface engagement");
+  if (top) traits.push(`a strong “${top}” concept signal`);
+  if (!traits.length) return null;
+  return `This session resembles anonymous visitors with ${traits.join(", ")} — use for tone, not identity.`;
 }
 
 function deviceContext(): BehaviorSnapshot["device_context"] {

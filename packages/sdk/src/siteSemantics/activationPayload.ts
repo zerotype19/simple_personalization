@@ -4,6 +4,10 @@ import { publicSiteTypeLabel } from "../siteIntelligence/publicLabels";
 
 const TIMELINE_PREVIEW_CAP = 5;
 
+function r2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 /** Strip accidental full URLs from timeline lines bound for vendor payloads (keep path + search when parseable). */
 function sanitizeTimelineMessageForPayload(message: string): string {
   return message.replace(/https?:\/\/[^\s)]+/gi, (raw) => {
@@ -109,12 +113,12 @@ export function buildActivationPayload(profile: SessionProfile): ActivationPaylo
         domain: sc.domain,
         type: sc.vertical,
         type_label: publicSiteTypeLabel(env.site.site_type),
-        confidence: env.site.confidence,
+        confidence: r2(env.site.confidence),
         business_context: publicSiteTypeLabel(env.site.site_type),
       },
       page: {
         kind: env.page.generic_kind,
-        confidence: env.page.confidence,
+        confidence: r2(env.page.confidence),
         primary_promise: sem.primary_promise ?? env.object.object_name,
         schema_types: sem.schema_types_detected,
       },
@@ -131,17 +135,17 @@ export function buildActivationPayload(profile: SessionProfile): ActivationPaylo
       objective: {
         primary: env.conversion.primary_objective,
         secondary: env.conversion.secondary_objective,
-        confidence: env.conversion.confidence,
+        confidence: r2(env.conversion.confidence),
       },
       nba: profile.next_best_action
         ? {
             action: profile.next_best_action.next_best_action,
             surface: profile.next_best_action.recommended_surface,
             treatment_level: profile.next_best_action.recommended_treatment_level,
-            confidence: profile.next_best_action.confidence,
+            confidence: r2(profile.next_best_action.confidence),
           }
         : null,
-      activation: profile.activation_opportunity,
+      activation: { ...profile.activation_opportunity, confidence: r2(profile.activation_opportunity.confidence) },
       playbook_match: profile.activation_opportunity.playbook,
       personalization_signal: sig,
       behavior: summarizeBehavior(profile),

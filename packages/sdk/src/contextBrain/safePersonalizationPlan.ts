@@ -34,7 +34,7 @@ export function buildSafePersonalizationPlan(p: SessionProfile): string[] {
   }
 
   if (p.site_environment.ladder.level <= 1) {
-    lines.push("Stay in observe mode on this host: refine signals before any DOM personalization.");
+    lines.push("Keep execution signal-only on this host until you opt into DOM personalization.");
   }
 
   const nba = p.next_best_action;
