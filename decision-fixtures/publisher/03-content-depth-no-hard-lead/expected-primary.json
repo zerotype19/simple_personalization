@@ -1,0 +1,7 @@
+{
+  "min_confidence": 0.45,
+  "forbidden_terms": [
+    "book a demo",
+    "schedule demo"
+  ]
+}

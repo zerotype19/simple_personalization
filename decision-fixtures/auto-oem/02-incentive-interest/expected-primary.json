@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "incentive_inline_offer",
+  "expected_offer_type": "incentive_stack_explainer",
+  "min_confidence": 0.45
+}

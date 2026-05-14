@@ -1,0 +1,47 @@
+{
+  "name": "New reader — thin engagement",
+  "vertical": "publisher_content",
+  "engagement_score": 14,
+  "commercial_journey_phase": "discovery",
+  "site_environment": {
+    "page": {
+      "generic_kind": "article_page",
+      "confidence": 0.55,
+      "signals_used": []
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 14,
+      "interruption_posture": "observe_only",
+      "rationale": []
+    },
+    "commercial_journey_phase": "discovery"
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.4,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": [
+      "fixture evidence"
+    ],
+    "reason": [
+      "fixture reason alpha",
+      "fixture reason beta"
+    ],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 0
+  }
+}

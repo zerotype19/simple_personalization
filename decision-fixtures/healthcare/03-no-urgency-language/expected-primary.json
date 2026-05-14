@@ -1,0 +1,7 @@
+{
+  "primary_must_be_null": true,
+  "forbidden_terms": [
+    "slots disappearing",
+    "act immediately"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "trade_in_soft_prompt",
+  "expected_offer_type": "trade_in_estimate_soft",
+  "min_confidence": 0.45
+}

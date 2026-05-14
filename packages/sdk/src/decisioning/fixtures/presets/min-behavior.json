@@ -1,0 +1,66 @@
+{
+  "traffic": {
+    "channel_guess": "organic_search",
+    "landing_path": "/",
+    "utm_source": null,
+    "utm_medium": null,
+    "utm_campaign": null,
+    "utm_term": null,
+    "utm_content": null,
+    "has_click_id": false,
+    "arrival_confidence_0_100": 55,
+    "acquisition_evidence": ["fixture-session"],
+    "acquisition_narrative": "Fixture session",
+    "acquisition_interpretation": null,
+    "entry_page_kind": "article_page",
+    "landing_pattern_summary": null,
+    "query_themes": []
+  },
+  "referral_model": {
+    "arrival_channel": "organic_search",
+    "arrival_subchannel": "",
+    "arrival_type": "",
+    "campaign_detected": false,
+    "campaign_confidence_0_1": 0,
+    "acquisition_strategy": "organic_fixture",
+    "acquisition_themes": [],
+    "acquisition_posture": null,
+    "creative_interpretation": null,
+    "commerce_mindset": [],
+    "personalization_hint": null,
+    "acquisition_stage": "research",
+    "evidence": [],
+    "confidence_0_1": 0.55
+  },
+  "campaign_intent": {
+    "keyword_themes": [],
+    "campaign_angle": null,
+    "commercial_clues": [],
+    "confidence_0_100": 0
+  },
+  "referrer": { "category": "unknown", "host": null, "narrative": "", "channel_hint": null },
+  "navigation": {
+    "journey_pattern": "fixture",
+    "journey_velocity": "deliberate",
+    "comparison_behavior": false,
+    "high_intent_transition": false,
+    "path_summary": "/"
+  },
+  "engagement_quality": {
+    "label": "deep_reader",
+    "rationale": ["fixture"]
+  },
+  "activation_readiness": {
+    "score_0_100": 55,
+    "interruption_posture": "soft_cta_ready",
+    "rationale": []
+  },
+  "commercial_journey_phase": "research",
+  "anonymous_similarity_hint": null,
+  "device_context": {
+    "coarse_device": "desktop",
+    "weekday": true,
+    "hour_local": 14,
+    "viewport_bucket": "wide"
+  }
+}

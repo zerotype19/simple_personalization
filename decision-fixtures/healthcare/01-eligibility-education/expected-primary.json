@@ -1,0 +1,10 @@
+{
+  "expected_surface_id": "eligibility_guidance_module",
+  "expected_offer_type": "eligibility_walkthrough",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "forbidden_terms": [
+    "diagnosed",
+    "guaranteed cure"
+  ]
+}

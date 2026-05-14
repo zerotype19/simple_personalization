@@ -1,0 +1,10 @@
+{
+  "expected_surface_id": "coupon_offer_secondary",
+  "expected_offer_type": "loyalty_or_coupon_reminder",
+  "expected_timing": "after_scroll",
+  "min_confidence": 0.45,
+  "forbidden_terms": [
+    "act now",
+    "today only"
+  ]
+}

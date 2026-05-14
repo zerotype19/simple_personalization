@@ -1,0 +1,14 @@
+{
+  "expected_surface_id": "article_inline_mid",
+  "expected_offer_type": "implementation_checklist",
+  "expected_message_angle": "make_it_practical",
+  "expected_timing": "after_scroll",
+  "min_confidence": 0.45,
+  "required_reason_terms": [
+    "recipe"
+  ],
+  "forbidden_terms": [
+    "ebook",
+    "guaranteed"
+  ]
+}

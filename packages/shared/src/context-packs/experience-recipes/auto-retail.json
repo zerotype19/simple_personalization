@@ -1,9 +1,53 @@
 [
   {
+    "id": "auto_retail_finance_payment_assist",
+    "label": "Finance and payment assist on inventory paths",
+    "verticals": ["auto_retail"],
+    "surfaces": ["finance_payment_assist"],
+    "min_engagement_score": 47,
+    "min_activation_readiness": 42,
+    "max_cta_clicks": 2,
+    "allowed_phases": ["comparison", "evaluation", "validation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline",
+      "message_angle": "payment_clarity",
+      "offer_type": "payment_estimate_walkthrough",
+      "headline": "Estimate payment before you visit",
+      "body": "Ballpark payment ranges from inventory context—no credit pull in-browser.",
+      "cta_label": "See payment assist",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 720
+    }
+  },
+  {
+    "id": "auto_retail_trade_in_soft",
+    "label": "Trade-in soft prompt after compare signals",
+    "verticals": ["auto_retail"],
+    "surfaces": ["trade_in_soft_prompt"],
+    "min_engagement_score": 42,
+    "min_activation_readiness": 40,
+    "max_cta_clicks": 2,
+    "allowed_phases": ["comparison", "evaluation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline",
+      "message_angle": "value_your_trade",
+      "offer_type": "trade_in_estimate_soft",
+      "headline": "Curious what your trade might be worth?",
+      "body": "Soft estimate flow—skip if you are not ready.",
+      "cta_label": "Start trade estimate",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 720
+    }
+  },
+  {
     "id": "auto_retail_inventory_assist",
     "label": "Inventory availability assist",
     "verticals": ["auto_retail"],
-    "surfaces": ["inventory_assist_module", "dealer_contact_assist"],
+    "surfaces": ["inventory_assist_module"],
     "min_engagement_score": 36,
     "min_activation_readiness": 34,
     "max_cta_clicks": 3,

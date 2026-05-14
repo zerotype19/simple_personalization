@@ -1,5 +1,27 @@
 [
   {
+    "id": "finance_card_shopping_primary",
+    "label": "Card comparison shopper",
+    "verticals": ["financial_services"],
+    "surfaces": ["card_comparison_module"],
+    "min_engagement_score": 48,
+    "min_activation_readiness": 44,
+    "max_cta_clicks": 2,
+    "allowed_phases": ["comparison", "evaluation", "research"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_module",
+      "message_angle": "compare_cards_fairly",
+      "offer_type": "card_finder_assist",
+      "headline": "Compare cards side by side",
+      "body": "Fees, rewards, and intro APRs in one module—no application until you choose.",
+      "cta_label": "Open card comparison",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 900
+    }
+  },
+  {
     "id": "finance_trust_compare_inline",
     "label": "Financial services trust-forward compare",
     "verticals": ["financial_services"],

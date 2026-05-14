@@ -1,5 +1,49 @@
 [
   {
+    "id": "auto_oem_incentive_inline",
+    "label": "Incentive-aware inline assist",
+    "verticals": ["auto_oem"],
+    "surfaces": ["incentive_inline_offer", "build_price_assist"],
+    "min_engagement_score": 44,
+    "min_activation_readiness": 42,
+    "max_cta_clicks": 3,
+    "allowed_phases": ["evaluation", "comparison", "validation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline",
+      "message_angle": "stack_incentives_clearly",
+      "offer_type": "incentive_stack_explainer",
+      "headline": "See how incentives stack on this build",
+      "body": "APR, lease, and cash incentives summarized without dealer pressure.",
+      "cta_label": "View incentive summary",
+      "timing": "after_scroll",
+      "friction": "low",
+      "ttl_seconds": 720
+    }
+  },
+  {
+    "id": "auto_oem_model_discovery_soft",
+    "label": "Early model discovery assist",
+    "verticals": ["auto_oem"],
+    "surfaces": ["model_discovery_assist"],
+    "min_engagement_score": 34,
+    "min_activation_readiness": 32,
+    "max_cta_clicks": 4,
+    "allowed_phases": ["discovery", "research"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline",
+      "message_angle": "orient_models",
+      "offer_type": "model_family_overview",
+      "headline": "Find the right model line first",
+      "body": "Short orientation before trims and builds—no dealer handoff yet.",
+      "cta_label": "Explore models",
+      "timing": "after_scroll",
+      "friction": "low",
+      "ttl_seconds": 900
+    }
+  },
+  {
     "id": "auto_oem_trim_compare",
     "label": "Trim comparison assist",
     "verticals": ["auto_oem"],

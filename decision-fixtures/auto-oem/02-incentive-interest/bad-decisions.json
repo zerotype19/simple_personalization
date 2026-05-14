@@ -1,0 +1,17 @@
+[
+  {
+    "forbidden_substring": "free ebook"
+  },
+  {
+    "forbidden_substring": "download our ebook"
+  },
+  {
+    "forbidden_substring": "guaranteed approval"
+  },
+  {
+    "forbidden_substring": "you have been diagnosed"
+  },
+  {
+    "forbidden_substring": "schedule demo now"
+  }
+]

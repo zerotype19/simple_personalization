@@ -1,5 +1,27 @@
 [
   {
+    "id": "healthcare_eligibility_guidance_soft",
+    "label": "Eligibility and coverage guidance (trust-first)",
+    "verticals": ["healthcare"],
+    "surfaces": ["eligibility_guidance_module", "coverage_reassurance_inline"],
+    "min_engagement_score": 42,
+    "min_activation_readiness": 46,
+    "max_cta_clicks": 2,
+    "allowed_phases": ["evaluation", "comparison", "validation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_module",
+      "message_angle": "clarity_on_coverage",
+      "offer_type": "eligibility_walkthrough",
+      "headline": "Understand eligibility before you commit time",
+      "body": "Plain-language steps on coverage, costs, and what to ask your clinician.",
+      "cta_label": "Open eligibility guide",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 900
+    }
+  },
+  {
     "id": "healthcare_education_next_step",
     "label": "Healthcare education inline",
     "verticals": ["healthcare"],

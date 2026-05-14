@@ -1,0 +1,6 @@
+{
+  "expected_surface_id": "category_help_me_choose",
+  "expected_offer_type": "guided_shortlist",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45
+}

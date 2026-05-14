@@ -1,0 +1,8 @@
+{
+  "expected_surface_id": "model_discovery_assist",
+  "expected_offer_type": "model_family_overview",
+  "min_confidence": 0.45,
+  "forbidden_terms": [
+    "dealer handoff today"
+  ]
+}

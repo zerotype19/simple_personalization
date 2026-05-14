@@ -1,0 +1,8 @@
+{
+  "expected_offer_type": "rate_and_fee_explainer",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "forbidden_terms": [
+    "no credit check"
+  ]
+}

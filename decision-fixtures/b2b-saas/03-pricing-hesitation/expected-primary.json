@@ -1,0 +1,8 @@
+{
+  "expected_offer_type": "security_and_implementation_faq",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "forbidden_terms": [
+    "schedule demo now"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "expected_offer_type": "next_clinical_step_guide",
+  "expected_message_angle": "education_first",
+  "min_confidence": 0.45
+}

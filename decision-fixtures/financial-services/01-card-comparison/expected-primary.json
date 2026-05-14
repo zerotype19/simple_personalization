@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "card_comparison_module",
+  "expected_offer_type": "card_finder_assist",
+  "min_confidence": 0.45
+}

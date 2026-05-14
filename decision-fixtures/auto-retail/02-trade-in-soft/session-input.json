@@ -1,0 +1,56 @@
+{
+  "name": "Trade-in consideration",
+  "vertical": "auto_retail",
+  "engagement_score": 46,
+  "commercial_journey_phase": "comparison",
+  "site_environment": {
+    "page": {
+      "generic_kind": "product_detail_page",
+      "confidence": 0.76,
+      "signals_used": [
+        "trade"
+      ]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 46,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "comparison",
+    "navigation": {
+      "journey_pattern": "trade",
+      "journey_velocity": "deliberate",
+      "comparison_behavior": true,
+      "high_intent_transition": false,
+      "path_summary": "/vdp"
+    }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.74,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": [
+      "fixture evidence"
+    ],
+    "reason": [
+      "fixture reason alpha",
+      "fixture reason beta"
+    ],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 0
+  }
+}
