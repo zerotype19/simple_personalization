@@ -1,0 +1,28 @@
+{
+  "id": "b2b_marketing_ops_implementation_evaluator",
+  "label": "B2B marketing ops — implementation evaluator",
+  "when": {
+    "verticals": ["b2b_saas", "lead_generation"],
+    "min_engagement_score": 48,
+    "require_return_visit": true,
+    "max_cta_clicks": 0,
+    "min_scroll_depth": 48,
+    "min_pages_viewed": 2,
+    "scroll_or_pages_either": true,
+    "concept_labels_any": [
+      "Implementation readiness",
+      "Team operating rhythm",
+      "Quarterly planning"
+    ],
+    "min_concept_affinity_for_any": 0.18
+  },
+  "output": {
+    "inferred_need": "Figure out how to put this operating model into practice for their team",
+    "message_angle": "Make it practical — reduce change-management friction",
+    "offer_type": "Implementation guide, planning checklist, or starter playbook",
+    "surface": "Inline CTA or soft popup after meaningful engagement",
+    "timing": "After high scroll depth or a second page view",
+    "friction": "low",
+    "recommended_activation_summary": "Offer an implementation guide or planning checklist — this visitor appears to be evaluating how to operationalize the framework; surface it inline or as a soft popup."
+  }
+}

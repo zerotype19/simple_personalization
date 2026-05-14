@@ -18,6 +18,12 @@ export interface ConceptDef {
   id: string;
   label: string;
   terms: string[];
+  /** Longer / intent-shaped phrases (optional). Matched like `terms` against scan text. */
+  intent_phrases?: string[];
+  /** Strategy hints for playbooks / activation (optional; not scored as text by default). */
+  message_angles?: string[];
+  recommended_offers?: string[];
+  recommended_surfaces?: string[];
 }
 
 export interface ConceptPackFile {
@@ -152,10 +158,11 @@ function scoreAndEvidenceForConcept(
   phrases: string[],
 ): { hit: number; matched: string[] } {
   const matchedTerms = new Set<string>();
+  const matchSources = [...c.terms, ...(c.intent_phrases ?? [])];
   let hit = 0;
   for (const ph of phrases) {
     let phraseWeight = 0;
-    for (const term of c.terms) {
+    for (const term of matchSources) {
       const tl = term.toLowerCase();
       if (phraseMatchesTerm(ph, tl)) {
         matchedTerms.add(tl);

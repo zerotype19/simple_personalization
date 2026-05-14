@@ -4,4 +4,4 @@ export {
   computeConceptAffinityDetailed,
   conceptSignalLabel,
 } from "./mapConcepts";
-export type { ConceptAffinityComputeResult } from "./mapConcepts";
+export type { ConceptAffinityComputeResult, ConceptDef } from "./mapConcepts";

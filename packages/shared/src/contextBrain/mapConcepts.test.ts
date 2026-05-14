@@ -41,11 +41,16 @@ describe("computeConceptAffinity", () => {
     expect(max).toBe(1);
   });
 
-  it("returns matched dictionary terms in evidence", () => {
-    const { affinity, evidence } = computeConceptAffinityDetailed("b2b_saas", scan(), {});
-    expect(affinity["Quarterly planning"]).toBeDefined();
-    expect(evidence["Quarterly planning"]?.length).toBeGreaterThan(0);
-    expect(evidence["Quarterly planning"]).toEqual(expect.arrayContaining(["quarter", "planning"]));
+  it("matches intent_phrases against page text for stronger implementation signal", () => {
+    const aff: CategoryAffinity = {};
+    const scanTitle = scan({
+      page_title: "How to implement this operating cadence for your team",
+      top_terms: ["team", "cadence"],
+    });
+    const out = computeConceptAffinityDetailed("b2b_saas", scanTitle, aff);
+    expect(out.affinity["Implementation readiness"]).toBeDefined();
+    const ev = out.evidence["Implementation readiness"] ?? [];
+    expect(ev.some((t) => t.includes("implement"))).toBe(true);
   });
 });
 

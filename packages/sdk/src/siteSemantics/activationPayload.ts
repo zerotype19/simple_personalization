@@ -90,6 +90,7 @@ export function buildActivationPayload(profile: SessionProfile): ActivationPaylo
           }
         : null,
       activation: profile.activation_opportunity,
+      playbook_match: profile.activation_opportunity.playbook,
       personalization_signal: sig,
     },
   };

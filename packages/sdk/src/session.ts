@@ -78,6 +78,8 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     if (!existing.concept_evidence) existing.concept_evidence = {};
     if (!existing.page_semantics) existing.page_semantics = emptyPageSemantics();
     if (!existing.activation_opportunity) existing.activation_opportunity = emptyActivationOpportunity();
+    else if (existing.activation_opportunity.playbook === undefined)
+      existing.activation_opportunity.playbook = null;
     if (!existing.personalization_signal) existing.personalization_signal = emptyPersonalizationSignal();
     if (!existing.activation_payload) existing.activation_payload = emptyActivationPayload();
     return existing;

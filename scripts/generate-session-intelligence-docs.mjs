@@ -69,7 +69,7 @@ function main() {
   });
 
   const packLines = [];
-  for (const key of ["taxonomies", "verticals", "concepts", "stopwords"]) {
+  for (const key of ["taxonomies", "verticals", "concepts", "stopwords", "playbooks"]) {
     const arr = ctxIndex[key];
     if (!Array.isArray(arr)) continue;
     packLines.push(`- **${key}**`);

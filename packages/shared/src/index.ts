@@ -112,6 +112,16 @@ export interface PageSemantics {
   cta_layout_summary: string;
 }
 
+/** When a file-based activation playbook matches, inspector + payload can cite it. */
+export interface ActivationPlaybookMatch {
+  id: string;
+  label: string;
+  /** Evidence-style bullets (why the playbook fired). */
+  why: string[];
+  /** One CMO-facing line (offer + surface). */
+  recommended_activation_summary: string;
+}
+
 /** Anonymous-visitor activation read (not site redesign advice). */
 export interface ActivationOpportunity {
   status: "developing" | "ready" | "strong";
@@ -129,6 +139,8 @@ export interface ActivationOpportunity {
   opportunity_note: string | null;
   evidence: string[];
   reason: string[];
+  /** Optional enrichment from `context-packs/playbooks/` (deterministic, explainable). */
+  playbook: ActivationPlaybookMatch | null;
 }
 
 /** Flat signal for dataLayer / Adobe / Optimizely-style tools. */

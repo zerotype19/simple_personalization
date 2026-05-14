@@ -43,6 +43,7 @@ export function emptyActivationOpportunity(): ActivationOpportunity {
     opportunity_note: null,
     evidence: [],
     reason: [],
+    playbook: null,
   };
 }
 

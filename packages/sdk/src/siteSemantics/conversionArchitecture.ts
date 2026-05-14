@@ -7,6 +7,7 @@ import type {
   SiteScanSummary,
   SiteVertical,
 } from "@si/shared";
+import { tryMatchActivationPlaybook } from "./matchActivationPlaybook";
 
 export function inferActivationOpportunity(input: {
   profile: SessionProfile;
@@ -114,7 +115,7 @@ export function inferActivationOpportunity(input: {
       ? "Activation opportunity: no dominant conversion CTA detected yet — consider a softer guide or checklist first."
       : "Activation opportunity: CTAs are present — align creative to the strongest concept and journey stage.";
 
-  return {
+  const base: ActivationOpportunity = {
     status,
     confidence,
     visitor_read,
@@ -130,5 +131,25 @@ export function inferActivationOpportunity(input: {
     opportunity_note,
     evidence,
     reason,
+    playbook: null,
+  };
+
+  const pb = tryMatchActivationPlaybook(profile, env, scan);
+  if (!pb) return base;
+
+  const boosted = Math.min(0.95, base.confidence + 0.06);
+  return {
+    ...base,
+    inferred_need: pb.output.inferred_need,
+    message_angle: pb.output.message_angle,
+    offer_type: pb.output.offer_type,
+    surface: pb.output.surface,
+    timing: pb.output.timing,
+    friction: pb.output.friction,
+    opportunity_note: pb.output.recommended_activation_summary,
+    confidence: boosted,
+    evidence: [`Activation playbook: ${pb.match.label}`, ...base.evidence],
+    reason: [...pb.match.why, ...base.reason].slice(0, 12),
+    playbook: pb.match,
   };
 }

@@ -23,7 +23,22 @@
         "annual plan",
         "roadmap",
         "priorities"
-      ]
+      ],
+      "intent_phrases": [
+        "quarterly business review",
+        "plan the quarter",
+        "quarterly priorities",
+        "reset for the quarter",
+        "end of quarter",
+        "next quarter"
+      ],
+      "message_angles": [
+        "clarify_priorities",
+        "reduce_planning_friction",
+        "align_exec_and_team"
+      ],
+      "recommended_offers": ["planning_checklist", "qbr_template", "priority_canvas"],
+      "recommended_surfaces": ["inline_cta", "content_module", "download_gate_soft"]
     },
     {
       "id": "team_operating_rhythm",
@@ -45,7 +60,22 @@
         "workflow cadence",
         "meeting rhythm",
         "scorecard meeting"
-      ]
+      ],
+      "intent_phrases": [
+        "how teams work together",
+        "team cadence",
+        "weekly rhythm",
+        "operating cadence",
+        "keep teams aligned",
+        "cross team sync"
+      ],
+      "message_angles": [
+        "team_enablement",
+        "reduce_meeting_load",
+        "make_cadence_actionable"
+      ],
+      "recommended_offers": ["team_playbook", "cadence_worksheet", "ritual_cards"],
+      "recommended_surfaces": ["inline_cta", "embedded_module", "soft_popup"]
     },
     {
       "id": "measurement_learning",
@@ -67,7 +97,21 @@
         "hypothesis",
         "learn loop",
         "insight"
-      ]
+      ],
+      "intent_phrases": [
+        "prove what worked",
+        "learning loop",
+        "measure outcomes not activity",
+        "experiment design",
+        "read out results"
+      ],
+      "message_angles": [
+        "credibility_from_data",
+        "safe_to_test",
+        "close_the_loop"
+      ],
+      "recommended_offers": ["experiment_brief", "metrics_primer", "learning_review_template"],
+      "recommended_surfaces": ["inline_cta", "content_module", "newsletter_block"]
     },
     {
       "id": "implementation_readiness",
@@ -86,7 +130,29 @@
         "migration",
         "cutover",
         "readiness"
-      ]
+      ],
+      "intent_phrases": [
+        "how to implement",
+        "how to start",
+        "put this into practice",
+        "getting started",
+        "roll this out",
+        "framework rollout",
+        "operating cadence",
+        "best practices"
+      ],
+      "message_angles": [
+        "make_it_practical",
+        "reduce_change_management_friction",
+        "start_small"
+      ],
+      "recommended_offers": [
+        "implementation_guide",
+        "planning_checklist",
+        "starter_playbook",
+        "diagnostic_light"
+      ],
+      "recommended_surfaces": ["inline_cta", "soft_popup", "content_module"]
     },
     {
       "id": "marketing_workflow",
@@ -107,7 +173,17 @@
         "request",
         "routing",
         "approvals"
-      ]
+      ],
+      "intent_phrases": [
+        "intake to delivery",
+        "marketing operations",
+        "process for campaigns",
+        "reduce rework",
+        "handoff between teams"
+      ],
+      "message_angles": ["efficiency", "clarity_of_process", "reduce_thrash"],
+      "recommended_offers": ["workflow_diagram", "brief_template", "routing_checklist"],
+      "recommended_surfaces": ["inline_cta", "embedded_module"]
     },
     {
       "id": "leadership_alignment",
@@ -126,7 +202,16 @@
         "steerco",
         "exec team",
         "sponsorship"
-      ]
+      ],
+      "intent_phrases": [
+        "get leadership on the same page",
+        "executive alignment",
+        "steer the portfolio",
+        "sponsor the initiative"
+      ],
+      "message_angles": ["strategic_alignment", "risk_reduction", "executive_summary_angle"],
+      "recommended_offers": ["one_pager_for_leads", "steerco_deck", "alignment_workshop"],
+      "recommended_surfaces": ["inline_cta", "content_module", "soft_popup"]
     },
     {
       "id": "cross_functional_collaboration",
@@ -150,7 +235,16 @@
         "partner team",
         "collaboration",
         "interlock"
-      ]
+      ],
+      "intent_phrases": [
+        "work across functions",
+        "break down silos",
+        "interlock meetings",
+        "shared objectives across teams"
+      ],
+      "message_angles": ["shared_language", "handoff_clarity", "joint_planning"],
+      "recommended_offers": ["interlock_agenda", "raci_light", "collaboration_guide"],
+      "recommended_surfaces": ["inline_cta", "content_module"]
     },
     {
       "id": "experimentation_discipline",
@@ -171,7 +265,16 @@
         "experimentation",
         "test plan",
         "learning agenda"
-      ]
+      ],
+      "intent_phrases": [
+        "run a clean test",
+        "hypothesis to result",
+        "experiment readout",
+        "learning agenda"
+      ],
+      "message_angles": ["rigor_without_bureaucracy", "ethical_testing", "learn_fast"],
+      "recommended_offers": ["experiment_brief", "guardrails_checklist", "readout_template"],
+      "recommended_surfaces": ["inline_cta", "content_module"]
     }
   ]
 }

@@ -340,6 +340,17 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <div>Timing</div><div class="si-muted">${escHtml(ao.timing)}</div>
           <div>Activation note</div><div class="si-muted">${escHtml(ao.opportunity_note ?? "—")}</div>
         </div>
+        ${
+          ao.playbook
+            ? `<div class="si-muted si-muted--block si-muted--mb6" style="margin-top:10px"><b>Activation playbook matched</b> — ${escHtml(
+                ao.playbook.label,
+              )}</div>
+        <div class="si-muted si-muted--mb6">Why</div>
+        <ul class="si-reason">${ao.playbook.why.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>
+        <div class="si-muted si-muted--mb6" style="margin-top:8px">Recommended activation</div>
+        <p class="si-muted si-muted--block">${escHtml(ao.playbook.recommended_activation_summary)}</p>`
+            : ""
+        }
         <div class="si-muted si-muted--mb6">Evidence</div>
         <ul class="si-reason">${ao.evidence.map((x) => `<li>${escHtml(x)}</li>`).join("") || "<li>—</li>"}</ul>
       </div>

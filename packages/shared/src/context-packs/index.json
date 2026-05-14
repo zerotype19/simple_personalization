@@ -20,5 +20,6 @@
     "concepts/lead-generation.json",
     "concepts/content-engagement.json"
   ],
-  "stopwords": ["stopwords/global.json", "stopwords/site-boilerplate.json"]
+  "stopwords": ["stopwords/global.json", "stopwords/site-boilerplate.json"],
+  "playbooks": ["playbooks/b2b-marketing-ops.json"]
 }
