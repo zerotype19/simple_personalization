@@ -1,6 +1,12 @@
 # Launch checklist (snippet CDN + API)
 
-Use this before pointing customers at **`https://cdn.optiview.ai/si.js`** and **`https://api.optiview.ai`**.
+## How to use these docs
+
+- **This file** (`LAUNCH_CHECKLIST.md`) — technical launch readiness: deploys, DNS, Access, CORS, Worker, CDN, and smoke tests before you call the stack deploy-ready.
+- **[EXTERNAL_BETA_CHECKLIST.md](./EXTERNAL_BETA_CHECKLIST.md)** — customer-facing beta readiness; use it before inviting external pilots, agencies, or unpaid beta sites.
+- **[CLOUDFLARE_INVENTORY.md](./CLOUDFLARE_INVENTORY.md)** — infrastructure map; use it to confirm hostname → Cloudflare project mapping before changing domains or deleting resources.
+
+Use the sections below before pointing customers at **`https://cdn.optiview.ai/si.js`** and **`https://api.optiview.ai`**.
 
 ## Pre-launch verification (auth, tenancy, and hosting)
 
@@ -77,6 +83,4 @@ window.SessionIntel.pushPersonalizationSignalAll();
 
 ## External beta gate
 
-Before inviting **external** pilots (not just internal demos), work through **[EXTERNAL_BETA_CHECKLIST.md](./EXTERNAL_BETA_CHECKLIST.md)** (Access, CORS, signup → admin → D1, CDN DNS, dashboard API URL).
-
-Cloudflare project ↔ hostname reference: **[CLOUDFLARE_INVENTORY.md](./CLOUDFLARE_INVENTORY.md)**.
+Before external pilots, complete **[EXTERNAL_BETA_CHECKLIST.md](./EXTERNAL_BETA_CHECKLIST.md)**. (See **How to use these docs** at the top of this file for roles of each doc.)

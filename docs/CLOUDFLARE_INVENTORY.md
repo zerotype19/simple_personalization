@@ -1,8 +1,8 @@
 # Cloudflare inventory (Optiview / Session Intelligence)
 
-Single-account map of **what is in use**, **what hostname it serves**, and **how you deploy it**. Naming is intentionally unchanged during beta; see **Rename later** at the bottom.
+**Infrastructure map** — which Cloudflare Worker and Pages projects exist, what they serve, and how to deploy them. Use this to confirm **hostname → project** wiring before changing DNS, custom domains, or deleting resources.
 
-Related: [PRODUCTION_HOSTING.md](./PRODUCTION_HOSTING.md), [ENVIRONMENT_MODES.md](./ENVIRONMENT_MODES.md), [EXTERNAL_BETA_CHECKLIST.md](./EXTERNAL_BETA_CHECKLIST.md).
+Related: [PRODUCTION_HOSTING.md](./PRODUCTION_HOSTING.md), [ENVIRONMENT_MODES.md](./ENVIRONMENT_MODES.md), [EXTERNAL_BETA_CHECKLIST.md](./EXTERNAL_BETA_CHECKLIST.md). Technical deploy checklist: [LAUNCH_CHECKLIST.md](./LAUNCH_CHECKLIST.md).
 
 ## Active resources
 

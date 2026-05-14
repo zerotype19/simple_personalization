@@ -1,8 +1,8 @@
 # External beta gate checklist
 
-Run this before inviting **external** pilots, agencies, or unpaid beta sites. It extends [LAUNCH_CHECKLIST.md](./LAUNCH_CHECKLIST.md) with signup, admin, and CDN/demo wiring.
+**Customer-facing beta readiness** — run this before inviting external pilots, agencies, or unpaid beta sites. It assumes technical deploy steps from [LAUNCH_CHECKLIST.md](./LAUNCH_CHECKLIST.md) are in progress or done.
 
-Also see [CLOUDFLARE_INVENTORY.md](./CLOUDFLARE_INVENTORY.md) for which Cloudflare project maps to which hostname.
+Related: [CLOUDFLARE_INVENTORY.md](./CLOUDFLARE_INVENTORY.md) (hostname → project map).
 
 ---
 
