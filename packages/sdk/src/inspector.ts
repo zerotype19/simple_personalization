@@ -17,7 +17,7 @@ import {
 import { humanGenericPageLabel } from "./siteEnvironment";
 import { formatTimelineClock } from "./sessionIntel";
 import {
-  marketerFriendlyArrivalSource,
+  marketerArrivalSourceHeadline,
   marketerLikelyVisitorMindset,
   marketerPersonalizationImplication,
 } from "./siteSemantics/acquisitionPanelCopy";
@@ -329,7 +329,9 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
 
     const bs = p.behavior_snapshot;
     const arrivalSourceFriendlyEsc = bs
-      ? escHtml(marketerFriendlyArrivalSource(bs.traffic.channel_guess))
+      ? escHtml(
+          marketerArrivalSourceHeadline(bs.traffic.channel_guess, bs.traffic.arrival_confidence_0_100),
+        )
       : "—";
     const landingPathEsc = bs ? escHtml(bs.traffic.landing_path.slice(0, 120)) : "—";
     const utmLine =

@@ -136,7 +136,7 @@ export function humanGenericPageLabel(kind: GenericPageKind): string {
     account_page: "Account / app",
     search_results_page: "Search results",
     support_page: "Support / docs",
-    unknown: "Unknown page",
+    unknown: "Content page",
   };
   return map[kind] ?? kind;
 }

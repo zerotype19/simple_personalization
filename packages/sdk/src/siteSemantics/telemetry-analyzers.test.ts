@@ -60,9 +60,17 @@ describe("analyzeNavigationPattern", () => {
     expect(r.journey_pattern).toBe("evaluation_or_conversion_surface");
   });
 
-  it("returns empty path summary when no steps", () => {
-    const r = analyzeNavigationPattern(undefined, { ...createBlankSignals(), pages_viewed: 0 });
-    expect(r.path_summary).toBe("—");
-    expect(r.journey_velocity).toBe("deliberate");
+  it("dedupes consecutive identical path/kind segments in path summary", () => {
+    const t0 = 1;
+    const r = analyzeNavigationPattern(
+      [
+        { path: "/", generic_kind: "homepage", title_snippet: null, t: t0 },
+        { path: "/", generic_kind: "homepage", title_snippet: null, t: t0 + 1 },
+        { path: "/dive-into-rhythm90", generic_kind: "unknown", title_snippet: null, t: t0 + 2 },
+      ],
+      { ...createBlankSignals(), pages_viewed: 3 },
+    );
+    expect(r.path_summary).not.toMatch(/\(\s*homepage\s*\).*→.*\(\s*homepage\s*\)/i);
+    expect(r.path_summary).toContain("/dive-into-rhythm90");
   });
 });

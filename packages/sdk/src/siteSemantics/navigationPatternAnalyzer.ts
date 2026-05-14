@@ -4,6 +4,12 @@ function kindLabel(k: GenericPageKind): string {
   return k.replace(/_/g, " ");
 }
 
+function compactPathForSummary(path: string): string {
+  const p = (path.split("?")[0] || "/").trim() || "/";
+  if (p === "/") return "/";
+  return p.length > 44 ? `${p.slice(0, 41)}…` : p;
+}
+
 /**
  * Path + page-role sequence → journey shape (anonymous, first-party only).
  */
@@ -18,10 +24,17 @@ export function analyzeNavigationPattern(
   const path_summary =
     seq.length === 0
       ? "—"
-      : seq
-          .slice(-6)
-          .map((s) => `${s.path.split("/").pop() || "/"} (${kindLabel(s.generic_kind)})`)
-          .join(" → ");
+      : (() => {
+          const parts: string[] = [];
+          let prev = "";
+          for (const s of seq.slice(-14)) {
+            const seg = `${compactPathForSummary(s.path)} (${kindLabel(s.generic_kind)})`;
+            if (seg === prev) continue;
+            prev = seg;
+            parts.push(seg);
+          }
+          return parts.length === 0 ? "—" : parts.slice(-6).join(" → ");
+        })();
 
   const comparison_behavior =
     kinds.some((k) => k === "product_detail_page" || k === "search_results_page") &&

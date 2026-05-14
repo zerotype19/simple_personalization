@@ -274,8 +274,9 @@ export class SessionIntelRuntime {
   }
 
   private tick(): void {
-    const urlNow = window.location.pathname + window.location.search;
-    const isNewPageContext = this.lastContextUrl !== urlNow;
+    /** Pathname only — query churn should not create fake “new page” hops or duplicate journey rows. */
+    const pathKey = window.location.pathname;
+    const isNewPageContext = this.lastContextUrl !== pathKey;
 
     const scan = isNewPageContext ? runSiteScan() : this.profile.site_context.scan;
     const { vertical, confidence } = classifyVertical(scan, window.location.pathname);
@@ -322,7 +323,7 @@ export class SessionIntelRuntime {
       }
     }
 
-    this.lastContextUrl = ctx.url;
+    this.lastContextUrl = pathKey;
 
     recomputeScores(this.profile);
     const concept = computeConceptAffinityDetailed(vertical, scan, this.profile.category_affinity);
@@ -337,17 +338,11 @@ export class SessionIntelRuntime {
     this.profile.next_best_action = rec;
 
     this.profile.page_semantics = runSiteSemantics(scan, env, vertical);
-    this.profile.activation_opportunity = inferActivationOpportunity({
-      profile: this.profile,
-      env,
-      scan,
-      semantics: this.profile.page_semantics,
-    });
 
     if (isNewPageContext) {
       const steps = this.profile.page_journey ?? [];
       steps.push({
-        path: window.location.pathname,
+        path: pathKey,
         generic_kind: env.page.generic_kind,
         title_snippet: scan.page_title ? scan.page_title.slice(0, 80) : null,
         t: Date.now(),
@@ -357,9 +352,15 @@ export class SessionIntelRuntime {
     }
 
     buildBehaviorSnapshot(this.profile);
+    this.profile.activation_opportunity = inferActivationOpportunity({
+      profile: this.profile,
+      env,
+      scan,
+      semantics: this.profile.page_semantics,
+    });
     appendIntelMilestones(this.profile, {
       isNewPageContext,
-      pathname: urlNow,
+      pathname: pathKey,
       genericKind: env.page.generic_kind,
     });
     this.profile.personalization_signal = buildPersonalizationSignal(this.profile);

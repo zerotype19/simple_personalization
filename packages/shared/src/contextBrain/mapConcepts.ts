@@ -127,6 +127,13 @@ function buildStopwordSet(): Set<string> {
 
 const STOP = buildStopwordSet();
 
+/** Drop single-token matches that read arbitrary in “Why” lines (e.g. star ratings UI). */
+const WEAK_EVIDENCE_TOKENS = new Set(["rating", "star", "stars"]);
+
+function filterWeakEvidenceTerms(matched: string[]): string[] {
+  return matched.filter((t) => !WEAK_EVIDENCE_TOKENS.has(t.toLowerCase()));
+}
+
 function normalizeToken(raw: string): string | null {
   const t = raw
     .toLowerCase()
@@ -241,7 +248,7 @@ export function computeConceptAffinityDetailed(
     const norm = Math.min(1, raw / max);
     if (norm >= CONCEPT_DISPLAY_MIN_SCORE) {
       affinity[label] = norm;
-      evidence[label] = rawEvidence[label] ?? [];
+      evidence[label] = filterWeakEvidenceTerms(rawEvidence[label] ?? []);
     }
   }
   return { affinity, evidence };

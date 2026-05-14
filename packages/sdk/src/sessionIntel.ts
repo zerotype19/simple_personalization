@@ -13,6 +13,11 @@ function channelNarrative(guess: string): string {
 export function pushIntelEvent(profile: SessionProfile, message: string, dedupeKey?: string): void {
   if (!profile.intel_timeline) profile.intel_timeline = [];
   if (dedupeKey && profile.intel_timeline.some((e) => e.dedupeKey === dedupeKey)) return;
+  const last = profile.intel_timeline.at(-1);
+  if (last && last.message === message) {
+    last.t = Date.now();
+    return;
+  }
   profile.intel_timeline.push({ t: Date.now(), message, ...(dedupeKey ? { dedupeKey } : {}) });
   if (profile.intel_timeline.length > INTEL_TIMELINE_CAP) {
     profile.intel_timeline.splice(0, profile.intel_timeline.length - INTEL_TIMELINE_CAP);

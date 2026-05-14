@@ -1,5 +1,29 @@
 import type { TrafficChannelGuess } from "@si/shared";
 
+/** Channels where arrival confidence should soften the headline below 70%. */
+const ARRIVAL_HEADLINE_CONFIDENCE_CHANNELS = new Set<TrafficChannelGuess>([
+  "organic_search",
+  "paid_search",
+  "paid_social",
+  "organic_social",
+  "direct_or_unknown",
+  "partner_referral",
+  "affiliate",
+  "display",
+  "email",
+  "crm",
+]);
+
+/** Inspector headline: honest when acquisition read is weak (<70%). */
+export function marketerArrivalSourceHeadline(channel: TrafficChannelGuess, arrivalConfidence0_100: number): string {
+  const base = marketerFriendlyArrivalSource(channel);
+  if (!ARRIVAL_HEADLINE_CONFIDENCE_CHANNELS.has(channel)) return base;
+  if (arrivalConfidence0_100 >= 70) return base;
+  const lower = base.charAt(0).toLowerCase() + base.slice(1);
+  if (arrivalConfidence0_100 >= 40) return `Likely ${lower}`;
+  return `Possibly ${lower}`;
+}
+
 /** Inspector / operator copy — not sent on activation payloads (those keep enum slugs). */
 export function marketerFriendlyArrivalSource(channel: TrafficChannelGuess): string {
   const labels: Record<TrafficChannelGuess, string> = {

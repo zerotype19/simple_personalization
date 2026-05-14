@@ -123,10 +123,14 @@ export function inferActivationOpportunity(input: {
   if (profile.engagement_score >= 52 && env.conversion.confidence >= 0.55) status = "ready";
   if (profile.engagement_score >= 68 && env.conversion.confidence >= 0.62) status = "strong";
 
-  const confidence = Math.min(
-    0.92,
-    0.45 + env.conversion.confidence * 0.22 + env.page.confidence * 0.15 + (topConcepts[0]?.[1] ?? 0) * 0.12,
+  let rawConf = Math.min(
+    0.82,
+    0.38 + env.conversion.confidence * 0.2 + env.page.confidence * 0.13 + (topConcepts[0]?.[1] ?? 0) * 0.1,
   );
+  const acq = profile.behavior_snapshot?.traffic.arrival_confidence_0_100;
+  if (acq != null && acq < 55) rawConf -= 0.05;
+  if (acq != null && acq < 40) rawConf -= 0.04;
+  const confidence = Math.max(0.45, Math.min(0.86, rawConf));
 
   const opportunity_note =
     convCtas === 0
@@ -155,7 +159,7 @@ export function inferActivationOpportunity(input: {
   const pb = tryMatchActivationPlaybook(profile, env, scan);
   if (!pb) return base;
 
-  const boosted = Math.min(0.95, base.confidence + 0.06);
+  const boosted = Math.min(0.9, base.confidence + 0.04);
   return {
     ...base,
     inferred_need: pb.output.inferred_need,
