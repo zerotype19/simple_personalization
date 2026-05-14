@@ -11,6 +11,9 @@ import {
 
 const TREATMENT_LABELS: Record<string, string> = {
   t_high_intent: "High-intent urgency (hero CTA + subtext)",
+  t_value_message: "Value / pricing clarity (generic shell)",
+  t_related_content: "Related content emphasis (generic shell)",
+  t_premium_or_priority: "Priority or premium positioning (generic shell)",
   t_payment_sensitive: "Payment-sensitive messaging",
   t_family_buyer: "Family / SUV emphasis (promo module)",
   t_luxury_buyer: "Luxury positioning",

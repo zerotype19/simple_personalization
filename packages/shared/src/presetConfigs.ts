@@ -44,8 +44,8 @@ export const GENERIC_HOSTED_SDK_CONFIG: SDKConfig = {
       ],
     },
     {
-      id: "t_payment_sensitive",
-      name: "Offer clarity (disabled in generic config)",
+      id: "t_value_message",
+      name: "Value-message shell (disabled in generic config)",
       applies_when: "false",
       selectors: [
         { slot: "hero-sub", op: "text", value: "See pricing and options that match your visit." },
@@ -53,8 +53,8 @@ export const GENERIC_HOSTED_SDK_CONFIG: SDKConfig = {
       ],
     },
     {
-      id: "t_family_buyer",
-      name: "Promo emphasis (disabled in generic config)",
+      id: "t_related_content",
+      name: "Related-content shell (disabled in generic config)",
       applies_when: "false",
       selectors: [
         { slot: "promo-title", op: "text", value: "Popular picks for your visit" },
@@ -62,8 +62,8 @@ export const GENERIC_HOSTED_SDK_CONFIG: SDKConfig = {
       ],
     },
     {
-      id: "t_luxury_buyer",
-      name: "Premium positioning (disabled in generic config)",
+      id: "t_premium_or_priority",
+      name: "Priority positioning shell (disabled in generic config)",
       applies_when: "false",
       selectors: [
         { slot: "hero-sub", op: "text", value: "Premium options are available when intent is high." },

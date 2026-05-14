@@ -131,8 +131,11 @@ export interface SessionProfile extends SessionScores {
   /**
    * Normalized business-concept scores (0–1) from bundled context packs + scan tokens.
    * Keys are human labels (e.g. "Quarterly planning"), not raw keywords.
+   * Weak concepts below the display threshold are omitted.
    */
   concept_affinity: Record<string, number>;
+  /** Pack terms that triggered each concept label (same keys as `concept_affinity`). */
+  concept_evidence: Record<string, string[]>;
   page_type: PageType;
   signals: SessionSignals;
   experiment_assignment: ExperimentAssignment | null;

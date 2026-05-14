@@ -68,6 +68,7 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     if (!existing.dynamic_signals) existing.dynamic_signals = {};
     if (!existing.site_environment) existing.site_environment = emptySiteEnvironmentSnapshot();
     if (!existing.concept_affinity) existing.concept_affinity = {};
+    if (!existing.concept_evidence) existing.concept_evidence = {};
     return existing;
   }
   const session_id = generateId();
@@ -82,6 +83,7 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     journey_stage: stage,
     category_affinity: {},
     concept_affinity: {},
+    concept_evidence: {},
     page_type: initialPageType,
     signals: { ...createBlankSignals(), return_visit: detectReturnVisit() },
     experiment_assignment: null,

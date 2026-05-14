@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { computeConceptAffinity } from "./mapConcepts";
+import {
+  CONCEPT_DISPLAY_MIN_SCORE,
+  computeConceptAffinity,
+  computeConceptAffinityDetailed,
+  conceptSignalLabel,
+} from "./mapConcepts";
 import type { CategoryAffinity, SiteScanSummary } from "../index";
 
 function scan(overrides: Partial<SiteScanSummary> = {}): SiteScanSummary {
@@ -26,13 +31,29 @@ describe("computeConceptAffinity", () => {
     expect(out["rhythm90"]).toBeUndefined();
   });
 
-  it("normalizes scores to 0–1", () => {
+  it("normalizes scores to 0–1 and applies display floor", () => {
     const out = computeConceptAffinity("b2b_saas", scan(), {});
     for (const v of Object.values(out)) {
-      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeGreaterThanOrEqual(CONCEPT_DISPLAY_MIN_SCORE);
       expect(v).toBeLessThanOrEqual(1);
     }
     const max = Math.max(...Object.values(out));
     expect(max).toBe(1);
+  });
+
+  it("returns matched dictionary terms in evidence", () => {
+    const { affinity, evidence } = computeConceptAffinityDetailed("b2b_saas", scan(), {});
+    expect(affinity["Quarterly planning"]).toBeDefined();
+    expect(evidence["Quarterly planning"]?.length).toBeGreaterThan(0);
+    expect(evidence["Quarterly planning"]).toEqual(expect.arrayContaining(["quarter", "planning"]));
+  });
+});
+
+describe("conceptSignalLabel", () => {
+  it("maps score bands to copy", () => {
+    expect(conceptSignalLabel(0.09)).toBeNull();
+    expect(conceptSignalLabel(0.15)).toBe("light signal");
+    expect(conceptSignalLabel(0.55)).toBe("emerging signal");
+    expect(conceptSignalLabel(0.88)).toBe("strong signal");
   });
 });

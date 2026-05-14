@@ -1,4 +1,5 @@
 import type { SessionProfile } from "@si/shared";
+import { conceptSignalLabel } from "@si/shared/contextBrain";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
 import { buildSafePersonalizationPlan } from "./contextBrain/safePersonalizationPlan";
@@ -227,6 +228,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const envSignals = escHtml(env.page.signals_used.join(" · ") || "—");
     const themes = sc.scan.content_themes.slice(0, 4).map(escHtml).join(", ") || "—";
     const termsPreview = sc.scan.top_terms.slice(0, 8).map(escHtml).join(", ") || "—";
+    const showTopTermsRow = isAuto || urlHasSiDebug();
+    const topTermsLabel = isAuto ? "Top terms (sample)" : "Top terms (debug sample)";
     const signalRows = Object.entries(p.dynamic_signals)
       .map(
         ([k, val]) =>
@@ -234,24 +237,33 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       )
       .join("");
     const conceptAff = p.concept_affinity ?? {};
-    const affinityRows = isAuto
-      ? Object.entries(p.category_affinity)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 8)
-          .map(
-            ([k, v]) =>
-              `<div>${escHtml(k.replace(/_/g, " "))}</div><div class="si-metric">${(v * 100).toFixed(0)}%</div>`,
-          )
-          .join("")
-      : Object.entries(conceptAff)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 8)
-          .map(
-            ([k, v]) =>
-              `<div>${escHtml(k)}</div><div class="si-metric">${(v * 100).toFixed(0)}%</div>`,
-          )
-          .join("");
+    const affRowsAuto = Object.entries(p.category_affinity)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(
+        ([k, v]) =>
+          `<div>${escHtml(k.replace(/_/g, " "))}</div><div class="si-metric">${(v * 100).toFixed(0)}%</div>`,
+      )
+      .join("");
+    const affRowsConcept = Object.entries(conceptAff)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, score]) => {
+        const band = conceptSignalLabel(score);
+        const pct = (score * 100).toFixed(0);
+        const termsMatched = (p.concept_evidence?.[label] ?? []).join(", ") || "—";
+        const hint = `Matched pack terms: ${termsMatched}`;
+        const bandHtml = band ? ` — <span class="si-muted">${escHtml(band)}</span>` : "";
+        return `<div class="si-concept-item" title="${escHtml(hint)}">
+          <div class="si-concept-head"><span class="si-concept-name">${escHtml(label)}</span>${bandHtml}<span class="si-concept-pct">${pct}%</span></div>
+          <div class="si-muted si-concept-match">Matched: ${escHtml(termsMatched)}</div>
+        </div>`;
+      })
+      .join("");
+    const affinityBlock = isAuto
+      ? `<div class="si-kv si-kv--tight">${affRowsAuto}</div>`
+      : `<div class="si-concept-stack">${affRowsConcept}</div>`;
     const affinityEmpty = isAuto ? Object.keys(p.category_affinity).length === 0 : Object.keys(conceptAff).length === 0;
+    const personaControlLabel = isAuto ? "Force shopper archetype (debug)" : "Force session archetype (debug)";
 
     const certainty = buildInferenceCertaintyBands(p);
     const surfaceList = describeConversionSurfaces(p);
@@ -295,7 +307,11 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <div>Type confidence</div><div class="si-metric">${Math.round(sc.vertical_confidence)}%</div>
           <div>Page kind</div><div><span class="si-pill">${escHtml(sc.page_kind)}</span></div>
           <div>Content themes</div><div class="si-muted">${themes}</div>
-          <div>Top terms (sample)</div><div class="si-muted">${termsPreview}</div>
+          ${
+            showTopTermsRow
+              ? `<div>${escHtml(topTermsLabel)}</div><div class="si-muted">${termsPreview}</div>`
+              : ""
+          }
         </div>
       </div>
 
@@ -347,9 +363,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       <div class="si-card">
         <h3>${escHtml(topicAffinitySectionTitle(sc.vertical))}</h3>
         <div class="si-muted">${affinityEmpty ? "No strong signals yet — keep browsing." : ""}</div>
-        <div class="si-kv si-kv--tight">
-          ${affinityRows}
-        </div>
+        ${affinityBlock}
       </div>
 
       <div class="si-card">
@@ -458,7 +472,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <button class="si-btn primary" id="si-toggle-perso">${persoOn ? "Disable" : "Enable"} personalization</button>
           <button class="si-btn" id="si-export">Export state</button>
         </div>
-        <div class="si-muted si-muted--persona">Force archetype (debug)</div>
+        <div class="si-muted si-muted--persona">${escHtml(personaControlLabel)}</div>
         <div class="si-btn-row" id="si-personas"></div>
       </div>
     `;

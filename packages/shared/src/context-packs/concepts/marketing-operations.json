@@ -5,32 +5,173 @@
     {
       "id": "quarterly_planning",
       "label": "Quarterly planning",
-      "terms": ["quarter", "quarterly", "planning", "qbr", "q1", "q2", "q3", "q4", "fiscal", "okrs", "okr", "objectives", "key results"]
+      "terms": [
+        "quarter",
+        "quarterly",
+        "planning",
+        "qbr",
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "fiscal",
+        "okrs",
+        "okr",
+        "objectives",
+        "key results",
+        "operating plan",
+        "annual plan",
+        "roadmap",
+        "priorities"
+      ]
     },
     {
       "id": "team_operating_rhythm",
       "label": "Team operating rhythm",
-      "terms": ["team", "teams", "alignment", "ritual", "rituals", "cadence", "operating", "rhythm", "rhythmic", "standup", "sync", "operating model", "operating system"]
+      "terms": [
+        "team",
+        "teams",
+        "alignment",
+        "ritual",
+        "rituals",
+        "cadence",
+        "operating",
+        "rhythm",
+        "rhythmic",
+        "standup",
+        "sync",
+        "operating model",
+        "operating system",
+        "workflow cadence",
+        "meeting rhythm",
+        "scorecard meeting"
+      ]
     },
     {
       "id": "measurement_learning",
       "label": "Measurement & learning",
-      "terms": ["signal", "signals", "learning", "test", "testing", "experiment", "experiments", "scorecard", "measurement", "analytics", "iterate", "iteration", "feedback loop"]
+      "terms": [
+        "signal",
+        "signals",
+        "learning",
+        "test",
+        "testing",
+        "experiment",
+        "experiments",
+        "scorecard",
+        "measurement",
+        "analytics",
+        "iterate",
+        "iteration",
+        "feedback loop",
+        "hypothesis",
+        "learn loop",
+        "insight"
+      ]
     },
     {
       "id": "implementation_readiness",
       "label": "Implementation readiness",
-      "terms": ["implementation", "rollout", "adoption", "change management", "playbook", "runbook", "enablement", "onboarding", "roll-out"]
+      "terms": [
+        "implementation",
+        "rollout",
+        "adoption",
+        "change management",
+        "playbook",
+        "runbook",
+        "enablement",
+        "onboarding",
+        "roll-out",
+        "deploy",
+        "migration",
+        "cutover",
+        "readiness"
+      ]
     },
     {
       "id": "marketing_workflow",
       "label": "Marketing workflow",
-      "terms": ["workflow", "workflows", "pipeline", "pipelines", "brief", "briefs", "campaign", "campaigns", "calendar", "intake", "handoff", "handoffs"]
+      "terms": [
+        "workflow",
+        "workflows",
+        "pipeline",
+        "pipelines",
+        "brief",
+        "briefs",
+        "campaign",
+        "campaigns",
+        "calendar",
+        "intake",
+        "handoff",
+        "handoffs",
+        "request",
+        "routing",
+        "approvals"
+      ]
     },
     {
       "id": "leadership_alignment",
       "label": "Leadership alignment",
-      "terms": ["leadership", "executive", "stakeholder", "stakeholders", "sponsor", "buy-in", "buyin", "governance", "prioritization", "portfolio"]
+      "terms": [
+        "leadership",
+        "executive",
+        "stakeholder",
+        "stakeholders",
+        "sponsor",
+        "buy-in",
+        "buyin",
+        "governance",
+        "prioritization",
+        "portfolio",
+        "steerco",
+        "exec team",
+        "sponsorship"
+      ]
+    },
+    {
+      "id": "cross_functional_collaboration",
+      "label": "Cross-functional collaboration",
+      "terms": [
+        "cross-functional",
+        "cross functional",
+        "xfn",
+        "matrix",
+        "pod",
+        "pods",
+        "squad",
+        "squads",
+        "tribe",
+        "tribes",
+        "chapter",
+        "guild",
+        "handoff",
+        "handoffs",
+        "shared service",
+        "partner team",
+        "collaboration",
+        "interlock"
+      ]
+    },
+    {
+      "id": "experimentation_discipline",
+      "label": "Experimentation discipline",
+      "terms": [
+        "experiment design",
+        "a/b",
+        "ab test",
+        "split test",
+        "variant",
+        "variants",
+        "control group",
+        "treatment group",
+        "sample size",
+        "statistical",
+        "significance",
+        "guardrails",
+        "experimentation",
+        "test plan",
+        "learning agenda"
+      ]
     }
   ]
 }

@@ -16,13 +16,19 @@ export function archetypePersonasForVertical(v: SiteVertical): string[] {
       return [
         "strategic_researcher",
         "implementation_evaluator",
+        "economic_buyer",
         "team_leader",
-        "tool_shopper",
         "high_intent_lead",
       ];
     case "nonprofit":
       return ["cause_explorer", "volunteer_prospect", "donor_ready", "event_interested", "recurring_supporter"];
     default:
-      return ["strategic_researcher", "content_explorer", "tool_shopper", "high_intent_visitor", "return_visitor"];
+      return [
+        "strategic_researcher",
+        "implementation_evaluator",
+        "economic_buyer",
+        "content_explorer",
+        "high_intent_visitor",
+      ];
   }
 }
