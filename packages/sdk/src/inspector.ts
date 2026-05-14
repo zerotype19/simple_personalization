@@ -16,6 +16,11 @@ import {
 } from "./siteIntelligence/panelLabelMapper";
 import { humanGenericPageLabel } from "./siteEnvironment";
 import { formatTimelineClock } from "./sessionIntel";
+import {
+  marketerFriendlyArrivalSource,
+  marketerLikelyVisitorMindset,
+  marketerPersonalizationImplication,
+} from "./siteSemantics/acquisitionPanelCopy";
 
 /** Set only in the hosted IIFE build (`SI_PUBLIC_INSPECTOR_CSS_URL`); empty in ESM. */
 declare const __SI_EMBED_INSPECTOR_CSS_URL__: string;
@@ -323,7 +328,9 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const primaryPromiseEsc = escHtml(pm.primary_promise ?? env.object.object_name ?? "—");
 
     const bs = p.behavior_snapshot;
-    const channelHuman = bs ? escHtml(bs.traffic.channel_guess.replace(/_/g, " ")) : "—";
+    const arrivalSourceFriendlyEsc = bs
+      ? escHtml(marketerFriendlyArrivalSource(bs.traffic.channel_guess))
+      : "—";
     const landingPathEsc = bs ? escHtml(bs.traffic.landing_path.slice(0, 120)) : "—";
     const utmLine =
       bs && (bs.traffic.utm_source || bs.traffic.utm_medium)
@@ -388,11 +395,61 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         )
       : "—";
 
+    const rm = bs?.referral_model;
+    const acqIntelMindsetEsc = bs
+      ? escHtml(
+          marketerLikelyVisitorMindset({
+            channel: bs.traffic.channel_guess,
+            acquisition_interpretation: bs.traffic.acquisition_interpretation,
+          }),
+        )
+      : "—";
+    const acqIntelImplicationEsc = bs
+      ? escHtml(marketerPersonalizationImplication(bs.traffic.channel_guess, rm?.personalization_hint ?? null))
+      : "—";
+    const acqIntelPostureEsc = rm?.acquisition_posture ? escHtml(rm.acquisition_posture) : "—";
+    const acqIntelStrategyEsc = rm ? escHtml(rm.acquisition_strategy.replace(/_/g, " ")) : "—";
+    const acqIntelStageEsc = rm ? escHtml(rm.acquisition_stage.replace(/_/g, " ")) : "—";
+    const acqIntelThemesEsc =
+      rm && (rm.acquisition_themes.length || bs.campaign_intent.keyword_themes.length)
+        ? escHtml(
+            [...new Set([...rm.acquisition_themes, ...bs.campaign_intent.keyword_themes])].slice(0, 14).join(", "),
+          )
+        : "—";
+    const acqIntelCreativeEsc = rm?.creative_interpretation ? escHtml(rm.creative_interpretation) : "—";
+    const acqIntelConfPct = rm ? `${Math.round(rm.confidence_0_1 * 100)}%` : "—";
+    const acqIntelRefHostEsc = bs?.referrer.host ? escHtml(bs.referrer.host) : "—";
+    const acqIntelEvidenceUl =
+      rm && rm.evidence.length
+        ? `<ul class="si-reason si-reason--tight">${rm.evidence.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
+        : `<div class="si-muted">—</div>`;
+
+    const acquisitionIntelHtml = bs
+      ? `<div class="si-card">
+        <h3>Acquisition intelligence</h3>
+        <div class="si-kv">
+          <div>Arrival source</div><div class="si-metric">${arrivalSourceFriendlyEsc}</div>
+          <div>Likely visitor mindset</div><div class="si-muted si-metric--break">${acqIntelMindsetEsc}</div>
+          <div>Personalization implication</div><div class="si-muted si-metric--break">${acqIntelImplicationEsc}</div>
+          <div class="si-muted si-muted--mb6" style="grid-column:1/-1;margin-top:8px">Supporting signals</div>
+          <div>Referrer host</div><div class="si-muted">${acqIntelRefHostEsc}</div>
+          <div>Platform / source posture</div><div class="si-muted si-metric--break">${acqIntelPostureEsc}</div>
+          <div>Acquisition stage</div><div class="si-metric">${acqIntelStageEsc}</div>
+          <div>Campaign / strategy read</div><div class="si-muted si-metric--break">${acqIntelStrategyEsc}</div>
+          <div>Theme blend (URL + campaign)</div><div class="si-muted si-metric--break">${acqIntelThemesEsc}</div>
+          <div>Creative interpretation</div><div class="si-muted si-metric--break">${acqIntelCreativeEsc}</div>
+          <div>Interpretation confidence</div><div class="si-metric">${escHtml(acqIntelConfPct)}</div>
+          <div class="si-muted si-muted--mb6" style="grid-column:1/-1;margin-top:4px">Evidence</div>
+          <div style="grid-column:1/-1">${acqIntelEvidenceUl}</div>
+        </div>
+      </div>`
+      : "";
+
     const trafficIntelHtml = bs
       ? `<div class="si-card">
         <h3>Traffic &amp; acquisition</h3>
         <div class="si-kv">
-          <div>Arrival channel (inferred)</div><div class="si-metric">${channelHuman}</div>
+          <div>Arrival source</div><div class="si-metric">${arrivalSourceFriendlyEsc}</div>
           <div>Arrival confidence</div><div class="si-metric">${escHtml(arrivalConfPct)}</div>
           <div>Acquisition narrative</div><div class="si-muted si-metric--break">${acquisitionNarrEsc}</div>
           <div>Acquisition interpretation</div><div class="si-muted si-metric--break">${acquisitionInterpEsc}</div>
@@ -609,7 +666,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       </div>`
         : "";
 
-    const trafficJourneySectionHtml = `${behaviorWarmupHtml}${trafficIntelHtml}${journeyIntelHtml}`;
+    const trafficJourneySectionHtml = `${behaviorWarmupHtml}${trafficIntelHtml}${acquisitionIntelHtml}${journeyIntelHtml}`;
 
     const activationPayloadJson = formatActivationPayloadJson(p);
     const activationPayloadPreviewEsc = escHtml(activationPayloadPreviewBody(activationPayloadJson, 14));

@@ -1,4 +1,5 @@
-import type { ReferrerIntelligenceRead, TrafficChannelGuess } from "@si/shared";
+import type { ReferrerIntelligenceRead } from "@si/shared";
+import { classifyGenerativeReferrer } from "./llmReferralAnalyzer";
 
 /**
  * Classify inbound referrer host for intent / trust heuristics (same-origin referrer often empty).
@@ -54,21 +55,13 @@ export function analyzeReferrer(
     h === "ecosia.org" ||
     /(^|\.)startpage\.com$/.test(h);
 
-  const llmHost =
-    /(^|\.)chatgpt\.com$/.test(h) ||
-    /(^|\.)openai\.com$/.test(h) ||
-    /(^|\.)claude\.ai$/.test(h) ||
-    /(^|\.)anthropic\.com$/.test(h) ||
-    /(^|\.)perplexity\.ai$/.test(h) ||
-    /(^|\.)gemini\.google\.com$/.test(h) ||
-    /(^|\.)copilot\.microsoft\.com$/.test(h);
-
-  if (llmHost) {
+  const gen = classifyGenerativeReferrer(h);
+  if (gen) {
     return {
       category: "ai_chat",
       host,
-      channel_hint: "llm_referral",
-      narrative: "LLM / answer-engine referrer — AI-assisted discovery; lead with concise proof and sources.",
+      channel_hint: gen.channel,
+      narrative: gen.context_line,
     };
   }
 

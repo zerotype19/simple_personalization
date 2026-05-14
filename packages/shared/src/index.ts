@@ -46,6 +46,8 @@ export type TrafficChannelGuess =
   | "review_site"
   | "community_referral"
   | "llm_referral"
+  | "answer_engine_referral"
+  | "ai_search_referral"
   | "direct_or_unknown";
 
 export interface TrafficAcquisitionRead {
@@ -72,6 +74,37 @@ export interface TrafficAcquisitionRead {
   landing_pattern_summary: string | null;
   /** Privacy-safe themes from URL search params only (raw query text discarded after tokenization). */
   query_themes: string[];
+}
+
+/** Funnel stage implied by acquisition + first-touch context (anonymous). */
+export type AcquisitionStage =
+  | "awareness"
+  | "research"
+  | "comparison"
+  | "evaluation"
+  | "retargeting"
+  | "high_intent_conversion"
+  | "unknown";
+
+/**
+ * First-class acquisition interpretation — likely mindset/context for this visit.
+ * (Interpretation, not cross-session attribution; no raw search query storage.)
+ */
+export interface TrafficReferralModel {
+  arrival_channel: TrafficChannelGuess;
+  arrival_subchannel: string;
+  arrival_type: string;
+  campaign_detected: boolean;
+  campaign_confidence_0_1: number;
+  acquisition_strategy: string;
+  acquisition_themes: string[];
+  acquisition_posture: string | null;
+  creative_interpretation: string | null;
+  commerce_mindset: string[];
+  personalization_hint: string | null;
+  acquisition_stage: AcquisitionStage;
+  evidence: string[];
+  confidence_0_1: number;
 }
 
 export interface CampaignIntentRead {
@@ -123,6 +156,7 @@ export interface ActivationReadinessRead {
 /** Session-level anonymous behavioral intelligence (no fingerprinting, no cross-site graph). */
 export interface BehaviorSnapshot {
   traffic: TrafficAcquisitionRead;
+  referral_model: TrafficReferralModel;
   campaign_intent: CampaignIntentRead;
   referrer: ReferrerIntelligenceRead;
   navigation: NavigationPatternRead;

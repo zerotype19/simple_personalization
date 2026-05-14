@@ -7,10 +7,38 @@ import type {
   TrafficChannelGuess,
 } from "@si/shared";
 import { analyzeReferrer } from "./referrerAnalyzer";
+import type { LandingPatternRead } from "./landingPatternAnalyzer";
 import { analyzeLandingAcquisitionPattern } from "./landingPatternAnalyzer";
 import { extractQueryThemes } from "./queryThemeExtractor";
 
-const CLICK_IDS = ["gclid", "fbclid", "msclkid", "ttclid", "li_fat_id", "wbraid", "gbraid"] as const;
+const CLICK_IDS = ["gclid", "fbclid", "msclkid", "ttclid", "li_fat_id", "wbraid", "gbraid", "rdt_cid", "epik"] as const;
+
+const AFFILIATE_PARAM_KEYS = [
+  "ref",
+  "affiliate",
+  "aff",
+  "partner",
+  "creator",
+  "influencer",
+  "coupon",
+  "promo",
+  "promocode",
+  "discountcode",
+] as const;
+
+function detectAffiliateParams(sp: URLSearchParams): { detected: boolean; keys: string[] } {
+  const keys: string[] = [];
+  for (const k of AFFILIATE_PARAM_KEYS) {
+    if (sp.has(k)) keys.push(k);
+  }
+  return { detected: keys.length > 0, keys };
+}
+
+function inferPaidChannelFromClickIds(sp: URLSearchParams): TrafficChannelGuess {
+  if (sp.get("gclid") || sp.get("gbraid") || sp.get("wbraid") || sp.get("msclkid")) return "paid_search";
+  if (sp.get("fbclid") || sp.get("ttclid") || sp.get("li_fat_id") || sp.get("rdt_cid") || sp.get("epik")) return "paid_social";
+  return "display";
+}
 
 function norm(s: string | null): string | null {
   if (!s) return null;
@@ -37,6 +65,8 @@ export interface TrafficInferenceContext {
   signals: SessionSignals;
   firstJourneyEntry: { generic_kind: GenericPageKind; path: string } | null;
   currentGenericKind: GenericPageKind;
+  /** When provided, skips recomputing landing pattern inside infer. */
+  landingPattern?: LandingPatternRead | null;
 }
 
 function buildInterpretation(
@@ -55,7 +85,11 @@ function buildInterpretation(
     return "Organic search visitor — intent still forming from on-site behavior.";
   }
   if (channel === "llm_referral")
-    return "AI-assisted discovery visitor — answer-led; lead with proof, citations, and fast clarity.";
+    return "Conversational LLM referral — framework or decision support; lead with proof and fast clarity.";
+  if (channel === "answer_engine_referral")
+    return "Answer-engine referral — scannable proof, citations, and tight topical relevance.";
+  if (channel === "ai_search_referral")
+    return "AI-assisted search referral — reconcile AI summary with authoritative on-page depth.";
   if (channel === "community_referral") return "Community-sourced visitor — peer context and skepticism are elevated.";
   if (channel === "review_site") return "Review- or video-led discovery — demonstration and credibility carry extra weight.";
   if (channel === "organic_social") return "Social-driven research visitor — professional or peer-influenced evaluation.";
@@ -92,6 +126,15 @@ export function inferTrafficAcquisition(ctx: TrafficInferenceContext): TrafficAc
     };
   }
 
+  const entryKindEarly = ctx.firstJourneyEntry?.generic_kind ?? ctx.currentGenericKind;
+  const landingPattern =
+    ctx.landingPattern ??
+    analyzeLandingAcquisitionPattern({
+      entryKind: ctx.firstJourneyEntry?.generic_kind ?? entryKindEarly,
+      signals: ctx.signals,
+      navigation: ctx.navigation,
+    });
+
   const sp = url.searchParams;
   const utm_source = norm(sp.get("utm_source"));
   const utm_medium = norm(sp.get("utm_medium"));
@@ -113,11 +156,6 @@ export function inferTrafficAcquisition(ctx: TrafficInferenceContext): TrafficAc
   const landing_path = sanitizeLandingPath(url);
 
   const entryKind = ctx.firstJourneyEntry?.generic_kind ?? ctx.currentGenericKind;
-  const landingPattern = analyzeLandingAcquisitionPattern({
-    entryKind: ctx.firstJourneyEntry?.generic_kind ?? entryKind,
-    signals: ctx.signals,
-    navigation: ctx.navigation,
-  });
 
   const evidence: string[] = [];
   let channel: TrafficChannelGuess = "direct_or_unknown";
@@ -129,18 +167,16 @@ export function inferTrafficAcquisition(ctx: TrafficInferenceContext): TrafficAc
 
   // 1) Paid click IDs
   if (has_click_id) {
-    if (/cpc|ppc|paidsearch|search/i.test(ms) || src === "google") {
-      channel = "paid_search";
+    channel = inferPaidChannelFromClickIds(sp);
+    if (channel === "paid_search") {
       confidence = 88;
-      push("Paid ad click parameter detected on URL");
-    } else if (/paid|social|paidsocial|social/i.test(ms) || /facebook|instagram|tiktok|linkedin|twitter|x\.com/i.test(src)) {
-      channel = "paid_social";
-      confidence = 84;
-      push("Paid ad click parameter with social or paid-social hints");
+      push("Paid search click ID on landing URL (e.g. gclid / msclkid)");
+    } else if (channel === "paid_social") {
+      confidence = 86;
+      push("Paid social click ID on landing URL (e.g. fbclid / ttclid / rdt_cid)");
     } else {
-      channel = "display";
       confidence = 78;
-      push("Paid ad click parameter — treat as programmatic / display-class traffic");
+      push("Paid ad click parameter — programmatic / display-class when platform ID is ambiguous");
     }
     if (utm_medium || utm_source) push("UTM tags present alongside click ID");
     return finalize(
@@ -251,6 +287,26 @@ export function inferTrafficAcquisition(ctx: TrafficInferenceContext): TrafficAc
     );
   }
 
+  const aff = detectAffiliateParams(sp);
+  if (!has_click_id && !(utm_medium || utm_source) && aff.detected) {
+    channel = "affiliate";
+    confidence = 71;
+    for (const k of aff.keys) push(`Affiliate or partner URL param: ${k}`);
+    if (query_themes.length) push(`Query themes (privacy-safe): ${query_themes.join(", ")}`);
+    return finalize(channel, confidence, evidence, {
+      landing_path,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_term,
+      utm_content,
+      has_click_id,
+      entryKind,
+      landingPattern,
+      query_themes,
+    });
+  }
+
   // 3) Referrer + host hints (no UTMs / click ids)
   const hint = ctx.referrerRead.channel_hint;
   if (ctx.documentReferrer && ctx.referrerRead.category !== "internal" && hint) {
@@ -264,7 +320,13 @@ export function inferTrafficAcquisition(ctx: TrafficInferenceContext): TrafficAc
       }
     } else if (hint === "llm_referral") {
       confidence = 90;
-      push("LLM / answer-engine referrer host");
+      push("Conversational LLM referrer host");
+    } else if (hint === "answer_engine_referral") {
+      confidence = 90;
+      push("Answer-engine referrer host");
+    } else if (hint === "ai_search_referral") {
+      confidence = 88;
+      push("AI-assisted search referrer host");
     } else if (hint === "community_referral") {
       confidence = 86;
       push("Community platform referrer (e.g. Reddit-style discussion traffic)");
@@ -416,7 +478,9 @@ function buildNarrative(channel: TrafficChannelGuess, confidence: number, entryK
     partner_referral: "partner or web referral",
     review_site: "review- or video-led discovery",
     community_referral: "community referral",
-    llm_referral: "LLM / answer-engine referral",
+    llm_referral: "conversational LLM referral",
+    answer_engine_referral: "answer-engine referral",
+    ai_search_referral: "AI-assisted search referral",
     direct_or_unknown: "direct or ambiguous arrival",
   };
 

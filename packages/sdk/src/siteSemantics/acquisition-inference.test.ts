@@ -50,7 +50,7 @@ describe("inferTrafficAcquisition", () => {
     });
     expect(r.channel_guess).toBe("llm_referral");
     expect(r.arrival_confidence_0_100).toBeGreaterThanOrEqual(85);
-    expect(r.acquisition_evidence.join(" ")).toMatch(/LLM|answer-engine/i);
+    expect(r.acquisition_evidence.join(" ")).toMatch(/Conversational LLM|LLM|answer-engine/i);
   });
 
   it("infers review-site / video-led discovery from YouTube referrer", () => {
@@ -59,6 +59,66 @@ describe("inferTrafficAcquisition", () => {
       ref: "https://www.youtube.com/watch?v=abc",
     });
     expect(r.channel_guess).toBe("review_site");
+  });
+
+  it("infers answer-engine referral from Perplexity referrer", () => {
+    const r = runInfer({
+      href: "https://shop.example/guide",
+      ref: "https://www.perplexity.ai/",
+    });
+    expect(r.channel_guess).toBe("answer_engine_referral");
+    expect(r.acquisition_evidence.join(" ")).toMatch(/Answer-engine/i);
+  });
+
+  it("infers AI-assisted search referral from Gemini referrer", () => {
+    const r = runInfer({
+      href: "https://shop.example/",
+      ref: "https://gemini.google.com/app",
+    });
+    expect(r.channel_guess).toBe("ai_search_referral");
+    expect(r.acquisition_evidence.join(" ")).toMatch(/AI-assisted search/i);
+  });
+
+  it("infers paid search from gclid", () => {
+    const r = runInfer({
+      href: "https://shop.example/p?utm_campaign=spring&gclid=abc",
+      ref: null,
+    });
+    expect(r.channel_guess).toBe("paid_search");
+    expect(r.acquisition_evidence.some((e) => /Paid search click ID/i.test(e))).toBe(true);
+  });
+
+  it("infers paid social from fbclid", () => {
+    const r = runInfer({
+      href: "https://shop.example/?fbclid=IwAR0",
+      ref: null,
+    });
+    expect(r.channel_guess).toBe("paid_social");
+  });
+
+  it("infers paid social from rdt_cid", () => {
+    const r = runInfer({
+      href: "https://shop.example/promo?rdt_cid=xyz",
+      ref: null,
+    });
+    expect(r.channel_guess).toBe("paid_social");
+  });
+
+  it("infers organic social from TikTok referrer", () => {
+    const r = runInfer({
+      href: "https://shop.example/",
+      ref: "https://www.tiktok.com/@creator/video/1",
+    });
+    expect(r.channel_guess).toBe("organic_social");
+  });
+
+  it("infers affiliate from coupon param without UTMs", () => {
+    const r = runInfer({
+      href: "https://shop.example/shop?coupon=SAVE20",
+      ref: null,
+    });
+    expect(r.channel_guess).toBe("affiliate");
+    expect(r.acquisition_evidence.some((e) => /Affiliate or partner URL param/i.test(e))).toBe(true);
   });
 
   it("infers community referral from Reddit host", () => {

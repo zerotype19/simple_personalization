@@ -7,8 +7,10 @@ import type {
   SessionProfile,
 } from "@si/shared";
 import { analyzeCampaignIntent } from "./campaignIntentAnalyzer";
+import { analyzeLandingAcquisitionPattern } from "./landingPatternAnalyzer";
 import { analyzeNavigationPattern } from "./navigationPatternAnalyzer";
 import { analyzeReferrer } from "./referrerAnalyzer";
+import { buildTrafficReferralModel } from "./trafficReferralModel";
 import { inferTrafficAcquisition } from "./trafficSourceAnalyzer";
 
 function inferCommercialPhase(p: SessionProfile, nav: NavigationPatternRead): CommercialJourneyPhase {
@@ -129,6 +131,12 @@ export function buildBehaviorSnapshot(p: SessionProfile): BehaviorSnapshot {
   const siteHostname =
     typeof window !== "undefined" ? window.location.hostname : (p.site_context.domain || null);
   const referrer = analyzeReferrer(p.signals.initial_referrer, siteHostname);
+  const entryKind = first?.generic_kind ?? p.site_environment.page.generic_kind;
+  const landingPattern = analyzeLandingAcquisitionPattern({
+    entryKind: first?.generic_kind ?? entryKind,
+    signals: p.signals,
+    navigation,
+  });
   const traffic = inferTrafficAcquisition({
     href: landing,
     documentReferrer: p.signals.initial_referrer,
@@ -138,6 +146,7 @@ export function buildBehaviorSnapshot(p: SessionProfile): BehaviorSnapshot {
     signals: p.signals,
     firstJourneyEntry: first ? { generic_kind: first.generic_kind, path: first.path } : null,
     currentGenericKind: p.site_environment.page.generic_kind,
+    landingPattern,
   });
   const campaign_intent = analyzeCampaignIntent(
     traffic.utm_term,
@@ -145,6 +154,15 @@ export function buildBehaviorSnapshot(p: SessionProfile): BehaviorSnapshot {
     traffic.utm_content,
     traffic.query_themes,
   );
+  const referral_model = buildTrafficReferralModel({
+    urlString: landing,
+    traffic,
+    referrer,
+    navigation,
+    campaign_intent,
+    signals: p.signals,
+    landingPattern,
+  });
 
   const engagement_quality = engagementQuality(p, navigation);
   const activation_readiness = activationReadiness(p);
@@ -153,6 +171,7 @@ export function buildBehaviorSnapshot(p: SessionProfile): BehaviorSnapshot {
 
   const out: BehaviorSnapshot = {
     traffic,
+    referral_model,
     campaign_intent,
     referrer,
     navigation,
