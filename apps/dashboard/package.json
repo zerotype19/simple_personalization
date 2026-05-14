@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5174",
-    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "dev": "node ../../scripts/copy-integration-docs.mjs && vite --port 5174",
+    "build": "node ../../scripts/copy-integration-docs.mjs && tsc -p tsconfig.json --noEmit && vite build",
     "preview": "vite preview --port 5174",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

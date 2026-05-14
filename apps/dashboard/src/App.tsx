@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { DashboardSummary, ExperimentReport } from "@si/shared";
+import WebmasterIntegrationSection from "./components/WebmasterIntegrationSection";
 import { workerUrl } from "./workerUrl";
 
 export default function App() {
@@ -127,6 +128,8 @@ export default function App() {
             ))}
           </div>
         </section>
+
+        <WebmasterIntegrationSection />
       </main>
     </div>
   );

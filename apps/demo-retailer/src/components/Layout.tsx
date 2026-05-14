@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import SessionPersonalizationStrip from "./SessionPersonalizationStrip";
+import WebmasterIntegrationSection from "./WebmasterIntegrationSection";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -47,6 +48,7 @@ export default function Layout() {
       <main className="mx-auto max-w-6xl px-4 py-8">
         <Outlet />
       </main>
+      <WebmasterIntegrationSection />
       <footer className="border-t border-slate-800 py-10 text-center text-xs text-slate-500">
         Fictional dealership for product demo. Open the Session Intelligence inspector with the{" "}
         <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">SI</span> button (lower-left)

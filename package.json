@@ -18,7 +18,8 @@
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
-    "docs:generate": "node scripts/generate-session-intelligence-docs.mjs"
+    "docs:generate": "node scripts/generate-session-intelligence-docs.mjs",
+    "docs:copy-to-apps": "node scripts/copy-integration-docs.mjs"
   },
   "devDependencies": {
     "happy-dom": "^15.11.7",

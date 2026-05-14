@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "node scripts/prepare-hosted-snippet.mjs && tsc -p tsconfig.json --noEmit && vite build",
+    "dev": "node ../../scripts/copy-integration-docs.mjs && vite",
+    "build": "node ../../scripts/copy-integration-docs.mjs && node scripts/prepare-hosted-snippet.mjs && tsc -p tsconfig.json --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

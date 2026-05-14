@@ -28,3 +28,11 @@ dist/
 # Generated drop-in snippet (baked Worker URLs); see apps/demo-retailer/scripts/prepare-hosted-snippet.mjs
 apps/demo-retailer/public/si.js
 apps/demo-retailer/public/si-inspector.css
+
+# Copied from /docs by scripts/copy-integration-docs.mjs (dev + build)
+apps/demo-retailer/public/integration/*.md
+apps/dashboard/public/integration/*.md
+
+# Ad-hoc review zip exports
+session-intelligence-review-bundle.zip
+session-intelligence-intelligence-review.zip
