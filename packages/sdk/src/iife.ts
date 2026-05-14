@@ -8,6 +8,8 @@ declare const __SI_EMBED_FORCE_INSPECTOR__: boolean;
 
 declare global {
   interface Window {
+    /** Resolves when hosted `si.js` has finished `bootFromScriptTag` (SessionIntel ready). */
+    __siBootFromTag?: Promise<void>;
     SessionIntel?: {
       boot: typeof api.boot;
       destroy: typeof api.destroy;
@@ -82,6 +84,7 @@ export function boot(): void {
   };
 }
 
-/** Hosted `si.js`: register `bootFromScriptTag` then run it (footer cannot run after `exports.boot` in the IIFE bundle). */
+/** Hosted `si.js`: register `bootFromScriptTag`, expose its promise, then start boot.
+ * Dynamic loaders (e.g. demo CDN bridge) must await `__siBootFromTag` — `load` fires before async boot finishes. */
 boot();
-void window.SessionIntelBundle?.bootFromScriptTag?.();
+window.__siBootFromTag = window.SessionIntelBundle?.bootFromScriptTag?.() ?? Promise.resolve();

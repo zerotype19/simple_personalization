@@ -13,6 +13,7 @@ const SNIPPET_ORIGIN = (import.meta.env.VITE_SI_SNIPPET_ORIGIN as string | undef
 
 declare global {
   interface Window {
+    __siBootFromTag?: Promise<void>;
     SessionIntel?: {
       getState: () => import("@si/shared").SessionProfile;
       subscribe: (cb: (p: import("@si/shared").SessionProfile) => void) => () => void;
@@ -37,10 +38,38 @@ function loadSnippet(): Promise<void> {
     if (import.meta.env.VITE_SI_DEMO_SNIPPET_INSPECTOR === "1") {
       s.setAttribute("data-inspector", "1");
     }
-    s.onload = () => resolve();
+    s.onload = () => {
+      void (async () => {
+        try {
+          const p = window.__siBootFromTag;
+          if (p && typeof p.then === "function") {
+            await p;
+          } else {
+            await waitForSessionIntel();
+          }
+          if (!window.SessionIntel) {
+            reject(new Error("Session Intelligence did not initialize after si.js load"));
+            return;
+          }
+          resolve();
+        } catch (e) {
+          reject(e instanceof Error ? e : new Error(String(e)));
+        }
+      })();
+    };
     s.onerror = () => reject(new Error(`Failed to load Session Intelligence snippet: ${src}`));
     document.head.appendChild(s);
   });
+}
+
+async function waitForSessionIntel(timeoutMs = 25_000): Promise<void> {
+  const start = Date.now();
+  while (!window.SessionIntel) {
+    if (Date.now() - start > timeoutMs) {
+      throw new Error("Session Intelligence did not become ready after si.js load (timeout)");
+    }
+    await new Promise((r) => setTimeout(r, 20));
+  }
 }
 
 function api() {
