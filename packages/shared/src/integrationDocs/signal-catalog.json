@@ -1,0 +1,529 @@
+{
+  "activation_event_default": "si_personalization_signal",
+  "notes": "Keep rows aligned with packages/sdk/src/siteSemantics/activationPayload.ts, PersonalizationSignal / ActivationOpportunity in packages/shared/src/index.ts, and AnalyticsPayload.summary + batcher.buildPayload(). Regenerate docs after edits: pnpm docs:generate",
+  "personalization_signal": [
+    {
+      "field": "visitor_status",
+      "type": "\"anonymous\"",
+      "description": "Visitor is not identified; signals are session-scoped only.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal", "si:activation"]
+    },
+    {
+      "field": "journey_stage",
+      "type": "JourneyStage",
+      "description": "discovery | browsing | comparison | conversion — inferred from behavior and rules.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal", "collect.summary"]
+    },
+    {
+      "field": "inferred_archetype",
+      "type": "string | null",
+      "description": "Vertical-aware persona label (e.g. strategic_researcher, implementation_evaluator).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "inferred_need",
+      "type": "string",
+      "description": "Plain-language need from activation opportunity (not page redesign advice).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "top_concepts",
+      "type": "{ id, label, score }[]",
+      "description": "Up to five strongest business-concept affinities (0–1 scores).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "intent_score",
+      "type": "number",
+      "description": "0–100 intent heuristic from session signals.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal", "collect.summary"]
+    },
+    {
+      "field": "urgency_score",
+      "type": "number",
+      "description": "0–100 urgency heuristic.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal", "collect.summary"]
+    },
+    {
+      "field": "engagement_score",
+      "type": "number",
+      "description": "0–100 engagement heuristic.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal", "collect.summary"]
+    },
+    {
+      "field": "conversion_readiness",
+      "type": "number",
+      "description": "0–100 blend of CTA engagement, intent, and return visit (not a guarantee to convert).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "recommended_message_angle",
+      "type": "string",
+      "description": "Suggested narrative angle for a treatment (e.g. implementation support).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "recommended_offer_type",
+      "type": "string",
+      "description": "Suggested offer class (guide, checklist, soft demo, etc.).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "recommended_surface",
+      "type": "string",
+      "description": "Where to place the treatment (maps from NBA surface + opportunity).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "recommended_timing",
+      "type": "string",
+      "description": "When to surface the treatment (e.g. after scroll depth, second page).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "recommended_friction_level",
+      "type": "\"low\" | \"medium\" | \"high\"",
+      "description": "Suggested friction for the offer or CTA.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "description": "0–1 confidence on activation opportunity backing this signal.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "reason",
+      "type": "string[]",
+      "description": "Short bullet reasons (trimmed) supporting the signal.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    }
+  ],
+  "activation_envelope": [
+    {
+      "field": "event",
+      "type": "string",
+      "description": "Event name for tag managers (default si_personalization_signal).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely.eventName"]
+    },
+    {
+      "field": "si",
+      "type": "object",
+      "description": "Nested envelope consumed by GTM, Adobe, Optimizely, or custom listeners.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely.tags"]
+    }
+  ],
+  "si_site": [
+    {
+      "field": "domain",
+      "type": "string",
+      "description": "Current host from site context.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "type",
+      "type": "SiteVertical",
+      "description": "Inferred vertical slug (e.g. b2b_saas).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "type_label",
+      "type": "string",
+      "description": "Human-readable site type for CMO-facing tools.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "description": "0–1 site fingerprint confidence.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "business_context",
+      "type": "string",
+      "description": "Same as type_label today — high-level business read.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    }
+  ],
+  "si_page": [
+    {
+      "field": "kind",
+      "type": "GenericPageKind",
+      "description": "homepage, article_page, pricing_page, etc.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "description": "0–1 confidence in generic page kind.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "primary_promise",
+      "type": "string | null",
+      "description": "Primary headline / promise (normalized spacing).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "schema_types",
+      "type": "string[]",
+      "description": "Schema.org / JSON-LD types detected on the page.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    }
+  ],
+  "si_session": [
+    {
+      "field": "id",
+      "type": "string",
+      "description": "Anonymous session id (sessionStorage-backed).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "collect.session_id"]
+    },
+    {
+      "field": "journey_stage",
+      "type": "JourneyStage",
+      "description": "Same as personalization_signal.journey_stage in envelope.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "collect.summary"]
+    },
+    {
+      "field": "intent_score",
+      "type": "number",
+      "description": "Mirrors profile scores inside si for tag mapping.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "collect.summary"]
+    },
+    {
+      "field": "urgency_score",
+      "type": "number",
+      "description": "Mirrors profile urgency.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "collect.summary"]
+    },
+    {
+      "field": "engagement_score",
+      "type": "number",
+      "description": "Mirrors profile engagement.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "collect.summary"]
+    },
+    {
+      "field": "conversion_readiness",
+      "type": "number",
+      "description": "Mirrors personalization signal readiness.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "return_visit",
+      "type": "boolean",
+      "description": "Whether this anonymous session looks like a return visit.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    }
+  ],
+  "si_concepts_item": [
+    {
+      "field": "id",
+      "type": "string",
+      "description": "Slug derived from concept label.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "label",
+      "type": "string",
+      "description": "Human concept name (e.g. Quarterly planning).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "score",
+      "type": "number",
+      "description": "Affinity score 0–1 for that concept.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    }
+  ],
+  "si_objective": [
+    {
+      "field": "primary",
+      "type": "string",
+      "description": "Primary inferred conversion objective string.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "secondary",
+      "type": "string | null",
+      "description": "Secondary objective when present.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "description": "0–1 confidence on conversion objective inference.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    }
+  ],
+  "si_nba_item": [
+    {
+      "field": "action",
+      "type": "string",
+      "description": "Next best action copy from rules engine.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "surface",
+      "type": "RecommendedSurface | undefined",
+      "description": "Suggested UI surface enum when present.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "treatment_level",
+      "type": "RecommendedTreatmentLevel | undefined",
+      "description": "observe | recommend_only | safe_personalization.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "description": "NBA confidence 0–1.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    }
+  ],
+  "si_activation_opportunity": [
+    {
+      "field": "status",
+      "type": "\"developing\" | \"ready\" | \"strong\"",
+      "description": "How mature the activation read is for this session.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "confidence",
+      "type": "number",
+      "description": "0–1 confidence for the opportunity block.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "visitor_read",
+      "type": "string",
+      "description": "Plain-language anonymous visitor read.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely", "si:personalization-signal"]
+    },
+    {
+      "field": "inferred_need",
+      "type": "string",
+      "description": "Primary inferred need for personalization.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "message_angle",
+      "type": "string",
+      "description": "Angle for messaging (parallel to recommended_message_angle).",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "offer_type",
+      "type": "string",
+      "description": "Suggested offer category.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "surface",
+      "type": "string",
+      "description": "Suggested surface string from opportunity engine.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "timing",
+      "type": "string",
+      "description": "When to activate.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "friction",
+      "type": "\"low\" | \"medium\" | \"high\"",
+      "description": "Suggested friction for the path.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "primary_path_label",
+      "type": "string",
+      "description": "Primary activation path label.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "secondary_path_label",
+      "type": "string",
+      "description": "Secondary path label.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "soft_path_label",
+      "type": "string",
+      "description": "Soft conversion path label.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "opportunity_note",
+      "type": "string | null",
+      "description": "Optional CMO-facing note.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "evidence",
+      "type": "string[]",
+      "description": "Evidence strings for the opportunity.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    },
+    {
+      "field": "reason",
+      "type": "string[]",
+      "description": "Reason strings backing the opportunity.",
+      "destinations": ["dataLayer", "adobeDataLayer", "optimizely"]
+    }
+  ],
+  "collect_summary": [
+    {
+      "field": "pages",
+      "type": "number",
+      "description": "Pages viewed in session.",
+      "destinations": ["Worker D1 summary_json", "dashboard aggregates"]
+    },
+    {
+      "field": "vdp_views",
+      "type": "number",
+      "description": "Vehicle detail views (auto vertical demo).",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "pricing_views",
+      "type": "number",
+      "description": "Pricing page views.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "finance_interactions",
+      "type": "number",
+      "description": "Finance UI interactions.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "compare_interactions",
+      "type": "number",
+      "description": "Compare interactions.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "cta_clicks",
+      "type": "number",
+      "description": "CTA clicks counted in session.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "max_scroll_depth",
+      "type": "number",
+      "description": "Max scroll depth observed.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "intent_score",
+      "type": "number",
+      "description": "Denormalized on row and inside summary_json.",
+      "destinations": ["Worker D1 columns + summary_json"]
+    },
+    {
+      "field": "urgency_score",
+      "type": "number",
+      "description": "Denormalized on row and inside summary_json.",
+      "destinations": ["Worker D1 columns + summary_json"]
+    },
+    {
+      "field": "engagement_score",
+      "type": "number",
+      "description": "Denormalized on row and inside summary_json.",
+      "destinations": ["Worker D1 columns + summary_json"]
+    },
+    {
+      "field": "journey_stage",
+      "type": "JourneyStage",
+      "description": "Stored in summary_json and journey_stage column.",
+      "destinations": ["Worker D1"]
+    },
+    {
+      "field": "category_affinity",
+      "type": "Record<string, number>",
+      "description": "Category → score map from IAB-style signals.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "site_vertical",
+      "type": "SiteVertical | undefined",
+      "description": "Inferred vertical when hosted tag fills it.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "page_kind",
+      "type": "string | undefined",
+      "description": "Site context page kind string.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "inferred_site_type",
+      "type": "string | undefined",
+      "description": "Composite site type from environment.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "inferred_generic_page",
+      "type": "GenericPageKind | undefined",
+      "description": "Generic page archetype.",
+      "destinations": ["Worker D1 summary_json"]
+    },
+    {
+      "field": "personalization_ladder",
+      "type": "1 | 2 | 3 | 4 | undefined",
+      "description": "Confidence ladder level for safe personalization.",
+      "destinations": ["Worker D1 summary_json"]
+    }
+  ],
+  "sdk_surface": [
+    {
+      "name": "getPersonalizationSignal()",
+      "description": "Returns a clone of profile.personalization_signal.",
+      "destinations": ["In-page JS", "Console demos"]
+    },
+    {
+      "name": "getActivationPayload()",
+      "description": "Returns { event, si } envelope for tag managers.",
+      "destinations": ["In-page JS", "GTM Custom JS", "Console demos"]
+    },
+    {
+      "name": "pushToDataLayer() / pushPersonalizationSignalToDataLayer()",
+      "description": "Pushes full envelope to window.dataLayer.",
+      "destinations": ["GTM dataLayer"]
+    },
+    {
+      "name": "pushToAdobeDataLayer() / pushPersonalizationSignalToAdobeDataLayer()",
+      "description": "Pushes full envelope to window.adobeDataLayer.",
+      "destinations": ["Adobe AEP / Launch data layer"]
+    },
+    {
+      "name": "pushToOptimizely() / pushPersonalizationSignalToOptimizely()",
+      "description": "Pushes Optimizely event with eventName + tags = payload.si.",
+      "destinations": ["Optimizely Web"]
+    },
+    {
+      "name": "pushPersonalizationSignalAll()",
+      "description": "All three pushes plus si:personalization-signal and si:activation CustomEvents.",
+      "destinations": ["One-shot wiring for demos"]
+    },
+    {
+      "name": "subscribe(cb)",
+      "description": "Stream SessionProfile updates when scores refresh.",
+      "destinations": ["SPA hooks", "Live UI"]
+    }
+  ],
+  "browser_events": [
+    {
+      "name": "si:personalization-signal",
+      "description": "detail = ActivationPayloadEnvelope; fires when signal meaningfully changes (and from pushPersonalizationSignalAll).",
+      "destinations": ["addEventListener in-site"]
+    },
+    {
+      "name": "si:activation",
+      "description": "Same detail as si:personalization-signal for generic listeners.",
+      "destinations": ["addEventListener in-site"]
+    }
+  ]
+}

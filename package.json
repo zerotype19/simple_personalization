@@ -17,7 +17,8 @@
     "cloudflare:deploy:pages": "bash scripts/deploy-pages.sh",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "docs:generate": "node scripts/generate-session-intelligence-docs.mjs"
   },
   "devDependencies": {
     "happy-dom": "^15.11.7",
