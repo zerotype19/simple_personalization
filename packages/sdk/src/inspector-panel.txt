@@ -358,26 +358,10 @@ button.si-btn.danger {
 .si-card--privacy h3 {
   color: #86efac;
 }
-.si-pre--payload-preview {
-  max-height: 13.5em;
-  overflow: hidden;
-  margin-bottom: 0;
-}
-.si-payload-details {
+/* Taller scroll region for activation JSON (base .si-pre keeps monospace + border). */
+.si-pre.si-pre--activation-payload {
+  max-height: min(52vh, 440px);
   margin-top: 8px;
-}
-.si-payload-details summary {
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  color: #94a3b8;
-  list-style: none;
-}
-.si-payload-details summary::-webkit-details-marker {
-  display: none;
-}
-.si-payload-details[open] summary {
-  margin-bottom: 8px;
 }
 
 .si-kv-after {

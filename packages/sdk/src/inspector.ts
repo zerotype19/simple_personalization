@@ -60,12 +60,6 @@ function formatActivationPayloadJson(profile: SessionProfile): string {
   return JSON.stringify(profile.activation_payload, roundJsonFloats, 2);
 }
 
-function activationPayloadPreviewBody(json: string, maxLines: number): string {
-  const lines = json.split("\n");
-  if (lines.length <= maxLines) return json;
-  return `${lines.slice(0, maxLines).join("\n")}\n…`;
-}
-
 /**
  * Populate `el` from an HTML string without using live-document `innerHTML`
  * (Trusted Types / hardened pages often block third-party `innerHTML`).
@@ -790,8 +784,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         : "";
 
     const activationPayloadJson = formatActivationPayloadJson(p);
-    const activationPayloadPreviewEsc = escHtml(activationPayloadPreviewBody(activationPayloadJson, 14));
-    const activationPayloadFullEsc = escHtml(activationPayloadJson);
+    const activationPayloadEsc = escHtml(activationPayloadJson);
 
     const platformOpenAttr = " open";
     const platformSectionHtml = `
@@ -805,11 +798,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
               <code class="si-code">pushPersonalizationSignalAll()</code> fans out to common targets and dispatches
               <code class="si-code">si:personalization-signal</code> / <code class="si-code">si:activation</code> when the signal meaningfully changes.
             </p>
-            <pre class="si-pre si-pre--payload-preview">${activationPayloadPreviewEsc}</pre>
-            <details class="si-payload-details" open>
-              <summary>Full payload JSON</summary>
-              <pre class="si-pre">${activationPayloadFullEsc}</pre>
-            </details>
+            <pre class="si-pre si-pre--activation-payload">${activationPayloadEsc}</pre>
           </div>
         </details>
       </div>`;
