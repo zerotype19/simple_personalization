@@ -309,7 +309,7 @@ export function inferTrafficAcquisition(ctx: TrafficInferenceContext): TrafficAc
 
   // 3) Referrer + host hints (no UTMs / click ids)
   const hint = ctx.referrerRead.channel_hint;
-  if (ctx.documentReferrer && ctx.referrerRead.category !== "internal" && hint) {
+  if (ctx.documentReferrer && hint) {
     channel = hint;
     if (hint === "organic_search") {
       confidence = ctx.referrerRead.category === "search" ? 78 : 62;
