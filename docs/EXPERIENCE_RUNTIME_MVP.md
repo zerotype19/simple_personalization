@@ -26,6 +26,39 @@ Recipes **match** on top of today’s concepts / playbooks / behavior / readines
 
 **Do not sell as:** “we identify visitors,” “AI behavioral intelligence,” “personalization platform replacement,” or analytics / pseudo-CDP.
 
+## Core question (constrained)
+
+No system can cover every category, objective, buyer journey, and commercial motion perfectly on day one — and Optiview does **not** try to understand every visitor, identify anonymous users, predict exact intent, replace Adobe/Optimizely, become a CDP, or become analytics.
+
+The runtime answers **one** constrained question:
+
+> **Given this session, what is the safest and most commercially plausible next experience decision right now?**
+
+That is **achievable** — and it **generalizes across verticals** because it targets **plausible next steps**, not omniscience.
+
+## Architectural truth
+
+We do **not** need universal user understanding, universal identity, or universal “behavioral intelligence.” We need **commercially plausible next-step inference** — narrower, more defensible, and shippable.
+
+## Cross-vertical scaling (runtime vs vertical packs)
+
+**The runtime is not vertical-specific in its concerns.** It evaluates: confidence, interruption risk, ask intensity, timing appropriateness, surface fit, evidence quality, escalation vs suppression, and (later) session momentum deltas. Those dimensions are **universal**.
+
+**What changes by vertical** (and by customer) is **data**, not a separate product stack: recipe packs, realistic `surface_id` catalogs, offer ladders, timing tolerances, commercial tone, and typical interruption patterns.
+
+```txt
+Universal anonymous decision engine
++ vertical recipe packs
++ customer surface mappings
++ timing guidance (advisory)
+```
+
+**Not** the story: “vertical-specific AI models” as the core architecture — the engine is shared; **packs and mappings** specialize.
+
+## Moat (what actually differentiates)
+
+Not raw AI, identity, LLMs, reverse IP, dashboards, or enrichment volume alone. The combination that is **actually rare** in market practice: **restraint + correct timing + commercial plausibility** — explicitly resisting over-trigger, over-fit, and “treat all anonymous traffic like lead-gen.”
+
 ## MVP cut line
 
 | In MVP | Out of MVP (later) |
@@ -136,6 +169,10 @@ A **valid** experience decision (one we emit to subscribers / destinations) shou
 
 **Weak or generic decisions must not emit.** Prefer emitting nothing over burning trust with a hollow recommendation.
 
+### Failure mode: “generic recommendation soup”
+
+If emitted decisions read like template inference (“visitor engaged,” “show guide,” “surface educational content” with no situational bite), the product fails regardless of SDK quality. Copy and structure should aim for **CRO / lifecycle / performance-marketer** maturity — specific, defensible, and **timed** — not a generic anonymous intelligence demo.
+
 ## Surfaces vs presentation
 
 Optiview recommends **what** to show on a **surface** the customer maps in their CMS — not “popup vs inline” as the core abstraction.
@@ -152,6 +189,8 @@ surface_type?: string;     // optional — grouping / reporting only, not requir
 
 Customer owns **DOM / component implementation**; we own **message angle, offer, timing guidance, suppression, priority, confidence, reasons**.
 
+**Why this unlocks PMF:** Adobe, Optimizely, AEM, Shopify, GTM, and headless/React stacks can all consume **`surface_id`-scoped** decisions **without** Optiview rebuilding their CMS or owning their DOM. One contract (`surface_id` + payload fields) maps to many stacks — that is the platform shape.
+
 ## Progressive offer hierarchy (philosophy)
 
 The runtime should respect **ask intensity** — not every visitor should see the same conversion depth.
@@ -165,6 +204,12 @@ Illustrative ladder (exact labels live in recipe packs; this is strategic intent
 | **High intent** | demo request, lead form, pricing / quote, hard sales CTA |
 
 Recipes choose the **appropriate rung** for current readiness and posture — not “popup everywhere.” Escalation across the session should be **earned** by behavior, not assumed.
+
+## Progression over immediate conversion (invariant)
+
+The runtime optimizes for **progression**, not **immediate conversion** on every tick.
+
+Sessions should be allowed — and often encouraged — to: **deepen**, **compare**, **educate**, **defer** a hard ask until a later navigation, or receive **only low-friction** activation. This blocks devolution into “always push demo,” “always push lead,” or “always maximize CTA clicks,” which reads as **spam optimization** rather than strategy.
 
 ## Confidence earns interruption (invariant)
 
@@ -259,6 +304,14 @@ Vertical breadth supports **credible demos** — but if every vertical “feels 
 ## Existential execution risks (posture, not features)
 
 Success still depends on shipping: **(1)** decision copy that sounds like a thoughtful operator, not a template; **(2)** integration paths so simple that a marketer can wire one surface in an afternoon; **(3)** timing + suppression correctness over taxonomy richness; **(4)** frequent **`primary_decision: null`** framed as mature restraint, not failure; **(5)** vertical-specific realism so demos do not collapse into one generic voice.
+
+### What to optimize aggressively (implementation order)
+
+1. **Decision realism** — highest priority: believable decisions, escalation/suppression logic, tasteful activation — not more features or raw data volume.
+2. **Surface realism** — enterprise- and CMS-credible `surface_id` catalogs and interruption patterns matter more than model sophistication.
+3. **Integration triviality** — tiny install, reversible hooks, no replatform or giant implementation narrative.
+4. **Suppression sophistication** — “not now,” inline-only, wait for `next_navigation`, suppress popup vs lead form — this is where the product feels **premium**.
+5. **Timing correctness** — most vendors stop at *what*; winning on *when* (without expanding the locked timing enum) compounds the moat.
 
 ## Related docs
 
