@@ -1,0 +1,24 @@
+[
+  {
+    "id": "auto_retail_inventory_assist",
+    "label": "Inventory availability assist",
+    "verticals": ["auto_retail"],
+    "surfaces": ["inventory_assist_module", "dealer_contact_assist"],
+    "min_engagement_score": 36,
+    "min_activation_readiness": 34,
+    "max_cta_clicks": 3,
+    "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_module",
+      "message_angle": "reduce_friction",
+      "offer_type": "inventory_snapshot",
+      "headline": "Check availability near you",
+      "body": "Lightweight inventory read — no hard contact until you want it.",
+      "cta_label": "See nearby matches",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 720
+    }
+  }
+]

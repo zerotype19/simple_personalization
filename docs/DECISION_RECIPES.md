@@ -1,0 +1,55 @@
+# Decision recipes (JSON packs)
+
+Recipes live under:
+
+`packages/shared/src/context-packs/experience-recipes/`
+
+They are **matched deterministically** in the SDK (no DSL, no remote fetch). Vertical selection uses `@si/shared/experiencePacks` (`getExperienceRecipesForVertical`).
+
+## Shape
+
+```json
+{
+  "id": "b2b_implementation_readiness_inline",
+  "label": "Human-readable label",
+  "verticals": ["b2b_saas", "content_led_business", "generic"],
+  "surfaces": ["article_inline_mid", "implementation_readiness_inline"],
+  "min_engagement_score": 40,
+  "min_activation_readiness": 35,
+  "required_any_concepts": ["implementation_readiness"],
+  "max_cta_clicks": 2,
+  "allowed_phases": ["research", "evaluation", "comparison"],
+  "decision": {
+    "action": "show",
+    "surface_type": "inline_cta",
+    "message_angle": "make_it_practical",
+    "offer_type": "implementation_checklist",
+    "headline": "…",
+    "body": "…",
+    "cta_label": "…",
+    "target_url_hint": "",
+    "timing": "after_scroll",
+    "friction": "low",
+    "ttl_seconds": 900
+  }
+}
+```
+
+## Concept slugs
+
+`required_any_concepts` entries are **slugs** aligned with slugified `concept_affinity` keys from the context brain (e.g. `implementation_readiness` ↔ “Implementation readiness”). Weak concepts below the display floor do not match.
+
+## Phases
+
+`allowed_phases` uses `CommercialJourneyPhase` from `@si/shared` (`research`, `evaluation`, `comparison`, …). If the profile has no phase, the gate passes.
+
+## Ordering
+
+Multiple recipes may match. The engine **dedupes by `recipe.id`**, keeps the strongest candidate per recipe, ranks by confidence, then applies **suppression** and surface rules. At most **one primary** and **two secondaries** are emitted.
+
+## Editing workflow
+
+1. Add or edit JSON in `experience-recipes/`.
+2. Ensure surfaces exist in the matching [surface catalog](SURFACE_CATALOGS.md) for that vertical.
+3. Run `pnpm test` — `experienceDecisions.test.ts` guards key behaviors.
+4. Ship SDK bundle — recipes are compiled into `si.js`.

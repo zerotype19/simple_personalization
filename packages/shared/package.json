@@ -10,7 +10,8 @@
     "./contextBrain": "./src/contextBrain/index.ts",
     "./demoMetrics": "./src/demoMetrics.ts",
     "./presetConfigs": "./src/presetConfigs.ts",
-    "./context-packs/playbooks/b2b-marketing-ops.json": "./src/context-packs/playbooks/b2b-marketing-ops.json"
+    "./context-packs/playbooks/b2b-marketing-ops.json": "./src/context-packs/playbooks/b2b-marketing-ops.json",
+    "./experiencePacks": "./src/experiencePacks.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",

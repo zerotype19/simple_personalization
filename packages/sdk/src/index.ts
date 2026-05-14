@@ -1,9 +1,15 @@
-import type { ActivationPayloadEnvelope, PersonalizationSignal } from "@si/shared";
+import type {
+  ActivationPayloadEnvelope,
+  ExperienceDecision,
+  ExperienceDecisionEnvelope,
+  PersonalizationSignal,
+} from "@si/shared";
 import { SessionIntelRuntime, type BootOptions } from "./runtime";
 
 let singleton: SessionIntelRuntime | null = null;
 
 export type { BootOptions };
+export type { ExperienceDecision, ExperienceDecisionEnvelope };
 export { SessionIntelRuntime };
 
 export async function boot(opts: BootOptions = {}): Promise<SessionIntelRuntime> {
@@ -86,6 +92,49 @@ export function pushPersonalizationSignalToOptimizely(): void {
 export function pushPersonalizationSignalAll(): void {
   if (!singleton) throw new Error("SessionIntel not booted");
   singleton.pushPersonalizationSignalAll();
+}
+
+export function getExperienceDecisionEnvelope(): ExperienceDecisionEnvelope {
+  if (!singleton) throw new Error("SessionIntel not booted");
+  return singleton.getExperienceDecisionEnvelope();
+}
+
+export function getExperienceDecision(surfaceId: string): ExperienceDecision {
+  if (!singleton) throw new Error("SessionIntel not booted");
+  return singleton.getExperienceDecision(surfaceId);
+}
+
+export function getAllExperienceDecisions(): ExperienceDecision[] {
+  if (!singleton) throw new Error("SessionIntel not booted");
+  return singleton.getAllExperienceDecisions();
+}
+
+export function subscribeToDecision(
+  surfaceId: string,
+  cb: (envelope: ExperienceDecisionEnvelope) => void,
+): () => void {
+  if (!singleton) throw new Error("SessionIntel not booted");
+  return singleton.subscribeToDecision(surfaceId, cb);
+}
+
+export function subscribeToAllDecisions(cb: (envelope: ExperienceDecisionEnvelope) => void): () => void {
+  if (!singleton) throw new Error("SessionIntel not booted");
+  return singleton.subscribeToAllDecisions(cb);
+}
+
+export function pushExperienceDecisionToDataLayer(): void {
+  if (!singleton) throw new Error("SessionIntel not booted");
+  singleton.pushExperienceDecisionToDataLayer();
+}
+
+export function pushExperienceDecisionToAdobeDataLayer(): void {
+  if (!singleton) throw new Error("SessionIntel not booted");
+  singleton.pushExperienceDecisionToAdobeDataLayer();
+}
+
+export function pushExperienceDecisionToOptimizely(): void {
+  if (!singleton) throw new Error("SessionIntel not booted");
+  singleton.pushExperienceDecisionToOptimizely();
 }
 
 export { buildRuleContext, evaluateExpression } from "./rules";

@@ -1,0 +1,52 @@
+{
+  "surfaces": [
+    {
+      "surface_id": "homepage_hero_secondary",
+      "surface_type": "inline_cta",
+      "min_confidence": 0.45,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "article_inline_mid",
+      "surface_type": "inline_cta",
+      "min_confidence": 0.42,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "implementation_readiness_inline",
+      "surface_type": "inline_cta",
+      "min_confidence": 0.44,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "pricing_page_secondary_cta",
+      "surface_type": "inline_cta",
+      "min_confidence": 0.48,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "comparison_module",
+      "surface_type": "inline_module",
+      "min_confidence": 0.46,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "demo_soft_escalation",
+      "surface_type": "soft_modal",
+      "min_confidence": 0.7,
+      "max_friction": "low",
+      "allowed_timing": ["next_navigation", "idle"],
+      "safe_for_zero_config": false
+    }
+  ]
+}

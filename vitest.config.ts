@@ -17,6 +17,7 @@ export default defineConfig({
         __dirname,
         "packages/shared/src/contextBrain/index.ts",
       ),
+      "@si/shared/experiencePacks": path.resolve(__dirname, "packages/shared/src/experiencePacks.ts"),
       "@si/shared/demoMetrics": path.resolve(__dirname, "packages/shared/src/demoMetrics.ts"),
       "@si/shared": path.resolve(__dirname, "packages/shared/src/index.ts"),
     },

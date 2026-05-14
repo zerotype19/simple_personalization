@@ -374,4 +374,9 @@ Architecture returns diminish after this file. Invest next in:
 
 ## Related docs
 
-Update marketing copy and implementation briefs to align with this file. Snippet install and `/collect` privacy posture stay unchanged until an explicit phase adds decision telemetry.
+- [Experience decisions (API + envelope)](EXPERIENCE_DECISIONS.md)
+- [CMS activation examples](CMS_ACTIVATION_EXAMPLES.md)
+- [Decision recipes (pack format)](DECISION_RECIPES.md)
+- [Surface catalogs](SURFACE_CATALOGS.md)
+
+Snippet install and `/collect` privacy posture stay unchanged until an explicit phase adds decision telemetry.

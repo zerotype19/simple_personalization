@@ -1,0 +1,44 @@
+{
+  "surfaces": [
+    {
+      "surface_id": "card_comparison_module",
+      "surface_type": "inline_module",
+      "min_confidence": 0.48,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "rate_fee_explainer",
+      "surface_type": "inline",
+      "min_confidence": 0.45,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "application_soft_resume",
+      "surface_type": "inline",
+      "min_confidence": 0.52,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "idle"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "trust_reassurance_inline",
+      "surface_type": "inline",
+      "min_confidence": 0.44,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "eligibility_assist",
+      "surface_type": "inline_module",
+      "min_confidence": 0.5,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    }
+  ]
+}

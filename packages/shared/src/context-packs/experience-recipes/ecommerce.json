@@ -1,0 +1,24 @@
+[
+  {
+    "id": "ecom_help_me_choose_compare",
+    "label": "Help me choose on comparison-heavy paths",
+    "verticals": ["ecommerce"],
+    "surfaces": ["category_help_me_choose", "pdp_comparison_module"],
+    "min_engagement_score": 42,
+    "min_activation_readiness": 35,
+    "max_cta_clicks": 3,
+    "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_module",
+      "message_angle": "narrow_the_field",
+      "offer_type": "guided_shortlist",
+      "headline": "Narrow down faster",
+      "body": "Answer two quick preferences and we will highlight a tighter shortlist.",
+      "cta_label": "Help me choose",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 720
+    }
+  }
+]

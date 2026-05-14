@@ -1,0 +1,25 @@
+[
+  {
+    "id": "generic_soft_content_inline",
+    "label": "Soft inline content assist",
+    "verticals": ["generic"],
+    "surfaces": ["content_recommendation", "inline_cta"],
+    "min_engagement_score": 35,
+    "min_activation_readiness": 30,
+    "max_cta_clicks": 4,
+    "allowed_phases": ["discovery", "research", "comparison", "evaluation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline",
+      "message_angle": "helpful_next_step",
+      "offer_type": "related_read",
+      "headline": "Continue with a suggested next read",
+      "body": "Based on this page, here is a low-friction follow-up.",
+      "cta_label": "View suggestion",
+      "target_url_hint": "",
+      "timing": "after_scroll",
+      "friction": "low",
+      "ttl_seconds": 600
+    }
+  }
+]

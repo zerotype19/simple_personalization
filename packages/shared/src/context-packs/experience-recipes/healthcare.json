@@ -1,0 +1,46 @@
+[
+  {
+    "id": "healthcare_education_next_step",
+    "label": "Healthcare education inline",
+    "verticals": ["healthcare"],
+    "surfaces": ["education_inline_next_step", "coverage_reassurance_inline"],
+    "min_engagement_score": 35,
+    "min_activation_readiness": 32,
+    "max_cta_clicks": 2,
+    "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline",
+      "message_angle": "education_first",
+      "offer_type": "next_clinical_step_guide",
+      "headline": "Understand your options at your pace",
+      "body": "Educational next steps — no pressure to book until you are ready.",
+      "cta_label": "Read next step",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 900
+    }
+  },
+  {
+    "id": "healthcare_flash_urgency_test",
+    "label": "Aggressive urgency (should be suppressed)",
+    "verticals": ["healthcare"],
+    "surfaces": ["provider_discussion_cta"],
+    "min_engagement_score": 20,
+    "min_activation_readiness": 20,
+    "max_cta_clicks": 0,
+    "allowed_phases": ["research"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_cta",
+      "message_angle": "urgent_book_now",
+      "offer_type": "limited_time_booking",
+      "headline": "Book now — slots disappearing today",
+      "body": "Act immediately or lose your spot.",
+      "cta_label": "Book urgent appointment",
+      "timing": "immediate",
+      "friction": "high",
+      "ttl_seconds": 300
+    }
+  }
+]

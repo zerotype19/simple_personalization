@@ -1,5 +1,7 @@
 import type {
   ActivationPayloadEnvelope,
+  ExperienceDecision,
+  ExperienceDecisionEnvelope,
   PersonalizationSignal,
   SDKConfig,
   SessionProfile,
@@ -29,6 +31,12 @@ import { appendIntelMilestones } from "./sessionIntel";
 import { inferActivationOpportunity } from "./siteSemantics/conversionArchitecture";
 import { runSiteSemantics } from "./siteSemantics/semanticScanner";
 import { buildSiteEnvironment, humanGenericPageLabel } from "./siteEnvironment";
+import { pushExperienceDecisionToAdobeDataLayer as pushExpDecisionAdobe } from "./destinations/adobeDataLayerDestination";
+import { dispatchExperienceDecisionCustomEvent } from "./destinations/customEventDestination";
+import { pushExperienceDecisionToDataLayer as pushExpDecisionDataLayer } from "./destinations/dataLayerDestination";
+import { pushExperienceDecisionToOptimizely as pushExpDecisionOptimizely } from "./destinations/optimizelyDestination";
+import { buildExperienceDecisionEnvelope } from "./decisioning/buildExperienceDecisionEnvelope";
+import { DecisionBus } from "./decisioning/decisionBus";
 
 export interface BootOptions {
   /** Absolute URL to fetch JSON config (GET). */
@@ -48,6 +56,11 @@ export interface BootOptions {
    * when both are present (must match the key’s site).
    */
   snippetKey?: string | null;
+  /**
+   * `observe_only` builds envelopes with null primary (staging / trust).
+   * Default `emit` runs normal browser-local decisioning.
+   */
+  experienceDecisionMode?: "emit" | "observe_only";
 }
 
 export class SessionIntelRuntime {
@@ -62,6 +75,9 @@ export class SessionIntelRuntime {
   private conversionType: string | null = null;
   private lastContextUrl: string | null = null;
   private lastPersonalizationJson = "";
+  private decisionBus = new DecisionBus();
+  private lastExperienceEnvelope: ExperienceDecisionEnvelope | null = null;
+  private slotDecisions: Record<string, ExperienceDecision> = {};
 
   constructor(private opts: BootOptions = {}) {}
 
@@ -116,6 +132,9 @@ export class SessionIntelRuntime {
     this.batcher = null;
     this.stopInspector?.();
     this.stopInspector = null;
+    this.decisionBus.reset();
+    this.lastExperienceEnvelope = null;
+    this.slotDecisions = {};
   }
 
   getState(): SessionProfile {
@@ -199,6 +218,83 @@ export class SessionIntelRuntime {
     }
   }
 
+  getExperienceDecisionEnvelope(): ExperienceDecisionEnvelope {
+    if (!this.lastExperienceEnvelope) {
+      return {
+        event: "si_experience_decision",
+        generated_at: Date.now(),
+        session_id: this.profile.session_id,
+        primary_decision: null,
+        secondary_decisions: [],
+        suppression_summary: "Experience decisions warm up after the first profile tick.",
+      };
+    }
+    return structuredClone(this.lastExperienceEnvelope);
+  }
+
+  getExperienceDecision(surfaceId: string): ExperienceDecision {
+    const hit = this.slotDecisions[surfaceId];
+    if (hit) return structuredClone(hit);
+    return structuredClone({
+      id: `none_${surfaceId}`,
+      surface_id: surfaceId,
+      action: "none",
+      message_angle: "none",
+      offer_type: "none",
+      headline: "",
+      body: "",
+      cta_label: "",
+      target_url_hint: "",
+      timing: "immediate",
+      friction: "low",
+      priority: 0,
+      confidence: 0,
+      reason: ["surface_not_in_catalog_for_vertical"],
+      evidence: [],
+      ttl_seconds: 120,
+      expires_at: Date.now() + 120_000,
+      privacy_scope: "session_only",
+      visitor_status: "anonymous",
+    });
+  }
+
+  getAllExperienceDecisions(): ExperienceDecision[] {
+    return Object.values(this.slotDecisions).map((d) => structuredClone(d));
+  }
+
+  subscribeToDecision(surfaceId: string, cb: (envelope: ExperienceDecisionEnvelope) => void): () => void {
+    return this.decisionBus.subscribeToDecision(surfaceId, cb);
+  }
+
+  subscribeToAllDecisions(cb: (envelope: ExperienceDecisionEnvelope) => void): () => void {
+    return this.decisionBus.subscribeAll(cb);
+  }
+
+  pushExperienceDecisionToDataLayer(): void {
+    pushExpDecisionDataLayer(this.getExperienceDecisionEnvelope());
+  }
+
+  pushExperienceDecisionToAdobeDataLayer(): void {
+    pushExpDecisionAdobe(this.getExperienceDecisionEnvelope());
+  }
+
+  pushExperienceDecisionToOptimizely(): void {
+    pushExpDecisionOptimizely(this.getExperienceDecisionEnvelope());
+  }
+
+  private syncExperienceDecisions(): void {
+    const { envelope, slotDecisions } = buildExperienceDecisionEnvelope(this.profile, {
+      now: Date.now(),
+      observeOnly: this.opts.experienceDecisionMode === "observe_only",
+    });
+    this.lastExperienceEnvelope = envelope;
+    this.slotDecisions = slotDecisions;
+    const changed = this.decisionBus.notifyIfChanged(envelope);
+    if (changed) {
+      dispatchExperienceDecisionCustomEvent(envelope);
+    }
+  }
+
   private maybeEmitActivationPayload(): void {
     const json = JSON.stringify(this.profile.personalization_signal);
     if (json === this.lastPersonalizationJson) return;
@@ -226,6 +322,9 @@ export class SessionIntelRuntime {
     this.profile.experiment_assignment = assignExperiments(this.config.experiments, this.profile);
     this.lastContextUrl = null;
     this.lastPersonalizationJson = "";
+    this.decisionBus.reset();
+    this.lastExperienceEnvelope = null;
+    this.slotDecisions = {};
     this.tick();
   }
 
@@ -244,6 +343,7 @@ export class SessionIntelRuntime {
     logSiDebug("mounting inspector");
     this.stopInspector = mountInspector({
       getState: () => this.getState(),
+      getExperienceDecisionEnvelope: () => this.getExperienceDecisionEnvelope(),
       subscribe: (cb) => this.subscribe(cb),
       onSoftReset: () => {
         this.softResetSession();
@@ -379,6 +479,8 @@ export class SessionIntelRuntime {
     this.profile.personalization_signal = buildPersonalizationSignal(this.profile);
     this.profile.activation_payload = buildActivationPayload(this.profile);
 
+    this.syncExperienceDecisions();
+
     // Re-assign experiments if none yet.
     if (!this.profile.experiment_assignment) {
       this.profile.experiment_assignment = assignExperiments(
@@ -433,5 +535,6 @@ declare global {
     "si:conversion": CustomEvent<{ type?: string }>;
     "si:activation": CustomEvent<import("@si/shared").ActivationPayloadEnvelope>;
     "si:personalization-signal": CustomEvent<import("@si/shared").ActivationPayloadEnvelope>;
+    "si:experience-decision": CustomEvent<import("@si/shared").ExperienceDecisionEnvelope>;
   }
 }

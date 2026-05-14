@@ -19,6 +19,9 @@ declare global {
       subscribe: (cb: (p: import("@si/shared").SessionProfile) => void) => () => void;
       markConversion: (type?: string) => void;
       softResetSession: () => void;
+      getExperienceDecisionEnvelope?: () => import("@si/shared").ExperienceDecisionEnvelope;
+      getExperienceDecision?: (surfaceId: string) => import("@si/shared").ExperienceDecision;
+      subscribeToAllDecisions?: (cb: (e: import("@si/shared").ExperienceDecisionEnvelope) => void) => () => void;
     };
   }
 }

@@ -19,6 +19,11 @@ declare global {
       softResetSession: typeof api.softResetSession;
       getActivationPayload: typeof api.getActivationPayload;
       getPersonalizationSignal: typeof api.getPersonalizationSignal;
+      getExperienceDecisionEnvelope: typeof api.getExperienceDecisionEnvelope;
+      getExperienceDecision: typeof api.getExperienceDecision;
+      getAllExperienceDecisions: typeof api.getAllExperienceDecisions;
+      subscribeToDecision: typeof api.subscribeToDecision;
+      subscribeToAllDecisions: typeof api.subscribeToAllDecisions;
       pushToDataLayer: typeof api.pushToDataLayer;
       pushToAdobeDataLayer: typeof api.pushToAdobeDataLayer;
       pushToOptimizely: typeof api.pushToOptimizely;
@@ -26,6 +31,9 @@ declare global {
       pushPersonalizationSignalToAdobeDataLayer: typeof api.pushPersonalizationSignalToAdobeDataLayer;
       pushPersonalizationSignalToOptimizely: typeof api.pushPersonalizationSignalToOptimizely;
       pushPersonalizationSignalAll: typeof api.pushPersonalizationSignalAll;
+      pushExperienceDecisionToDataLayer: typeof api.pushExperienceDecisionToDataLayer;
+      pushExperienceDecisionToAdobeDataLayer: typeof api.pushExperienceDecisionToAdobeDataLayer;
+      pushExperienceDecisionToOptimizely: typeof api.pushExperienceDecisionToOptimizely;
     };
     SessionIntelBundle?: {
       bootFromScriptTag: () => Promise<void>;
@@ -68,6 +76,11 @@ export function boot(): void {
           softResetSession: () => api.softResetSession(),
           getActivationPayload: () => rt.getActivationPayload(),
           getPersonalizationSignal: () => rt.getPersonalizationSignal(),
+          getExperienceDecisionEnvelope: () => rt.getExperienceDecisionEnvelope(),
+          getExperienceDecision: (surfaceId: string) => rt.getExperienceDecision(surfaceId),
+          getAllExperienceDecisions: () => rt.getAllExperienceDecisions(),
+          subscribeToDecision: (surfaceId, cb) => rt.subscribeToDecision(surfaceId, cb),
+          subscribeToAllDecisions: (cb) => rt.subscribeToAllDecisions(cb),
           pushToDataLayer: () => rt.pushToDataLayer(),
           pushToAdobeDataLayer: () => rt.pushToAdobeDataLayer(),
           pushToOptimizely: () => rt.pushToOptimizely(),
@@ -75,6 +88,9 @@ export function boot(): void {
           pushPersonalizationSignalToAdobeDataLayer: () => rt.pushPersonalizationSignalToAdobeDataLayer(),
           pushPersonalizationSignalToOptimizely: () => rt.pushPersonalizationSignalToOptimizely(),
           pushPersonalizationSignalAll: () => rt.pushPersonalizationSignalAll(),
+          pushExperienceDecisionToDataLayer: () => rt.pushExperienceDecisionToDataLayer(),
+          pushExperienceDecisionToAdobeDataLayer: () => rt.pushExperienceDecisionToAdobeDataLayer(),
+          pushExperienceDecisionToOptimizely: () => rt.pushExperienceDecisionToOptimizely(),
         };
       } catch (err) {
         console.error("[Session Intelligence] boot failed", err);

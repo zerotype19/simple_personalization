@@ -1,0 +1,46 @@
+[
+  {
+    "id": "finance_trust_compare_inline",
+    "label": "Financial services trust-forward compare",
+    "verticals": ["financial_services"],
+    "surfaces": ["card_comparison_module", "trust_reassurance_inline", "rate_fee_explainer"],
+    "min_engagement_score": 40,
+    "min_activation_readiness": 38,
+    "max_cta_clicks": 2,
+    "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_module",
+      "message_angle": "transparent_fees",
+      "offer_type": "rate_and_fee_explainer",
+      "headline": "Compare rates and fees clearly",
+      "body": "Plain-language explainer before you start an application.",
+      "cta_label": "See explainer",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 900
+    }
+  },
+  {
+    "id": "finance_guaranteed_approval_bad",
+    "label": "Unsafe approval language (should suppress)",
+    "verticals": ["financial_services"],
+    "surfaces": ["eligibility_assist"],
+    "min_engagement_score": 15,
+    "min_activation_readiness": 15,
+    "max_cta_clicks": 0,
+    "allowed_phases": ["research"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_module",
+      "message_angle": "instant_approval",
+      "offer_type": "guaranteed_approval",
+      "headline": "Guaranteed approval in 60 seconds",
+      "body": "Everyone qualifies — no credit check.",
+      "cta_label": "Get approved now",
+      "timing": "immediate",
+      "friction": "high",
+      "ttl_seconds": 300
+    }
+  }
+]

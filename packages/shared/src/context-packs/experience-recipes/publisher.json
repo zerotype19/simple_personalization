@@ -1,0 +1,24 @@
+[
+  {
+    "id": "publisher_article_newsletter_or_related",
+    "label": "Article depth — newsletter or related",
+    "verticals": ["publisher_content"],
+    "surfaces": ["article_inline_mid", "newsletter_soft_signup", "article_related_next", "topic_depth_module"],
+    "min_engagement_score": 38,
+    "min_activation_readiness": 30,
+    "max_cta_clicks": 2,
+    "allowed_phases": ["discovery", "research", "retention_interest"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_cta",
+      "message_angle": "stay_in_the_loop",
+      "offer_type": "newsletter_or_series",
+      "headline": "Go deeper on this topic",
+      "body": "Get the next article in this series or a weekly digest with similar reads.",
+      "cta_label": "Notify me",
+      "timing": "after_scroll",
+      "friction": "low",
+      "ttl_seconds": 1200
+    }
+  }
+]

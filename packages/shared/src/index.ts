@@ -348,6 +348,102 @@ export interface PersonalizationSignal {
   activation_readiness_score?: number;
 }
 
+/** Browser-local experience decision (anonymous, session-scoped). */
+export type ExperienceDecisionTiming =
+  | "immediate"
+  | "after_scroll"
+  | "next_navigation"
+  | "exit_intent"
+  | "idle";
+
+export type ExperienceDecisionAction =
+  | "show"
+  | "replace"
+  | "prioritize"
+  | "defer"
+  | "suppress"
+  | "none";
+
+export interface ExperienceDecision {
+  id: string;
+  surface_id: string;
+  surface_type?: string;
+  action: ExperienceDecisionAction;
+  message_angle: string;
+  offer_type: string;
+  headline: string;
+  body: string;
+  cta_label: string;
+  target_url_hint: string;
+  timing: ExperienceDecisionTiming;
+  friction: "low" | "medium" | "high";
+  priority: number;
+  /** 0–1 confidence in this decision. */
+  confidence: number;
+  reason: string[];
+  evidence: string[];
+  source_recipe_id?: string;
+  suppression_reason?: string;
+  ttl_seconds: number;
+  expires_at: number;
+  privacy_scope: "session_only";
+  visitor_status: "anonymous";
+}
+
+export interface ExperienceDecisionEnvelope {
+  event: "si_experience_decision";
+  generated_at: number;
+  session_id: string;
+  primary_decision: ExperienceDecision | null;
+  secondary_decisions: ExperienceDecision[];
+  suppression_summary?: string;
+}
+
+/** Partial decision payload stored on a recipe row (merged with runtime fields). */
+export interface ExperienceRecipeDecisionTemplate {
+  action?: ExperienceDecisionAction;
+  surface_type?: string;
+  message_angle: string;
+  offer_type: string;
+  headline: string;
+  body: string;
+  cta_label: string;
+  target_url_hint?: string;
+  timing: ExperienceDecisionTiming;
+  friction?: "low" | "medium" | "high";
+  ttl_seconds?: number;
+}
+
+/** Lightweight recipe row (no DSL) — shipped as JSON packs. */
+export interface ExperienceRecipe {
+  id: string;
+  label: string;
+  verticals: string[];
+  surfaces: string[];
+  min_engagement_score?: number;
+  min_activation_readiness?: number;
+  /** Concept slugs (e.g. `implementation_readiness`) matched against slugified `concept_affinity` keys. */
+  required_any_concepts?: string[];
+  max_cta_clicks?: number;
+  allowed_phases?: CommercialJourneyPhase[];
+  decision: ExperienceRecipeDecisionTemplate;
+}
+
+export interface ExperienceSurfaceCatalogEntry {
+  surface_id: string;
+  surface_type?: string;
+  label?: string;
+  /** Minimum decision confidence (0–1) to allow activation on this surface. */
+  min_confidence?: number;
+  max_friction?: "low" | "medium" | "high";
+  allowed_timing?: ExperienceDecisionTiming[];
+  safe_for_zero_config?: boolean;
+}
+
+export interface ExperienceSurfaceCatalogFile {
+  surfaces: ExperienceSurfaceCatalogEntry[];
+}
+
 export interface ActivationPayloadEnvelope {
   event: string;
   si: Record<string, unknown>;

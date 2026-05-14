@@ -1,0 +1,44 @@
+{
+  "surfaces": [
+    {
+      "surface_id": "article_inline_mid",
+      "surface_type": "inline_cta",
+      "min_confidence": 0.42,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "article_related_next",
+      "surface_type": "inline",
+      "min_confidence": 0.42,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "newsletter_soft_signup",
+      "surface_type": "inline_cta",
+      "min_confidence": 0.43,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation", "idle"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "topic_depth_module",
+      "surface_type": "inline_module",
+      "min_confidence": 0.45,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "return_reader_prompt",
+      "surface_type": "inline",
+      "min_confidence": 0.46,
+      "max_friction": "low",
+      "allowed_timing": ["next_navigation", "idle"],
+      "safe_for_zero_config": true
+    }
+  ]
+}

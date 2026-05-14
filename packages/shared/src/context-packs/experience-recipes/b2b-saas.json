@@ -1,0 +1,48 @@
+[
+  {
+    "id": "b2b_implementation_readiness_inline",
+    "label": "B2B implementation readiness inline assist",
+    "verticals": ["b2b_saas", "content_led_business"],
+    "surfaces": ["article_inline_mid", "homepage_hero_secondary", "implementation_readiness_inline"],
+    "min_engagement_score": 40,
+    "min_activation_readiness": 35,
+    "required_any_concepts": ["implementation_readiness", "team_operating_rhythm", "quarterly_planning"],
+    "max_cta_clicks": 2,
+    "allowed_phases": ["research", "evaluation", "comparison"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_cta",
+      "message_angle": "make_it_practical",
+      "offer_type": "implementation_checklist",
+      "headline": "Make this practical for your team",
+      "body": "Get a checklist for turning this framework into action.",
+      "cta_label": "Get the checklist",
+      "target_url_hint": "",
+      "timing": "after_scroll",
+      "friction": "low",
+      "ttl_seconds": 900
+    }
+  },
+  {
+    "id": "b2b_pricing_secondary_soft",
+    "label": "Pricing page secondary assist",
+    "verticals": ["b2b_saas", "content_led_business"],
+    "surfaces": ["pricing_page_secondary_cta", "comparison_module"],
+    "min_engagement_score": 45,
+    "min_activation_readiness": 40,
+    "max_cta_clicks": 1,
+    "allowed_phases": ["evaluation", "comparison", "validation"],
+    "decision": {
+      "action": "show",
+      "surface_type": "inline_cta",
+      "message_angle": "de_risk_purchase",
+      "offer_type": "security_and_implementation_faq",
+      "headline": "See how teams like yours evaluate us",
+      "body": "Short answers on security, rollout, and support — before you book time.",
+      "cta_label": "View FAQs",
+      "timing": "next_navigation",
+      "friction": "low",
+      "ttl_seconds": 900
+    }
+  }
+]

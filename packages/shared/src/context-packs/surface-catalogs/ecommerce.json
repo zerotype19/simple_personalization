@@ -1,0 +1,44 @@
+{
+  "surfaces": [
+    {
+      "surface_id": "pdp_comparison_module",
+      "surface_type": "inline_module",
+      "min_confidence": 0.46,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "category_help_me_choose",
+      "surface_type": "inline_module",
+      "min_confidence": 0.44,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "cart_assist_inline",
+      "surface_type": "inline_cta",
+      "min_confidence": 0.5,
+      "max_friction": "medium",
+      "allowed_timing": ["immediate", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "coupon_offer_secondary",
+      "surface_type": "inline",
+      "min_confidence": 0.55,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "idle"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "product_recommendation_slot",
+      "surface_type": "inline",
+      "min_confidence": 0.42,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    }
+  ]
+}

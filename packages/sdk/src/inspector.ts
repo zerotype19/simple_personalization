@@ -1,4 +1,4 @@
-import type { SessionProfile } from "@si/shared";
+import type { ExperienceDecisionEnvelope, SessionProfile } from "@si/shared";
 import { conceptSignalLabel } from "@si/shared/contextBrain";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import { isAutoSiteVertical } from "@si/shared";
@@ -32,6 +32,8 @@ declare const __SI_EMBED_INSPECTOR_CSS_URL__: string;
 
 export interface InspectorOptions {
   getState: () => SessionProfile;
+  /** Experience decision runtime envelope (browser-local). */
+  getExperienceDecisionEnvelope?: () => ExperienceDecisionEnvelope;
   subscribe: (cb: (p: SessionProfile) => void) => () => void;
   /** Clear `si:session` storage, new session id, re-roll A/B, re-apply — no reload. */
   onSoftReset: () => void;
@@ -243,6 +245,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
 
   function render() {
     const p = opts.getState();
+    const expEnv = opts.getExperienceDecisionEnvelope?.() ?? null;
+    const primaryDecision = expEnv?.primary_decision;
     const nba = p.next_best_action;
     const exp = p.experiment_assignment;
     const persoOn = opts.getPersonalizationEnabled();
@@ -552,6 +556,55 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         <p class="si-muted si-muted--block">${cohortEsc}</p>`
             : ""
         }
+      </div>`
+      : "";
+
+    const integrationSnippet = expEnv
+      ? escHtml(
+          JSON.stringify(
+            {
+              event: expEnv.event,
+              session_id: expEnv.session_id,
+              primary_surface: primaryDecision?.surface_id ?? null,
+              timing: primaryDecision?.timing ?? null,
+              confidence: primaryDecision?.confidence ?? null,
+              suppression_summary: expEnv.suppression_summary ?? null,
+            },
+            roundJsonFloats,
+            2,
+          ),
+        )
+      : "";
+
+    const experienceDecisionHtml = expEnv
+      ? `<div class="si-panel-section">
+        <div class="si-card si-card--hero si-card--experience">
+          <h3>Recommended experience decision</h3>
+          ${
+            primaryDecision
+              ? `<div class="si-kv">
+                  <div>Surface</div><div class="si-metric"><code class="si-code">${escHtml(primaryDecision.surface_id)}</code></div>
+                  <div>Timing</div><div class="si-muted">${escHtml(primaryDecision.timing)}</div>
+                  <div>Confidence</div><div class="si-metric">${escHtml(String(primaryDecision.confidence))}</div>
+                  <div>Action · friction</div><div class="si-muted">${escHtml(primaryDecision.action)} · ${escHtml(primaryDecision.friction)}</div>
+                  <div>Offer</div><div class="si-muted si-metric--break">${escHtml(primaryDecision.offer_type)}</div>
+                  <div>Angle</div><div class="si-muted si-metric--break">${escHtml(primaryDecision.message_angle)}</div>
+                </div>
+                <h4 class="si-subh">Proposed copy</h4>
+                <p class="si-rec-text">${escHtml(primaryDecision.headline)}</p>
+                <p class="si-muted si-muted--block">${escHtml(primaryDecision.body)}</p>
+                <div class="si-muted si-muted--mb6">Why this</div>
+                <ul class="si-reason">${primaryDecision.reason.slice(0, 8).map((r) => `<li>${escHtml(r)}</li>`).join("")}</ul>
+                <div class="si-muted si-muted--mb6">Evidence / grounding</div>
+                <ul class="si-reason">${primaryDecision.evidence.slice(0, 6).map((r) => `<li>${escHtml(r)}</li>`).join("")}</ul>
+                <h4 class="si-subh">Why not something stronger?</h4>
+                <p class="si-muted si-muted--block">Harder asks wait for higher confidence, readiness, and surface fit. Null primaries are a deliberate product outcome.</p>
+                <h4 class="si-subh">Integration preview (<code class="si-code">si:experience-decision</code>)</h4>
+                <pre class="si-pre si-pre--activation-payload">${integrationSnippet}</pre>`
+              : `<p class="si-muted si-muted--block">No strong experience decision yet — <b>this is expected</b> when the session is thin, contradictory, or early. Restraint protects the brand.</p>
+                <p class="si-muted si-muted--block">${escHtml(expEnv.suppression_summary ?? "Suppression: session state did not cross decision thresholds.")}</p>`
+          }
+        </div>
       </div>`
       : "";
 
@@ -902,6 +955,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       </div>`;
 
     const html = `
+      ${experienceDecisionHtml}
       ${behaviorWarmupHtml}
       ${visitorHeroHtml}
       ${sessionJourneyHtml}
