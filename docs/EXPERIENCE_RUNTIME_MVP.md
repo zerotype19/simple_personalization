@@ -51,6 +51,47 @@ It may intentionally emit **no primary decision**, softer conversion paths, or *
 
 Event diffing and inspector UX target this shape only.
 
+## Global envelope vs slot-specific API
+
+**Global session envelope** (e.g. full decision object / event `detail` for “everything this tick”):
+
+- If there is **no strong** primary decision: set **`primary_decision: null`** and **`secondary_decisions: []`** (or omit secondaries).
+- Do **not** fabricate a weak primary to “have something to show.”
+- Optional human-readable context: **`suppression_summary`** (string) when useful — e.g. why nothing is being pushed yet.
+
+Example:
+
+```json
+{
+  "primary_decision": null,
+  "secondary_decisions": [],
+  "suppression_summary": "Signals are still forming; no strong activation decision yet."
+}
+```
+
+**Slot-specific query** — `getExperienceDecision(surface_id)` (or equivalent):
+
+- When that **surface was evaluated** and **intentionally suppressed** for clear reasons, return a **surface-scoped** object with **`action: "suppress"`** and **`suppression_reason`** (and `surface_id`).
+
+Example:
+
+```json
+{
+  "surface_id": "soft_popup",
+  "action": "suppress",
+  "suppression_reason": "Visitor appears to be researching; interruption risk is high."
+}
+```
+
+**Rule of thumb:**
+
+| Situation | Shape |
+|-----------|--------|
+| Nothing worth acting on globally / signals weak | **`primary_decision: null`** on the envelope |
+| This **surface** was considered and we **choose** not to activate it | **`action: "suppress"`** on the slot result |
+
+Do **not** use `action: "suppress"` on the global primary slot to mean “no good decision anywhere” — that stays **`null`**.
+
 ## Decision quality standard
 
 A **valid** experience decision (one we emit to subscribers / destinations) should satisfy **most** of:
@@ -61,8 +102,8 @@ A **valid** experience decision (one we emit to subscribers / destinations) shou
 - **Context-differentiated** — varies by vertical / page / journey phase where the recipe pack allows
 - **CMS-actionable** — a host can map `surface_id` + copy/offer fields to a component without guessing
 - **Non-generic across surfaces** — same session should not get interchangeable “show a guide” on every `surface_id` without distinction
-- **Confidence-weighted** — low confidence → suppress or soften (see [Suppression behavior](#suppression-behavior))
-- **Suppressible** — weak or contradictory signals → no emit
+- **Confidence-weighted** — low confidence → **null primary** on the envelope or slot-level suppress (see [Suppression behavior](#suppression-behavior))
+- **Suppressible** — weak or contradictory signals → **no primary emit** (`primary_decision: null`), not a fake “show” decision
 - **Timing-aware** — includes timing guidance (see [Decision timing](#decision-timing))
 - **Interruption-aware** — respects research vs conversion posture already in the profile
 
@@ -134,9 +175,11 @@ Hosts map these to their own triggers (scroll %, route change, idle timers, exit
 
 ## Suppression behavior
 
-**Suppression-first:** the runtime is explicitly allowed to conclude **“do nothing.”**
+**Suppression-first:** the runtime is explicitly allowed to conclude **“do nothing”** at the global level — express that as **`primary_decision: null`** (see [Global envelope vs slot-specific API](#global-envelope-vs-slot-specific-api)).
 
-Suppress (emit **no** primary decision, or `action: "suppress"` / defer if represented in payload) when **any** of these hold, non-exhaustively:
+Use **`action: "suppress"`** only on **slot-scoped** results (e.g. `getExperienceDecision("soft_popup")`) when that **surface was evaluated** and we **intentionally** choose not to activate it, with a **`suppression_reason`**.
+
+When **any** of these hold, non-exhaustively, prefer **null primary** globally and/or **suppress** on affected surfaces — not weak “show” decisions:
 
 - **Confidence too weak** or signals **contradictory**
 - **Interruption risk high** — e.g. strong research posture, rapid bounce patterns, visitor likely overwhelmed
