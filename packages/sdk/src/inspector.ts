@@ -25,6 +25,7 @@ import {
   marketerLikelyVisitorMindset,
   marketerPersonalizationImplication,
 } from "./siteSemantics/acquisitionPanelCopy";
+import { analyzeNavigationPattern } from "./siteSemantics/navigationPatternAnalyzer";
 
 /** Set only in the hosted IIFE build (`SI_PUBLIC_INSPECTOR_CSS_URL`); empty in ESM. */
 declare const __SI_EMBED_INSPECTOR_CSS_URL__: string;
@@ -253,7 +254,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const persoOn = opts.getPersonalizationEnabled();
     const sc = p.site_context;
     const liftPreview = demoLiftPreviewCopy(sc.vertical);
-    const safePlanLines = buildSafePersonalizationPlan(p);
+    const safePlanLines = buildSafePersonalizationPlan(p).slice(0, 2);
     const isAuto = isAutoSiteVertical(sc.vertical);
     const env = p.site_environment;
     const pm = p.page_semantics;
@@ -312,7 +313,9 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         : "Few funnel-specific DOM cues detected",
       sc.scan.primary_ctas.length
         ? `Sample CTAs: ${sc.scan.primary_ctas.slice(0, 5).join(" · ")}`
-        : pm.cta_layout_summary || "No strong conversion-oriented CTA detected yet.",
+        : p.signals.cta_clicks >= 1
+          ? "Clicks logged — page scan may still show light conversion chrome in header/main."
+          : pm.cta_layout_summary || "No strong conversion-oriented CTA detected yet.",
       sc.scan.content_themes.length ? `Themes: ${sc.scan.content_themes.slice(0, 5).join(", ")}` : null,
     ]
       .filter((x): x is string => !!x)
@@ -377,7 +380,17 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const landingIntentConf = bs ? `${bs.campaign_intent.confidence_0_100}%` : "—";
     const refCatEsc = bs ? escHtml(bs.referrer.category.replace(/_/g, " ")) : "—";
     const refNarrEsc = bs ? escHtml(bs.referrer.narrative) : "—";
-    const pathSummaryEsc = bs ? escHtml(bs.navigation.path_summary) : "—";
+    const distinctPagesExplored =
+      p.page_journey && p.page_journey.length > 0
+        ? new Set(
+            p.page_journey.map((e) => ((e.path.split("?")[0] || "/").trim() || "/").toLowerCase()),
+          ).size
+        : Math.max(new Set(p.signals.path_sequence ?? []).size, 1);
+    const pathSummaryRaw =
+      p.page_journey && p.page_journey.length > 0
+        ? analyzeNavigationPattern(p.page_journey, p.signals).path_summary
+        : bs?.navigation.path_summary ?? "—";
+    const pathSummaryEsc = bs ? escHtml(pathSummaryRaw) : "—";
     const journeyPatternEsc = bs ? escHtml(bs.navigation.journey_pattern.replace(/_/g, " ")) : "—";
     const journeyVelEsc = bs ? escHtml(bs.navigation.journey_velocity) : "—";
     const navFlags =
@@ -518,13 +531,6 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       </div>`
       : "";
 
-    const distinctPagesExplored =
-      p.page_journey && p.page_journey.length > 0
-        ? new Set(
-            p.page_journey.map((e) => ((e.path.split("?")[0] || "/").trim() || "/").toLowerCase()),
-          ).size
-        : Math.max(new Set(p.signals.path_sequence ?? []).size, 1);
-
     const journeyDiagnosticsHtml = bs
       ? `<div class="si-card">
         <h3>Journey diagnostics</h3>
@@ -606,6 +612,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <div class="si-kv si-journey-kv">
             <div>Commercial journey phase</div><div class="si-metric">${commPhaseEsc}</div>
             <div>Path pattern (recent)</div><div class="si-muted si-metric--break">${pathSummaryEsc}</div>
+            <div>Distinct pages explored</div><div class="si-metric">${distinctPagesExplored}</div>
             <div>Engagement quality</div><div class="si-metric">${engageLabelEsc}</div>
             <div>Activation readiness (0–100)</div><div class="si-metric">${escHtml(actScore)}</div>
             <div>Interruption posture</div><div class="si-metric">${actPostureEsc}</div>

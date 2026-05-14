@@ -17,6 +17,7 @@ function inferCommercialPhase(
   p: SessionProfile,
   nav: NavigationPatternRead,
   engagement: EngagementQualityRead,
+  activation: ActivationReadinessRead,
 ): CommercialJourneyPhase {
   const legacy = p.journey_stage;
   const steps = p.page_journey ?? [];
@@ -24,7 +25,10 @@ function inferCommercialPhase(
   if (nav.high_intent_transition || legacy === "conversion") {
     const vertical = p.site_context.vertical;
     const editorialVertical =
-      vertical === "publisher_content" || vertical === "content_led_business" || vertical === "nonprofit";
+      vertical === "publisher_content" ||
+      vertical === "content_led_business" ||
+      vertical === "nonprofit" ||
+      vertical === "b2b_saas";
     const monetizationStep = steps.some(
       (st) =>
         st.generic_kind === "pricing_page" ||
@@ -33,10 +37,17 @@ function inferCommercialPhase(
         st.generic_kind === "checkout_page",
     );
     const noHardCommit = p.signals.cta_clicks === 0 && !monetizationStep;
+    const contentHeavyJourney =
+      steps.filter((s) => s.generic_kind === "article_page" || s.generic_kind === "unknown").length >= 2;
+    const contentLedObjective = p.site_environment.conversion.primary_objective === "content_depth";
+    const articleSurface = p.site_environment.page.generic_kind === "article_page";
+
     if (noHardCommit) {
       if (editorialVertical) return "evaluation";
       if (nav.journey_pattern === "content_depth_led") return "evaluation";
       if (engagement.label === "deep_reader" || engagement.label === "hesitant_converter") return "evaluation";
+      if (contentHeavyJourney && (contentLedObjective || articleSurface)) return "evaluation";
+      if (activation.interruption_posture === "observe_only" && activation.score_0_100 < 55) return "evaluation";
     }
     return "conversion_ready";
   }
@@ -188,7 +199,7 @@ export function buildBehaviorSnapshot(p: SessionProfile): BehaviorSnapshot {
 
   const engagement_quality = engagementQuality(p, navigation);
   const activation_readiness = activationReadiness(p);
-  const commercial_journey_phase = inferCommercialPhase(p, navigation, engagement_quality);
+  const commercial_journey_phase = inferCommercialPhase(p, navigation, engagement_quality, activation_readiness);
   const anonymous_similarity_hint = cohortHint(p, navigation);
 
   const out: BehaviorSnapshot = {

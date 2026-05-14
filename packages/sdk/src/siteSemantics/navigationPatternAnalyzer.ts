@@ -59,7 +59,7 @@ export function analyzeNavigationPattern(
       deltas.push(seq[i]!.t - seq[i - 1]!.t);
     }
     const med = deltas.sort((a, b) => a - b)[Math.floor(deltas.length / 2)] ?? 0;
-    if (med < 4500 && signals.pages_viewed >= 3) journey_velocity = "rapid";
+    if (med < 4500 && signals.pages_viewed >= 3 && signals.session_duration_ms < 120_000) journey_velocity = "rapid";
     else if (med > 45000) journey_velocity = "slow";
   }
 

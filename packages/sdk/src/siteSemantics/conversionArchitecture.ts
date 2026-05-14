@@ -109,8 +109,10 @@ export function inferActivationOpportunity(input: {
   if (pk === "homepage") evidence.push("Homepage layout and multi-section structure detected");
   const convCtas =
     (scan.cta_text_hard?.length ?? 0) + (scan.cta_text_soft?.length ?? 0) || scan.primary_ctas.length;
-  if (convCtas === 0 && semantics.nav_link_sample.length)
-    evidence.push("Navigation sampled — no strong conversion-oriented CTA detected in the scan yet");
+  if (convCtas === 0 && semantics.nav_link_sample.length && s.cta_clicks === 0)
+    evidence.push(
+      "Navigation sampled — no dominant conversion-focused CTA block in header/main chrome yet (nav and exploratory links may still register clicks).",
+    );
 
   const reason: string[] = [];
   if (s.return_visit) reason.push("Return visit increases readiness for a softer second ask");
@@ -134,7 +136,9 @@ export function inferActivationOpportunity(input: {
 
   const opportunity_note =
     convCtas === 0
-      ? "Activation opportunity: no strong conversion-oriented CTA detected yet — lead with depth, related chapters, or a soft subscribe path first."
+      ? s.cta_clicks >= 1
+        ? "Activation opportunity: page chrome still looks education-first — session shows early clicks, likely on nav or exploratory controls; keep implementation depth and soft next steps."
+        : "Activation opportunity: no strong conversion-oriented CTA detected yet — lead with depth, related chapters, or a soft subscribe path first."
       : "Activation opportunity: CTAs are present — align creative to the strongest concept and journey stage.";
 
   const base: ActivationOpportunity = {

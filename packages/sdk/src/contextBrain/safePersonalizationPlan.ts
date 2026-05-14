@@ -42,5 +42,5 @@ export function buildSafePersonalizationPlan(p: SessionProfile): string[] {
     lines.push(`Align messaging with the current session NBA: ${nba.next_best_action}`);
   }
 
-  return lines.slice(0, 6);
+  return lines.slice(0, 2);
 }
