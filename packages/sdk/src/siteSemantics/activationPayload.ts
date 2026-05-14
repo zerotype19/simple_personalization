@@ -37,6 +37,10 @@ function summarizeBehavior(p: SessionProfile): Record<string, unknown> | null {
   return {
     context: "activation_debug_preview",
     arrival_channel: b.traffic.channel_guess,
+    arrival_confidence_0_100: b.traffic.arrival_confidence_0_100,
+    acquisition_narrative: b.traffic.acquisition_narrative,
+    acquisition_evidence: b.traffic.acquisition_evidence.slice(0, 8),
+    query_themes: b.traffic.query_themes,
     campaign_clues: b.campaign_intent.commercial_clues,
     keyword_themes: b.campaign_intent.keyword_themes.slice(0, 10),
     campaign_angle: b.campaign_intent.campaign_angle,

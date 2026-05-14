@@ -38,17 +38,19 @@ function tokens(s: string | null): string[] {
 
 /**
  * Derive campaign / keyword themes from UTM fields (no identity; session-local only).
+ * `url_query_themes` are privacy-safe buckets from URL search params (see queryThemeExtractor).
  */
 export function analyzeCampaignIntent(
   utm_term: string | null,
   utm_campaign: string | null,
   utm_content: string | null,
+  url_query_themes: string[] = [],
 ): CampaignIntentRead {
   const blob = [utm_term, utm_campaign, utm_content].filter(Boolean).join(" ");
   const kw = tokens(utm_term);
   const camp = tokens(utm_campaign);
   const creative = tokens(utm_content);
-  const merged = [...new Set([...kw, ...camp, ...creative])];
+  const merged = [...new Set([...kw, ...camp, ...creative, ...url_query_themes])];
 
   const commercial_clues: string[] = [];
   if (/financ|lease|apr|payment|rate|promo|sale|discount|coupon/i.test(blob))

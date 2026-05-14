@@ -1,4 +1,14 @@
-import type { TrafficAcquisitionRead, TrafficChannelGuess } from "@si/shared";
+import type {
+  GenericPageKind,
+  NavigationPatternRead,
+  ReferrerIntelligenceRead,
+  SessionSignals,
+  TrafficAcquisitionRead,
+  TrafficChannelGuess,
+} from "@si/shared";
+import { analyzeReferrer } from "./referrerAnalyzer";
+import { analyzeLandingAcquisitionPattern } from "./landingPatternAnalyzer";
+import { extractQueryThemes } from "./queryThemeExtractor";
 
 const CLICK_IDS = ["gclid", "fbclid", "msclkid", "ttclid", "li_fat_id", "wbraid", "gbraid"] as const;
 
@@ -9,13 +19,59 @@ function norm(s: string | null): string | null {
   return t;
 }
 
+function sanitizeLandingPath(url: URL): string {
+  const sp = new URLSearchParams(url.search);
+  for (const k of ["q", "query", "text", "s", "search", "keyword", "keywords"]) {
+    if (sp.has(k)) sp.set(k, "*");
+  }
+  const q = sp.toString();
+  return `${url.pathname}${q ? `?${q}` : ""}`.slice(0, 500);
+}
+
+export interface TrafficInferenceContext {
+  href: string;
+  documentReferrer: string | null;
+  siteHostname: string | null;
+  referrerRead: ReferrerIntelligenceRead;
+  navigation: NavigationPatternRead;
+  signals: SessionSignals;
+  firstJourneyEntry: { generic_kind: GenericPageKind; path: string } | null;
+  currentGenericKind: GenericPageKind;
+}
+
+function buildInterpretation(
+  channel: TrafficChannelGuess,
+  entryKind: GenericPageKind | null,
+  landingPatternOrganic: boolean,
+): string | null {
+  if (channel === "organic_search") {
+    if (entryKind === "article_page")
+      return "Research-heavy organic visitor consuming depth content before harder asks.";
+    if (entryKind === "product_detail_page")
+      return "High-intent organic evaluation on a detail surface — specs, comparison, and trust matter.";
+    if (entryKind === "pricing_page" || entryKind === "lead_form_page")
+      return "Commercial-intent organic visitor landing on evaluation or conversion surfaces.";
+    if (landingPatternOrganic) return "Mid-funnel research-oriented organic visitor.";
+    return "Organic search visitor — intent still forming from on-site behavior.";
+  }
+  if (channel === "llm_referral")
+    return "AI-assisted discovery visitor — answer-led; lead with proof, citations, and fast clarity.";
+  if (channel === "community_referral") return "Community-sourced visitor — peer context and skepticism are elevated.";
+  if (channel === "review_site") return "Review- or video-led discovery — demonstration and credibility carry extra weight.";
+  if (channel === "organic_social") return "Social-driven research visitor — professional or peer-influenced evaluation.";
+  if (channel === "paid_search") return "Paid search visitor — align to keyword / offer continuity and post-click relevance.";
+  if (channel === "paid_social") return "Paid social visitor — creative-message match and lightweight first steps win.";
+  if (channel === "direct_or_unknown") return null;
+  return null;
+}
+
 /**
- * First-party URL + referrer read for acquisition intelligence (no third-party cookies).
+ * Probabilistic acquisition inference: paid markers → UTMs → referrer intelligence → landing/session shape.
  */
-export function analyzeTrafficAcquisition(href: string, documentReferrer: string | null): TrafficAcquisitionRead {
+export function inferTrafficAcquisition(ctx: TrafficInferenceContext): TrafficAcquisitionRead {
   let url: URL;
   try {
-    url = new URL(href, "https://placeholder.local");
+    url = new URL(ctx.href, "https://placeholder.local");
   } catch {
     return {
       channel_guess: "direct_or_unknown",
@@ -26,6 +82,13 @@ export function analyzeTrafficAcquisition(href: string, documentReferrer: string
       utm_term: null,
       utm_content: null,
       has_click_id: false,
+      arrival_confidence_0_100: 22,
+      acquisition_evidence: ["Landing URL could not be parsed — acquisition read is weak."],
+      acquisition_narrative: "Arrival source unclear",
+      acquisition_interpretation: null,
+      entry_page_kind: ctx.firstJourneyEntry?.generic_kind ?? ctx.currentGenericKind,
+      landing_pattern_summary: null,
+      query_themes: [],
     };
   }
 
@@ -46,45 +109,368 @@ export function analyzeTrafficAcquisition(href: string, documentReferrer: string
 
   const ms = (utm_medium ?? "").toLowerCase();
   const src = (utm_source ?? "").toLowerCase();
+  const query_themes = extractQueryThemes(ctx.href);
+  const landing_path = sanitizeLandingPath(url);
 
-  let channel_guess: TrafficChannelGuess = "direct_or_unknown";
+  const entryKind = ctx.firstJourneyEntry?.generic_kind ?? ctx.currentGenericKind;
+  const landingPattern = analyzeLandingAcquisitionPattern({
+    entryKind: ctx.firstJourneyEntry?.generic_kind ?? entryKind,
+    signals: ctx.signals,
+    navigation: ctx.navigation,
+  });
 
+  const evidence: string[] = [];
+  let channel: TrafficChannelGuess = "direct_or_unknown";
+  let confidence = 28;
+
+  const push = (e: string) => {
+    if (!evidence.includes(e)) evidence.push(e);
+  };
+
+  // 1) Paid click IDs
   if (has_click_id) {
-    if (/cpc|ppc|paidsearch|search/i.test(ms) || src === "google") channel_guess = "paid_search";
-    else if (/paid|social|paidsocial|social/i.test(ms) || /facebook|instagram|tiktok|linkedin|twitter|x\.com/i.test(src))
-      channel_guess = "paid_social";
-    else channel_guess = "display_or_programmatic";
-  } else if (utm_medium || utm_source) {
-    if (/cpc|ppc|paidsearch|paid-search|paid_search/i.test(ms)) channel_guess = "paid_search";
-    else if (/paidsocial|paid-social|paid_social/i.test(ms)) channel_guess = "paid_social";
-    else if (/cpm|display|programmatic|banner/i.test(ms)) channel_guess = "display_or_programmatic";
-    else if (/email|newsletter|crm|nurture/i.test(ms)) channel_guess = "email_or_crm";
-    else if (/affiliate|partner/i.test(ms)) channel_guess = "affiliate_or_partner";
-    else if (
-      (/organic|seo/i.test(ms) || ms === "organic") &&
-      /(google|bing|duckduckgo|yahoo|baidu|yandex|ecosia)\b/i.test(src)
-    )
-      channel_guess = "organic_search";
-    else if (
-      /social|social-network|social_network|community/i.test(ms) ||
-      /facebook|instagram|tiktok|linkedin|twitter|t\.co|reddit|youtube|pinterest/i.test(src)
-    )
-      channel_guess = "organic_social";
-    else if (/organic|seo|search/i.test(ms)) channel_guess = "organic_search";
-    else if (/referral|web|site/i.test(ms)) channel_guess = "referral";
-    else channel_guess = "referral";
-  } else if (documentReferrer && documentReferrer.length > 0) {
-    channel_guess = "referral";
+    if (/cpc|ppc|paidsearch|search/i.test(ms) || src === "google") {
+      channel = "paid_search";
+      confidence = 88;
+      push("Paid ad click parameter detected on URL");
+    } else if (/paid|social|paidsocial|social/i.test(ms) || /facebook|instagram|tiktok|linkedin|twitter|x\.com/i.test(src)) {
+      channel = "paid_social";
+      confidence = 84;
+      push("Paid ad click parameter with social or paid-social hints");
+    } else {
+      channel = "display";
+      confidence = 78;
+      push("Paid ad click parameter — treat as programmatic / display-class traffic");
+    }
+    if (utm_medium || utm_source) push("UTM tags present alongside click ID");
+    return finalize(
+      channel,
+      confidence,
+      evidence,
+      {
+        landing_path,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        utm_term,
+        utm_content,
+        has_click_id,
+        entryKind,
+        landingPattern,
+        query_themes,
+      },
+    );
   }
 
-  return {
-    channel_guess,
-    landing_path: `${url.pathname}${url.search}`.slice(0, 500),
+  // 2) UTMs without click id
+  if (utm_medium || utm_source) {
+    if (/cpc|ppc|paidsearch|paid-search|paid_search/i.test(ms)) {
+      channel = "paid_search";
+      confidence = 82;
+      push("UTM medium indicates paid search");
+    } else if (/paidsocial|paid-social|paid_social/i.test(ms)) {
+      channel = "paid_social";
+      confidence = 80;
+      push("UTM medium indicates paid social");
+    } else if (/cpm|display|programmatic|banner/i.test(ms)) {
+      channel = "display";
+      confidence = 76;
+      push("UTM medium indicates display / programmatic");
+    } else if (/email|newsletter|nurture/i.test(ms)) {
+      channel = "email";
+      confidence = 74;
+      push("UTM medium indicates email or newsletter");
+    } else if (/crm|salesforce|hubspot|iterable|customer\.io/i.test(ms)) {
+      channel = "crm";
+      confidence = 72;
+      push("UTM medium indicates CRM / lifecycle");
+    } else if (/affiliate|partner|revshare/i.test(ms)) {
+      channel = /affiliate/i.test(ms) ? "affiliate" : "partner_referral";
+      confidence = 70;
+      push("UTM medium indicates affiliate or partner program");
+    } else if (
+      (/organic|seo/i.test(ms) || ms === "organic") &&
+      /(google|bing|duckduckgo|yahoo|baidu|yandex|ecosia)\b/i.test(src)
+    ) {
+      channel = "organic_search";
+      confidence = 68;
+      push("UTM tagged as organic search");
+    } else if (
+      /social|social-network|social_network|community/i.test(ms) ||
+      /facebook|instagram|tiktok|linkedin|twitter|t\.co|reddit|youtube|pinterest/i.test(src)
+    ) {
+      channel = "organic_social";
+      confidence = 66;
+      push("UTM tagged as organic social");
+    } else if (/organic|seo|search/i.test(ms)) {
+      channel = "organic_search";
+      confidence = 58;
+      push("UTM suggests organic search without explicit engine source");
+    } else if (/referral|web|site/i.test(ms)) {
+      channel = "partner_referral";
+      confidence = 55;
+      push("UTM tagged as referral / partner web traffic");
+    } else {
+      channel = "partner_referral";
+      confidence = 48;
+      push("UTM present — acquisition channel inferred as referral-class");
+    }
+    if (query_themes.length) push(`Query themes (privacy-safe): ${query_themes.join(", ")}`);
+    return finalize(channel, confidence, evidence, {
+      landing_path,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_term,
+      utm_content,
+      has_click_id,
+      entryKind,
+      landingPattern,
+      query_themes,
+    });
+  }
+
+  // Same-site navigation — not a new acquisition source
+  if (ctx.referrerRead.category === "internal") {
+    return finalize(
+      "direct_or_unknown",
+      30,
+      ["Same-site referrer — acquisition channel not applicable for this hop"],
+      {
+        landing_path,
+        utm_source,
+        utm_medium,
+        utm_campaign,
+        utm_term,
+        utm_content,
+        has_click_id,
+        entryKind,
+        landingPattern,
+        query_themes,
+      },
+    );
+  }
+
+  // 3) Referrer + host hints (no UTMs / click ids)
+  const hint = ctx.referrerRead.channel_hint;
+  if (ctx.documentReferrer && ctx.referrerRead.category !== "internal" && hint) {
+    channel = hint;
+    if (hint === "organic_search") {
+      confidence = ctx.referrerRead.category === "search" ? 78 : 62;
+      push("Search-class referrer host with no paid campaign markers on the landing URL");
+      if (landingPattern.organic_research_shape) {
+        confidence = Math.min(92, confidence + 10);
+        push("Research-shaped landing and early journey reinforce organic search");
+      }
+    } else if (hint === "llm_referral") {
+      confidence = 90;
+      push("LLM / answer-engine referrer host");
+    } else if (hint === "community_referral") {
+      confidence = 86;
+      push("Community platform referrer (e.g. Reddit-style discussion traffic)");
+    } else if (hint === "review_site") {
+      confidence = 84;
+      push("Video / review platform referrer");
+    } else if (hint === "organic_social") {
+      confidence = 72;
+      push("Social or professional network referrer without paid click IDs");
+    } else if (hint === "partner_referral" || hint === "display") {
+      confidence = 66;
+      push("Third-party or syndication referrer");
+    }
+    if (query_themes.length) push(`Query themes (privacy-safe): ${query_themes.join(", ")}`);
+    return finalize(channel, confidence, evidence, {
+      landing_path,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_term,
+      utm_content,
+      has_click_id,
+      entryKind,
+      landingPattern,
+      query_themes,
+    });
+  }
+
+  // 4) Stripped referrer — infer organic-style when session shape matches
+  const noReferrer = !ctx.documentReferrer || ctx.referrerRead.category === "unknown";
+  if (noReferrer && !has_click_id && !(utm_medium || utm_source)) {
+    if (landingPattern.organic_research_shape) {
+      channel = "organic_search";
+      confidence = landingPattern.evidence.length >= 3 ? 58 : 46;
+      push("Referrer missing or stripped (common on HTTPS / privacy browsers)");
+      push("Landing and engagement resemble organic research traffic");
+      for (const e of landingPattern.evidence) push(e);
+    } else if (entryKind === "homepage" && ctx.signals.pages_viewed <= 1 && ctx.signals.max_scroll_depth < 40) {
+      channel = "direct_or_unknown";
+      confidence = 34;
+      push("Homepage entry with thin engagement — true direct or lightweight discovery");
+    } else {
+      channel = "direct_or_unknown";
+      confidence = 40;
+      push("No referrer, UTMs, or click IDs — limited acquisition context");
+    }
+    if (query_themes.length) push(`Query themes (privacy-safe): ${query_themes.join(", ")}`);
+    return finalize(channel, confidence, evidence, {
+      landing_path,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_term,
+      utm_content,
+      has_click_id,
+      entryKind,
+      landingPattern,
+      query_themes,
+    });
+  }
+
+  // 5) Referrer present but no channel_hint (parse edge)
+  if (ctx.documentReferrer) {
+    channel = "partner_referral";
+    confidence = 52;
+    push("External referrer without a stronger channel classifier — treating as generic referral");
+  }
+
+  if (query_themes.length) push(`Query themes (privacy-safe): ${query_themes.join(", ")}`);
+  return finalize(channel, confidence, evidence, {
+    landing_path,
     utm_source,
     utm_medium,
     utm_campaign,
     utm_term,
     utm_content,
     has_click_id,
+    entryKind,
+    landingPattern,
+    query_themes,
+  });
+}
+
+function finalize(
+  channel: TrafficChannelGuess,
+  confidence: number,
+  evidence: string[],
+  parts: {
+    landing_path: string;
+    utm_source: string | null;
+    utm_medium: string | null;
+    utm_campaign: string | null;
+    utm_term: string | null;
+    utm_content: string | null;
+    has_click_id: boolean;
+    entryKind: GenericPageKind;
+    landingPattern: ReturnType<typeof analyzeLandingAcquisitionPattern>;
+    query_themes: string[];
+  },
+): TrafficAcquisitionRead {
+  const {
+    landing_path,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    utm_term,
+    utm_content,
+    has_click_id,
+    entryKind,
+    landingPattern,
+    query_themes,
+  } = parts;
+
+  const narrative = buildNarrative(channel, confidence, entryKind);
+  const interpretation = buildInterpretation(channel, entryKind, landingPattern.organic_research_shape);
+
+  return {
+    channel_guess: channel,
+    landing_path,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    utm_term,
+    utm_content,
+    has_click_id,
+    arrival_confidence_0_100: Math.max(0, Math.min(100, Math.round(confidence))),
+    acquisition_evidence: evidence.slice(0, 10),
+    acquisition_narrative: narrative,
+    acquisition_interpretation: interpretation,
+    entry_page_kind: entryKind,
+    landing_pattern_summary: landingPattern.summary,
+    query_themes,
   };
+}
+
+function buildNarrative(channel: TrafficChannelGuess, confidence: number, entryKind: GenericPageKind): string {
+  const strength = confidence >= 72 ? "Likely" : confidence >= 52 ? "Probably" : "Possibly";
+  const weak = confidence < 52 ? " (limited acquisition signals)" : "";
+
+  const label: Record<TrafficChannelGuess, string> = {
+    organic_search: "organic search",
+    paid_search: "paid search",
+    organic_social: "organic social",
+    paid_social: "paid social",
+    email: "email / newsletter",
+    crm: "CRM or lifecycle",
+    display: "display / programmatic",
+    affiliate: "affiliate",
+    partner_referral: "partner or web referral",
+    review_site: "review- or video-led discovery",
+    community_referral: "community referral",
+    llm_referral: "LLM / answer-engine referral",
+    direct_or_unknown: "direct or ambiguous arrival",
+  };
+
+  const entryNote =
+    entryKind && entryKind !== "homepage"
+      ? ` — first touch: ${entryKind.replace(/_/g, " ")}`
+      : entryKind === "homepage"
+        ? " — first touch: homepage"
+        : "";
+
+  return `${strength} ${label[channel]}${entryNote}${weak}`;
+}
+
+/**
+ * URL + referrer only (used in unit tests). Prefer {@link inferTrafficAcquisition} with full session context in runtime.
+ */
+export function analyzeTrafficAcquisition(href: string, documentReferrer: string | null): TrafficAcquisitionRead {
+  const noopNav: NavigationPatternRead = {
+    journey_pattern: "explore",
+    journey_velocity: "deliberate",
+    comparison_behavior: false,
+    high_intent_transition: false,
+    path_summary: "—",
+  };
+  const noopSignals: SessionSignals = {
+    pages_viewed: 0,
+    vdp_views: 0,
+    pricing_views: 0,
+    finance_interactions: 0,
+    compare_interactions: 0,
+    cta_clicks: 0,
+    max_scroll_depth: 0,
+    return_visit: false,
+    session_duration_ms: 0,
+    category_hits: {},
+    landing_href: href,
+    initial_referrer: documentReferrer,
+    path_sequence: [],
+    tab_visible_ms: 0,
+    tab_hidden_ms: 0,
+    cta_hover_events: 0,
+    offer_surface_clicks: 0,
+    form_field_focus_events: 0,
+    onsite_search_events: 0,
+  };
+  const referrerRead = analyzeReferrer(documentReferrer, null);
+  return inferTrafficAcquisition({
+    href,
+    documentReferrer,
+    siteHostname: null,
+    referrerRead,
+    navigation: noopNav,
+    signals: noopSignals,
+    firstJourneyEntry: null,
+    currentGenericKind: "unknown",
+  });
 }

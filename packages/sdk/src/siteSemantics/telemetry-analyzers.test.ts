@@ -24,9 +24,9 @@ describe("analyzeTrafficAcquisition", () => {
     expect(r.channel_guess).toBe("organic_social");
   });
 
-  it("uses referral when only document referrer is present", () => {
+  it("classifies editorial referrer as partner / web referral", () => {
     const r = analyzeTrafficAcquisition("https://shop.example/", "https://news.example/article");
-    expect(r.channel_guess).toBe("referral");
+    expect(r.channel_guess).toBe("partner_referral");
   });
 });
 

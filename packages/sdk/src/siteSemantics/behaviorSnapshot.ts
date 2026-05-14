@@ -9,7 +9,7 @@ import type {
 import { analyzeCampaignIntent } from "./campaignIntentAnalyzer";
 import { analyzeNavigationPattern } from "./navigationPatternAnalyzer";
 import { analyzeReferrer } from "./referrerAnalyzer";
-import { analyzeTrafficAcquisition } from "./trafficSourceAnalyzer";
+import { inferTrafficAcquisition } from "./trafficSourceAnalyzer";
 
 function inferCommercialPhase(p: SessionProfile, nav: NavigationPatternRead): CommercialJourneyPhase {
   const legacy = p.journey_stage;
@@ -124,13 +124,27 @@ function deviceContext(): BehaviorSnapshot["device_context"] {
  */
 export function buildBehaviorSnapshot(p: SessionProfile): BehaviorSnapshot {
   const landing = p.signals.landing_href || (typeof window !== "undefined" ? window.location.href : "");
-  const traffic = analyzeTrafficAcquisition(landing, p.signals.initial_referrer);
-  const campaign_intent = analyzeCampaignIntent(traffic.utm_term, traffic.utm_campaign, traffic.utm_content);
-  const referrer = analyzeReferrer(
-    p.signals.initial_referrer,
-    typeof window !== "undefined" ? window.location.hostname : null,
-  );
   const navigation = analyzeNavigationPattern(p.page_journey, p.signals);
+  const first = p.page_journey?.[0] ?? null;
+  const siteHostname =
+    typeof window !== "undefined" ? window.location.hostname : (p.site_context.domain || null);
+  const referrer = analyzeReferrer(p.signals.initial_referrer, siteHostname);
+  const traffic = inferTrafficAcquisition({
+    href: landing,
+    documentReferrer: p.signals.initial_referrer,
+    siteHostname,
+    referrerRead: referrer,
+    navigation,
+    signals: p.signals,
+    firstJourneyEntry: first ? { generic_kind: first.generic_kind, path: first.path } : null,
+    currentGenericKind: p.site_environment.page.generic_kind,
+  });
+  const campaign_intent = analyzeCampaignIntent(
+    traffic.utm_term,
+    traffic.utm_campaign,
+    traffic.utm_content,
+    traffic.query_themes,
+  );
 
   const engagement_quality = engagementQuality(p, navigation);
   const activation_readiness = activationReadiness(p);

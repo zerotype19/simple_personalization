@@ -14,20 +14,43 @@ export type CommercialJourneyPhase =
   | "retention_interest"
   | "support_service";
 
-/** Inferred paid / owned / earned channel from URL parameters and referrer (first-party only). */
+/** Generic page archetype (orthogonal to auto `PageType`). Declared early for acquisition reads. */
+export type GenericPageKind =
+  | "homepage"
+  | "category_page"
+  | "product_detail_page"
+  | "article_page"
+  | "pricing_page"
+  | "lead_form_page"
+  | "cart_page"
+  | "checkout_page"
+  | "account_page"
+  | "search_results_page"
+  | "support_page"
+  | "unknown";
+
+/**
+ * Inferred acquisition / traffic channel (probabilistic merge of click IDs, UTMs, referrer host,
+ * landing pattern, and session shape — first-party only).
+ */
 export type TrafficChannelGuess =
-  | "paid_search"
-  | "paid_social"
-  | "display_or_programmatic"
-  | "email_or_crm"
-  | "affiliate_or_partner"
-  | "organic_social"
   | "organic_search"
-  | "direct_or_unknown"
-  | "referral";
+  | "paid_search"
+  | "organic_social"
+  | "paid_social"
+  | "email"
+  | "crm"
+  | "display"
+  | "affiliate"
+  | "partner_referral"
+  | "review_site"
+  | "community_referral"
+  | "llm_referral"
+  | "direct_or_unknown";
 
 export interface TrafficAcquisitionRead {
   channel_guess: TrafficChannelGuess;
+  /** Path + privacy-redacted search (raw `q` / `query` values replaced with `*`). */
   landing_path: string;
   utm_source: string | null;
   utm_medium: string | null;
@@ -35,6 +58,20 @@ export interface TrafficAcquisitionRead {
   utm_term: string | null;
   utm_content: string | null;
   has_click_id: boolean;
+  /** 0–100 confidence in `channel_guess`. */
+  arrival_confidence_0_100: number;
+  /** Short evidence bullets for the acquisition read (no raw search queries). */
+  acquisition_evidence: string[];
+  /** Confidence-aware headline for panels (e.g. “Likely organic search (Google)”). */
+  acquisition_narrative: string;
+  /** Commercial interpretation for operators (session-local). */
+  acquisition_interpretation: string | null;
+  /** First landing page archetype when journey is known. */
+  entry_page_kind: GenericPageKind | null;
+  /** Human summary of landing + early journey shape for acquisition. */
+  landing_pattern_summary: string | null;
+  /** Privacy-safe themes from URL search params only (raw query text discarded after tokenization). */
+  query_themes: string[];
 }
 
 export interface CampaignIntentRead {
@@ -49,6 +86,9 @@ export interface ReferrerIntelligenceRead {
     | "search"
     | "social"
     | "ai_chat"
+    | "community"
+    | "video"
+    | "professional_network"
     | "news_or_media"
     | "partner_or_affiliate"
     | "internal"
@@ -56,6 +96,8 @@ export interface ReferrerIntelligenceRead {
     | "unknown";
   host: string | null;
   narrative: string;
+  /** Strong coarse channel implied by referrer host (merged with URL + landing heuristics). */
+  channel_hint: TrafficChannelGuess | null;
 }
 
 export interface NavigationPatternRead {
@@ -140,21 +182,6 @@ export type SiteVertical =
 export function isAutoSiteVertical(vertical: SiteVertical): boolean {
   return vertical === "auto_retail" || vertical === "auto_oem";
 }
-
-/** Generic page archetype (orthogonal to auto `PageType`). */
-export type GenericPageKind =
-  | "homepage"
-  | "category_page"
-  | "product_detail_page"
-  | "article_page"
-  | "pricing_page"
-  | "lead_form_page"
-  | "cart_page"
-  | "checkout_page"
-  | "account_page"
-  | "search_results_page"
-  | "support_page"
-  | "unknown";
 
 export type PlatformGuess = "shopify" | "wordpress" | "webflow" | "squarespace" | "unknown";
 

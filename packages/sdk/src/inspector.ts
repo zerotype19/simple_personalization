@@ -335,6 +335,23 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       bs && bs.campaign_intent.keyword_themes.length
         ? escHtml(bs.campaign_intent.keyword_themes.slice(0, 8).join(", "))
         : "—";
+    const urlQueryThemesEsc =
+      bs && bs.traffic.query_themes.length ? escHtml(bs.traffic.query_themes.join(", ")) : "—";
+    const acquisitionNarrEsc = bs ? escHtml(bs.traffic.acquisition_narrative) : "—";
+    const acquisitionInterpEsc = bs?.traffic.acquisition_interpretation
+      ? escHtml(bs.traffic.acquisition_interpretation)
+      : "—";
+    const arrivalConfPct = bs ? `${bs.traffic.arrival_confidence_0_100}%` : "—";
+    const acqEvidenceUl =
+      bs && bs.traffic.acquisition_evidence.length
+        ? `<ul class="si-reason si-reason--tight">${bs.traffic.acquisition_evidence.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
+        : `<div class="si-muted">—</div>`;
+    const entryKindEsc = bs?.traffic.entry_page_kind
+      ? escHtml(bs.traffic.entry_page_kind.replace(/_/g, " "))
+      : "—";
+    const landPatternEsc = bs?.traffic.landing_pattern_summary
+      ? escHtml(bs.traffic.landing_pattern_summary)
+      : "—";
     const campaignAngleEsc = bs?.campaign_intent.campaign_angle ? escHtml(bs.campaign_intent.campaign_angle) : "—";
     const cluesEsc =
       bs && bs.campaign_intent.commercial_clues.length
@@ -375,8 +392,16 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       ? `<div class="si-card">
         <h3>Traffic &amp; acquisition</h3>
         <div class="si-kv">
-          <div>Arrival channel (guess)</div><div class="si-metric">${channelHuman}</div>
-          <div>Landing URL (capped)</div><div class="si-muted si-metric--break">${landingPathEsc}</div>
+          <div>Arrival channel (inferred)</div><div class="si-metric">${channelHuman}</div>
+          <div>Arrival confidence</div><div class="si-metric">${escHtml(arrivalConfPct)}</div>
+          <div>Acquisition narrative</div><div class="si-muted si-metric--break">${acquisitionNarrEsc}</div>
+          <div>Acquisition interpretation</div><div class="si-muted si-metric--break">${acquisitionInterpEsc}</div>
+          <div>First-touch page kind</div><div class="si-metric">${entryKindEsc}</div>
+          <div>Landing pattern</div><div class="si-muted si-metric--break">${landPatternEsc}</div>
+          <div class="si-muted si-muted--mb6" style="grid-column:1/-1;margin-top:4px">Acquisition evidence</div>
+          <div style="grid-column:1/-1">${acqEvidenceUl}</div>
+          <div>URL query themes (privacy-safe)</div><div class="si-muted">${urlQueryThemesEsc}</div>
+          <div>Landing URL (redacted query)</div><div class="si-muted si-metric--break">${landingPathEsc}</div>
           <div>UTM trail</div><div class="si-muted si-metric--break">${utmLine}</div>
           <div>Campaign angle</div><div class="si-metric">${campaignAngleEsc}</div>
           <div>Keyword themes</div><div class="si-muted">${keywordThemesEsc}</div>
