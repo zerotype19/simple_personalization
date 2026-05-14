@@ -27,7 +27,7 @@ export function archetypePersonasForVertical(v: SiteVertical): string[] {
         "strategic_researcher",
         "implementation_evaluator",
         "economic_buyer",
-        "content_explorer",
+        "framework_evaluator",
         "high_intent_visitor",
       ];
   }

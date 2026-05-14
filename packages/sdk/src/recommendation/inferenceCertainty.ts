@@ -1,4 +1,5 @@
 import type { SessionProfile } from "@si/shared";
+import { publicSiteTypeLabel } from "../siteIntelligence/publicLabels";
 
 export interface InferenceCertaintyBands {
   high: string[];
@@ -24,7 +25,7 @@ export function buildInferenceCertaintyBands(p: SessionProfile): InferenceCertai
   if (p.engagement_score >= 65) high.push("Visitor is deeply engaged this session");
   else if (p.engagement_score >= 45) medium.push("Moderate engagement — keep collecting signals");
 
-  if (site.confidence >= 0.65) high.push(`Site type read as ${site.site_type.replace(/_/g, " ")}`);
+  if (site.confidence >= 0.65) high.push(`Site type read as ${publicSiteTypeLabel(site.site_type)}`);
   else medium.push(`Site objective appears to be ${conversion.primary_objective.replace(/_/g, " ")}`);
 
   if (conversion.confidence >= 0.62) medium.push("Conversion objective inference is reasonably grounded");
@@ -32,7 +33,7 @@ export function buildInferenceCertaintyBands(p: SessionProfile): InferenceCertai
 
   if (p.site_context.scan.primary_ctas.length >= 2) high.push("Primary conversion surfaces detected from CTA text");
   else if (p.site_context.scan.primary_ctas.length === 1) medium.push("Limited CTA diversity on this page sample");
-  else low.push("No clear primary CTA detected yet in the sampled chrome");
+  else low.push("No dominant conversion CTA detected yet in the sampled chrome");
 
   if (env.ladder.level === 1) low.push("Personalization ladder is observe-only until confidence rises");
 

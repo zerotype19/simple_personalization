@@ -91,6 +91,71 @@ export interface SiteEnvironmentSnapshot {
   ladder: ConfidenceLadder;
 }
 
+/** Rich DOM/meta read for CMO-facing copy (no raw HTML persisted). */
+export interface PageSemantics {
+  canonical_href: string | null;
+  meta_description_snippet: string | null;
+  og_title: string | null;
+  og_type: string | null;
+  twitter_title: string | null;
+  schema_types_detected: string[];
+  h1_primary: string | null;
+  heading_counts: { h2: number; h3: number };
+  primary_promise: string | null;
+  nav_link_sample: string[];
+  form_guesses: string[];
+  link_intent_summary: string;
+  commerce_signal_hits: string[];
+  b2b_signal_hits: string[];
+  cms_platform: PlatformGuess;
+  /** Plain-language CTA density read for the inspector. */
+  cta_layout_summary: string;
+}
+
+/** Anonymous-visitor activation read (not site redesign advice). */
+export interface ActivationOpportunity {
+  status: "developing" | "ready" | "strong";
+  confidence: number;
+  visitor_read: string;
+  inferred_need: string;
+  message_angle: string;
+  offer_type: string;
+  surface: string;
+  timing: string;
+  friction: "low" | "medium" | "high";
+  primary_path_label: string;
+  secondary_path_label: string;
+  soft_path_label: string;
+  opportunity_note: string | null;
+  evidence: string[];
+  reason: string[];
+}
+
+/** Flat signal for dataLayer / Adobe / Optimizely-style tools. */
+export interface PersonalizationSignal {
+  visitor_status: "anonymous";
+  journey_stage: JourneyStage;
+  inferred_archetype: string | null;
+  inferred_need: string;
+  top_concepts: { id: string; label: string; score: number }[];
+  intent_score: number;
+  urgency_score: number;
+  engagement_score: number;
+  conversion_readiness: number;
+  recommended_message_angle: string;
+  recommended_offer_type: string;
+  recommended_surface: string;
+  recommended_timing: string;
+  recommended_friction_level: "low" | "medium" | "high";
+  confidence: number;
+  reason: string[];
+}
+
+export interface ActivationPayloadEnvelope {
+  event: string;
+  si: Record<string, unknown>;
+}
+
 /** Lightweight scan summary (no raw page dump — derived tokens only). */
 export interface SiteScanSummary {
   domain: string;
@@ -154,6 +219,14 @@ export interface SessionProfile extends SessionScores {
    * Populated each tick from DOM + URL + scan tokens only.
    */
   site_environment: SiteEnvironmentSnapshot;
+  /** Meta, headings, schema, and intent hints from the live page. */
+  page_semantics: PageSemantics;
+  /** What the visitor is likely ready for next (activation, not page critique). */
+  activation_opportunity: ActivationOpportunity;
+  /** Normalized personalization signal for integrations. */
+  personalization_signal: PersonalizationSignal;
+  /** dataLayer-style envelope (event + `si` object). */
+  activation_payload: ActivationPayloadEnvelope;
 }
 
 export interface SessionSignals {

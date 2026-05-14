@@ -1,0 +1,11 @@
+{
+  "tool": "epsilon",
+  "fields": {
+    "si_intent_score": "intent_score",
+    "si_engagement_score": "engagement_score",
+    "si_journey_stage": "journey_stage",
+    "si_primary_objective": "primary_objective",
+    "si_recommended_surface": "recommended_surface",
+    "si_top_concept": "top_concept"
+  }
+}

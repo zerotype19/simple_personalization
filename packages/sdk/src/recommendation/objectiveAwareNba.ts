@@ -6,6 +6,7 @@ import type {
   SessionProfile,
   SiteVertical,
 } from "@si/shared";
+import { publicSiteTypeLabel } from "../siteIntelligence/publicLabels";
 
 function ladderToTreatmentLevel(level: PersonalizationLadderLevel): RecommendedTreatmentLevel {
   if (level <= 1) return "observe";
@@ -36,7 +37,7 @@ export function buildObjectiveAwareRecommendation(p: SessionProfile): Recommenda
   const brand = brandHint(p);
 
   const baseReasons: string[] = [
-    `Site read as ${site.site_type} (~${Math.round(site.confidence * 100)}% site confidence)`,
+    `Site read as ${publicSiteTypeLabel(site.site_type)} (~${Math.round(site.confidence * 100)}% site confidence)`,
     `Page kind: ${pk.replace(/_/g, " ")} (~${Math.round(page.confidence * 100)}% page confidence)`,
     `Objective signal: ${po.replace(/_/g, " ")} (~${Math.round(conversion.confidence * 100)}% objective confidence)`,
   ];

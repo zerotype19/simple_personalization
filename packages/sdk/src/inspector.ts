@@ -5,6 +5,7 @@ import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
 import { buildSafePersonalizationPlan } from "./contextBrain/safePersonalizationPlan";
 import { archetypePersonasForVertical } from "./recommendation/archetypes";
 import { buildInferenceCertaintyBands, describeConversionSurfaces } from "./recommendation/inferenceCertainty";
+import { audienceForVertical, publicSiteTypeLabel } from "./siteIntelligence/publicLabels";
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
 import {
   liveSignalSectionTitle,
@@ -12,6 +13,7 @@ import {
   topicAffinitySectionTitle,
   verticalDisplayName,
 } from "./siteIntelligence/panelLabelMapper";
+import { humanGenericPageLabel } from "./siteEnvironment";
 
 /** Set only in the hosted IIFE build (`SI_PUBLIC_INSPECTOR_CSS_URL`); empty in ESM. */
 declare const __SI_EMBED_INSPECTOR_CSS_URL__: string;
@@ -225,6 +227,11 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const safePlanLines = buildSafePersonalizationPlan(p);
     const isAuto = sc.vertical === "auto_retail";
     const env = p.site_environment;
+    const pm = p.page_semantics;
+    const ao = p.activation_opportunity;
+    const sig = p.personalization_signal;
+    const confWord =
+      sc.vertical_confidence >= 72 ? "High" : sc.vertical_confidence >= 48 ? "Medium-high" : "Medium";
     const envSignals = escHtml(env.page.signals_used.join(" · ") || "—");
     const themes = sc.scan.content_themes.slice(0, 4).map(escHtml).join(", ") || "—";
     const termsPreview = sc.scan.top_terms.slice(0, 8).map(escHtml).join(", ") || "—";
@@ -249,21 +256,17 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       .sort((a, b) => b[1] - a[1])
       .map(([label, score]) => {
         const band = conceptSignalLabel(score);
-        const pct = (score * 100).toFixed(0);
         const termsMatched = (p.concept_evidence?.[label] ?? []).join(", ") || "—";
-        const hint = `Matched pack terms: ${termsMatched}`;
-        const bandHtml = band ? ` — <span class="si-muted">${escHtml(band)}</span>` : "";
-        return `<div class="si-concept-item" title="${escHtml(hint)}">
-          <div class="si-concept-head"><span class="si-concept-name">${escHtml(label)}</span>${bandHtml}<span class="si-concept-pct">${pct}%</span></div>
-          <div class="si-muted si-concept-match">Matched: ${escHtml(termsMatched)}</div>
-        </div>`;
+        const bandLine = band ? `<div class="si-muted si-concept-band">${escHtml(band)}</div>` : "";
+        return `<li class="si-concept-narrative"><div class="si-concept-name">${escHtml(label)}</div>${bandLine}<div class="si-muted si-concept-why">Why: ${escHtml(termsMatched)}</div></li>`;
       })
       .join("");
     const affinityBlock = isAuto
       ? `<div class="si-kv si-kv--tight">${affRowsAuto}</div>`
-      : `<div class="si-concept-stack">${affRowsConcept}</div>`;
+      : `<ul class="si-reason">${affRowsConcept}</ul>`;
     const affinityEmpty = isAuto ? Object.keys(p.category_affinity).length === 0 : Object.keys(conceptAff).length === 0;
     const personaControlLabel = isAuto ? "Force shopper archetype (debug)" : "Force session archetype (debug)";
+    const conceptCardTitle = isAuto ? topicAffinitySectionTitle(sc.vertical) : "Strongest inferred themes";
 
     const certainty = buildInferenceCertaintyBands(p);
     const surfaceList = describeConversionSurfaces(p);
@@ -277,7 +280,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         : "Few funnel-specific DOM cues detected",
       sc.scan.primary_ctas.length
         ? `Sample CTAs: ${sc.scan.primary_ctas.slice(0, 5).join(" · ")}`
-        : "No strong CTA sample from header/main in this pass",
+        : pm.cta_layout_summary || "No dominant conversion CTA detected yet.",
       sc.scan.content_themes.length ? `Themes: ${sc.scan.content_themes.slice(0, 5).join(", ")}` : null,
     ]
       .filter((x): x is string => !!x)
@@ -297,7 +300,67 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const certaintyMed = certainty.medium.map((t) => `<li>${escHtml(t)}</li>`).join("") || "<li>—</li>";
     const certaintyLow = certainty.low.map((t) => `<li>${escHtml(t)}</li>`).join("") || "<li>—</li>";
 
+    const primaryPromiseEsc = escHtml(pm.primary_promise ?? env.object.object_name ?? "—");
+    const siteIntelSummaryHtml = `
+      <div class="si-card">
+        <h3>Site intelligence summary</h3>
+        <p class="si-muted si-muted--block">
+          <b>What this site appears to be:</b> ${escHtml(publicSiteTypeLabel(env.site.site_type))}<br/>
+          <b>Likely audience:</b> ${escHtml(audienceForVertical(sc.vertical))}<br/>
+          <b>Likely objective:</b> ${escHtml(env.conversion.primary_objective.replace(/_/g, " "))}<br/>
+          <b>Confidence:</b> ${escHtml(confWord)} (${Math.round(sc.vertical_confidence)}% vertical read)
+        </p>
+      </div>
+      <div class="si-card">
+        <h3>Page understanding</h3>
+        <div class="si-kv">
+          <div>Page type</div><div class="si-metric">${escHtml(humanGenericPageLabel(env.page.generic_kind))}</div>
+          <div>Page role</div><div class="si-muted">${escHtml(
+            env.page.generic_kind === "homepage"
+              ? "Positioning + multi-section marketing home"
+              : "Content-led discovery and conversion paths",
+          )}</div>
+          <div>Primary page promise</div><div class="si-muted si-metric--break">${primaryPromiseEsc}</div>
+          <div>Detected structure</div><div class="si-muted">${pm.heading_counts.h2} section headings · ${
+            pm.heading_counts.h3
+          } supporting headings</div>
+        </div>
+      </div>
+      <div class="si-card">
+        <h3>Activation opportunity</h3>
+        <p class="si-muted si-muted--block">${escHtml(ao.visitor_read)}</p>
+        <div class="si-kv">
+          <div>Primary path</div><div class="si-metric si-metric--break">${escHtml(ao.primary_path_label)}</div>
+          <div>Secondary path</div><div class="si-muted">${escHtml(ao.secondary_path_label)}</div>
+          <div>Soft path</div><div class="si-muted">${escHtml(ao.soft_path_label)}</div>
+          <div>Inferred need</div><div class="si-metric si-metric--break">${escHtml(ao.inferred_need)}</div>
+          <div>Message angle</div><div class="si-muted">${escHtml(ao.message_angle)}</div>
+          <div>Offer type</div><div class="si-muted">${escHtml(ao.offer_type)}</div>
+          <div>Best surface</div><div class="si-muted">${escHtml(ao.surface)}</div>
+          <div>Timing</div><div class="si-muted">${escHtml(ao.timing)}</div>
+          <div>Activation note</div><div class="si-muted">${escHtml(ao.opportunity_note ?? "—")}</div>
+        </div>
+        <div class="si-muted si-muted--mb6">Evidence</div>
+        <ul class="si-reason">${ao.evidence.map((x) => `<li>${escHtml(x)}</li>`).join("") || "<li>—</li>"}</ul>
+      </div>
+      <div class="si-card">
+        <h3>Recommended personalization signal</h3>
+        <div class="si-kv">
+          <div>Inferred need</div><div class="si-metric si-metric--break">${escHtml(sig.inferred_need)}</div>
+          <div>Message angle</div><div class="si-muted">${escHtml(sig.recommended_message_angle)}</div>
+          <div>Offer</div><div class="si-muted">${escHtml(sig.recommended_offer_type)}</div>
+          <div>Surface</div><div class="si-muted">${escHtml(sig.recommended_surface)}</div>
+          <div>Timing</div><div class="si-muted">${escHtml(sig.recommended_timing)}</div>
+          <div>Friction</div><div class="si-muted">${escHtml(sig.recommended_friction_level)}</div>
+          <div>Conversion readiness</div><div class="si-metric">${sig.conversion_readiness}</div>
+          <div>Signal confidence</div><div class="si-metric">${(sig.confidence * 100).toFixed(0)}%</div>
+        </div>
+      </div>`;
+
+    const activationPreview = escHtml(JSON.stringify(p.activation_payload, null, 2));
+
     const html = `
+      ${siteIntelSummaryHtml}
       <div class="si-card">
         <h3>${siteContextTitle()}</h3>
         <div class="si-kv">
@@ -320,16 +383,16 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         <p class="si-muted si-muted--block">${escHtml(env.ladder.detail)}</p>
         <div class="si-kv">
           <div>Ladder</div><div><span class="si-pill">Level ${env.ladder.level} — ${escHtml(env.ladder.label)}</span></div>
-          <div>Inferred site type</div><div class="si-metric si-metric--break">${escHtml(env.site.site_type)}</div>
+          <div>Inferred site type</div><div class="si-metric si-metric--break">${escHtml(publicSiteTypeLabel(env.site.site_type))}</div>
           <div>Site confidence</div><div class="si-metric">${Math.round(env.site.confidence * 100)}%</div>
           <div>Generic page kind</div><div class="si-metric">${escHtml(env.page.generic_kind.replace(/_/g, " "))}</div>
           <div>Page confidence</div><div class="si-metric">${Math.round(env.page.confidence * 100)}%</div>
           <div>Page signals</div><div class="si-muted">${envSignals}</div>
-          <div>Likely objective</div><div class="si-metric si-metric--break">${escHtml(env.conversion.primary_objective)}</div>
+          <div>Likely objective</div><div class="si-metric si-metric--break">${escHtml(env.conversion.primary_objective.replace(/_/g, " "))}</div>
           <div>Secondary</div><div class="si-muted">${escHtml(env.conversion.secondary_objective ?? "—")}</div>
           <div>Objective confidence</div><div class="si-metric">${Math.round(env.conversion.confidence * 100)}%</div>
           <div>Conversion elements</div><div class="si-muted">${escHtml(env.conversion.detected_elements.join(", ") || "—")}</div>
-          <div>Page object</div><div class="si-muted">${escHtml(env.object.object_type)} — ${escHtml(env.object.object_name ?? "—")}</div>
+          <div>Page object</div><div class="si-muted">${escHtml(env.object.object_type)} — ${primaryPromiseEsc}</div>
           <div>Topic cluster</div><div class="si-muted">${escHtml(env.object.topic_cluster ?? "—")}</div>
           <div>Platform guess</div><div><span class="si-pill">${escHtml(env.site.platform_guess)}</span></div>
         </div>
@@ -361,7 +424,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       </div>
 
       <div class="si-card">
-        <h3>${escHtml(topicAffinitySectionTitle(sc.vertical))}</h3>
+        <h3>${escHtml(conceptCardTitle)}</h3>
         <div class="si-muted">${affinityEmpty ? "No strong signals yet — keep browsing." : ""}</div>
         ${affinityBlock}
       </div>
@@ -451,6 +514,19 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <div>${escHtml(liftPreview.ctaMetricLabel)}</div><div><span class="si-pill">${escHtml(liftPreview.ctaLine)}</span></div>
           <div>${escHtml(liftPreview.leadMetricLabel)}</div><div><span class="si-pill">${escHtml(liftPreview.leadLine)}</span></div>
         </div>
+      </div>
+
+      <div class="si-card">
+        <h3>Activation payload (integrations)</h3>
+        <p class="si-muted si-muted--block">
+          Use <code class="si-code">getActivationPayload()</code> / <code class="si-code">getPersonalizationSignal()</code>, or
+          <code class="si-code">pushPersonalizationSignalToDataLayer()</code> (and Adobe/Optimizely equivalents — same behavior as
+          <code class="si-code">pushToDataLayer()</code>, etc.).
+          <code class="si-code">pushPersonalizationSignalAll()</code> pushes to all three targets and dispatches
+          <code class="si-code">si:personalization-signal</code> and <code class="si-code">si:activation</code>.
+          During scoring, those two events also fire when the personalization signal changes meaningfully.
+        </p>
+        <pre class="si-pre">${activationPreview}</pre>
       </div>
 
       <div class="si-card">

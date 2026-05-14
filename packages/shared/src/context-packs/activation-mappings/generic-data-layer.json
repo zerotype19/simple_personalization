@@ -1,0 +1,6 @@
+{
+  "tool": "generic_data_layer",
+  "target": "dataLayer",
+  "event_name": "si_personalization_signal",
+  "notes": "Push SessionIntel.getActivationPayload() as a single object; fields mirror the `si` envelope."
+}

@@ -1,0 +1,6 @@
+{
+  "tool": "optimizely",
+  "target": "optimizely",
+  "event_name": "si_session_intelligence_update",
+  "notes": "Use SessionIntel.pushToOptimizely() or map `si` to Optimizely custom tags on the event payload."
+}

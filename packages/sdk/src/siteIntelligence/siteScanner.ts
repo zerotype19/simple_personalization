@@ -1,4 +1,5 @@
 import type { SiteScanSummary } from "@si/shared";
+import { normalizeReadableText } from "../siteSemantics/normalizeText";
 
 const STOP = new Set([
   "the",
@@ -156,7 +157,8 @@ function inferContentThemes(terms: string[]): string[] {
  */
 export function runSiteScan(): SiteScanSummary {
   const domain = typeof window !== "undefined" ? window.location.hostname : "";
-  const page_title = typeof document !== "undefined" ? document.title.trim() : "";
+  const page_title =
+    typeof document !== "undefined" ? normalizeReadableText(document.title) : "";
   const chunks: string[] = [];
 
   chunks.push(page_title);

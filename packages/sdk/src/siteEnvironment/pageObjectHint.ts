@@ -1,4 +1,5 @@
 import type { GenericPageKind, SiteScanSummary, SiteVertical } from "@si/shared";
+import { normalizeReadableText } from "../siteSemantics/normalizeText";
 
 function firstH1(): string | null {
   if (typeof document === "undefined") return null;
@@ -8,9 +9,9 @@ function firstH1(): string | null {
 }
 
 function objectDisplayName(h1: string | null, pageTitle: string): string | null {
-  const a = h1?.trim();
+  const a = normalizeReadableText(h1 ?? "");
   if (a) return a;
-  const b = pageTitle?.trim();
+  const b = normalizeReadableText(pageTitle);
   return b || null;
 }
 

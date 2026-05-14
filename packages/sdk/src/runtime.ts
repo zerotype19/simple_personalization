@@ -1,4 +1,9 @@
-import type { SDKConfig, SessionProfile } from "@si/shared";
+import type {
+  ActivationPayloadEnvelope,
+  PersonalizationSignal,
+  SDKConfig,
+  SessionProfile,
+} from "@si/shared";
 import { computeConceptAffinityDetailed } from "@si/shared/contextBrain";
 import { Batcher } from "./batcher";
 import { DEFAULT_CONFIG } from "./defaults";
@@ -17,6 +22,9 @@ import {
   classifyVertical,
   runSiteScan,
 } from "./siteIntelligence";
+import { buildActivationPayload, buildPersonalizationSignal } from "./siteSemantics/activationPayload";
+import { inferActivationOpportunity } from "./siteSemantics/conversionArchitecture";
+import { runSiteSemantics } from "./siteSemantics/semanticScanner";
 import { buildSiteEnvironment, humanGenericPageLabel } from "./siteEnvironment";
 
 export interface BootOptions {
@@ -39,6 +47,7 @@ export class SessionIntelRuntime {
   private converted = false;
   private conversionType: string | null = null;
   private lastContextUrl: string | null = null;
+  private lastPersonalizationJson = "";
 
   constructor(private opts: BootOptions = {}) {}
 
@@ -109,6 +118,84 @@ export class SessionIntelRuntime {
     void this.batcher?.flush("conversion");
   }
 
+  getActivationPayload(): ActivationPayloadEnvelope {
+    return structuredClone(this.profile.activation_payload);
+  }
+
+  getPersonalizationSignal(): PersonalizationSignal {
+    return structuredClone(this.profile.personalization_signal);
+  }
+
+  pushToDataLayer(): void {
+    const payload = this.getActivationPayload();
+    const w = window as unknown as { dataLayer?: unknown[] };
+    w.dataLayer = w.dataLayer || [];
+    w.dataLayer.push(payload);
+  }
+
+  pushToAdobeDataLayer(): void {
+    const payload = this.getActivationPayload();
+    const w = window as unknown as { adobeDataLayer?: unknown[] };
+    w.adobeDataLayer = w.adobeDataLayer || [];
+    w.adobeDataLayer.push(payload);
+  }
+
+  pushToOptimizely(): void {
+    const payload = this.getActivationPayload();
+    const w = window as unknown as { optimizely?: unknown[] };
+    w.optimizely = w.optimizely || [];
+    (w.optimizely as unknown[]).push({
+      type: "event",
+      eventName: payload.event,
+      tags: payload.si,
+    });
+  }
+
+  /** Alias for demos/docs — same as {@link pushToDataLayer}. */
+  pushPersonalizationSignalToDataLayer(): void {
+    this.pushToDataLayer();
+  }
+
+  /** Alias for demos/docs — same as {@link pushToAdobeDataLayer}. */
+  pushPersonalizationSignalToAdobeDataLayer(): void {
+    this.pushToAdobeDataLayer();
+  }
+
+  /** Alias for demos/docs — same as {@link pushToOptimizely}. */
+  pushPersonalizationSignalToOptimizely(): void {
+    this.pushToOptimizely();
+  }
+
+  /**
+   * Push current activation envelope to GTM/dataLayer, Adobe, and Optimizely, then dispatch
+   * `si:personalization-signal` and `si:activation` (useful for one-shot integration wiring).
+   */
+  pushPersonalizationSignalAll(): void {
+    this.pushToDataLayer();
+    this.pushToAdobeDataLayer();
+    this.pushToOptimizely();
+    const detail = this.getActivationPayload();
+    try {
+      window.dispatchEvent(new CustomEvent("si:personalization-signal", { detail }));
+      window.dispatchEvent(new CustomEvent("si:activation", { detail }));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private maybeEmitActivationPayload(): void {
+    const json = JSON.stringify(this.profile.personalization_signal);
+    if (json === this.lastPersonalizationJson) return;
+    this.lastPersonalizationJson = json;
+    const detail = this.getActivationPayload();
+    try {
+      window.dispatchEvent(new CustomEvent("si:personalization-signal", { detail }));
+      window.dispatchEvent(new CustomEvent("si:activation", { detail }));
+    } catch {
+      /* ignore */
+    }
+  }
+
   /**
    * Clears persisted session storage, starts a fresh session id, re-draws A/B assignment,
    * clears applied DOM treatments, and re-runs scoring — **without** a full page reload.
@@ -122,6 +209,7 @@ export class SessionIntelRuntime {
     this.profile = loadOrCreateProfile(ctx.page_type);
     this.profile.experiment_assignment = assignExperiments(this.config.experiments, this.profile);
     this.lastContextUrl = null;
+    this.lastPersonalizationJson = "";
     this.tick();
   }
 
@@ -245,6 +333,16 @@ export class SessionIntelRuntime {
     );
     this.profile.next_best_action = rec;
 
+    this.profile.page_semantics = runSiteSemantics(scan, env, vertical);
+    this.profile.activation_opportunity = inferActivationOpportunity({
+      profile: this.profile,
+      env,
+      scan,
+      semantics: this.profile.page_semantics,
+    });
+    this.profile.personalization_signal = buildPersonalizationSignal(this.profile);
+    this.profile.activation_payload = buildActivationPayload(this.profile);
+
     // Re-assign experiments if none yet.
     if (!this.profile.experiment_assignment) {
       this.profile.experiment_assignment = assignExperiments(
@@ -269,6 +367,7 @@ export class SessionIntelRuntime {
     }
 
     persistProfile(this.profile);
+    this.maybeEmitActivationPayload();
     this.emit();
     this.mountInspectorIfNeeded();
   }
@@ -296,5 +395,7 @@ function deepMerge<T extends Record<string, any>>(base: T, patch: Partial<T>): T
 declare global {
   interface WindowEventMap {
     "si:conversion": CustomEvent<{ type?: string }>;
+    "si:activation": CustomEvent<import("@si/shared").ActivationPayloadEnvelope>;
+    "si:personalization-signal": CustomEvent<import("@si/shared").ActivationPayloadEnvelope>;
   }
 }

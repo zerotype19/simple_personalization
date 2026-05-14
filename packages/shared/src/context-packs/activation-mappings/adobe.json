@@ -1,0 +1,13 @@
+{
+  "tool": "adobe",
+  "target": "adobeDataLayer",
+  "event_name": "si_session_intelligence_update",
+  "fields": {
+    "si.site.type": "site_type",
+    "si.page.kind": "page_kind",
+    "si.session.journey_stage": "journey_stage",
+    "si.session.intent_score": "intent_score",
+    "si.objective.primary": "primary_objective",
+    "si.nba.action": "next_best_action"
+  }
+}

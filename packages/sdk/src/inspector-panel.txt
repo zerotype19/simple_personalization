@@ -210,3 +210,31 @@ button.si-btn.danger {
   font-size: 11px;
   line-height: 1.35;
 }
+.si-pre {
+  margin: 0;
+  padding: 8px 10px;
+  background: #0b0f14;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  font-size: 10px;
+  line-height: 1.35;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.si-concept-narrative {
+  margin-bottom: 8px;
+}
+.si-concept-narrative .si-concept-name {
+  font-weight: 600;
+  color: #e6edf3;
+}
+.si-concept-band {
+  font-size: 11px;
+  margin-top: 2px;
+}
+.si-concept-why {
+  font-size: 11px;
+  margin-top: 3px;
+}

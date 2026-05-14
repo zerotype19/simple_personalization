@@ -8,6 +8,13 @@ import type {
 } from "@si/shared";
 import { detectReturnVisit, safeGetJSON, safeSetJSON } from "./storage";
 import { emptySiteEnvironmentSnapshot } from "./siteEnvironment";
+import {
+  emptyActivationOpportunity,
+  emptyActivationPayload,
+  emptyPageSemantics,
+  emptyPersonalizationSignal,
+} from "./siteSemantics/defaults";
+import { normalizeReadableText } from "./siteSemantics/normalizeText";
 
 /** sessionStorage key for the persisted SessionProfile (not a cookie). */
 export const SI_SESSION_STORAGE_KEY = "si:session";
@@ -25,7 +32,7 @@ function emptySiteScan(): SiteScanSummary {
   return {
     domain: typeof window !== "undefined" ? window.location.hostname : "",
     site_name: null,
-    page_title: typeof document !== "undefined" ? document.title : "",
+    page_title: typeof document !== "undefined" ? normalizeReadableText(document.title) : "",
     top_terms: [],
     primary_ctas: [],
     content_themes: [],
@@ -69,6 +76,10 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     if (!existing.site_environment) existing.site_environment = emptySiteEnvironmentSnapshot();
     if (!existing.concept_affinity) existing.concept_affinity = {};
     if (!existing.concept_evidence) existing.concept_evidence = {};
+    if (!existing.page_semantics) existing.page_semantics = emptyPageSemantics();
+    if (!existing.activation_opportunity) existing.activation_opportunity = emptyActivationOpportunity();
+    if (!existing.personalization_signal) existing.personalization_signal = emptyPersonalizationSignal();
+    if (!existing.activation_payload) existing.activation_payload = emptyActivationPayload();
     return existing;
   }
   const session_id = generateId();
@@ -93,6 +104,10 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     site_context: defaultSiteContext(),
     dynamic_signals: {},
     site_environment: emptySiteEnvironmentSnapshot(),
+    page_semantics: emptyPageSemantics(),
+    activation_opportunity: emptyActivationOpportunity(),
+    personalization_signal: emptyPersonalizationSignal(),
+    activation_payload: emptyActivationPayload(),
   };
   safeSetJSON(SESSION_KEY, profile);
   return profile;

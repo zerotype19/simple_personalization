@@ -1,4 +1,5 @@
 import type { PageType, SiteEnvironmentSnapshot, SiteScanSummary, SiteVertical } from "@si/shared";
+import { humanizePageSignals } from "../siteIntelligence/publicLabels";
 import { buildConfidenceLadder } from "./confidenceLadder";
 import { inferConversionObjectives } from "./conversionInference";
 import {
@@ -18,7 +19,8 @@ export interface BuildSiteEnvironmentInput {
 
 export function buildSiteEnvironment(input: BuildSiteEnvironmentInput): SiteEnvironmentSnapshot {
   const jsonLdTypes = collectJsonLdTypes();
-  const page = classifyGenericPage(input.pathname, input.scan, input.pageType, jsonLdTypes);
+  const pageRaw = classifyGenericPage(input.pathname, input.scan, input.pageType, jsonLdTypes);
+  const page = { ...pageRaw, signals_used: humanizePageSignals(pageRaw.signals_used) };
   const site = buildSiteFingerprint(
     input.scan,
     input.vertical,

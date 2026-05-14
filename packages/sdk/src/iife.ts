@@ -15,6 +15,15 @@ declare global {
       subscribe: (cb: (p: import("@si/shared").SessionProfile) => void) => () => void;
       markConversion: (type?: string) => void;
       softResetSession: typeof api.softResetSession;
+      getActivationPayload: typeof api.getActivationPayload;
+      getPersonalizationSignal: typeof api.getPersonalizationSignal;
+      pushToDataLayer: typeof api.pushToDataLayer;
+      pushToAdobeDataLayer: typeof api.pushToAdobeDataLayer;
+      pushToOptimizely: typeof api.pushToOptimizely;
+      pushPersonalizationSignalToDataLayer: typeof api.pushPersonalizationSignalToDataLayer;
+      pushPersonalizationSignalToAdobeDataLayer: typeof api.pushPersonalizationSignalToAdobeDataLayer;
+      pushPersonalizationSignalToOptimizely: typeof api.pushPersonalizationSignalToOptimizely;
+      pushPersonalizationSignalAll: typeof api.pushPersonalizationSignalAll;
     };
     SessionIntelBundle?: {
       bootFromScriptTag: () => Promise<void>;
@@ -43,6 +52,15 @@ export function boot(): void {
           subscribe: (cb) => rt.subscribe(cb),
           markConversion: (t?: string) => rt.markConversion(t),
           softResetSession: () => api.softResetSession(),
+          getActivationPayload: () => rt.getActivationPayload(),
+          getPersonalizationSignal: () => rt.getPersonalizationSignal(),
+          pushToDataLayer: () => rt.pushToDataLayer(),
+          pushToAdobeDataLayer: () => rt.pushToAdobeDataLayer(),
+          pushToOptimizely: () => rt.pushToOptimizely(),
+          pushPersonalizationSignalToDataLayer: () => rt.pushPersonalizationSignalToDataLayer(),
+          pushPersonalizationSignalToAdobeDataLayer: () => rt.pushPersonalizationSignalToAdobeDataLayer(),
+          pushPersonalizationSignalToOptimizely: () => rt.pushPersonalizationSignalToOptimizely(),
+          pushPersonalizationSignalAll: () => rt.pushPersonalizationSignalAll(),
         };
       } catch (err) {
         console.error("[Session Intelligence] boot failed", err);
