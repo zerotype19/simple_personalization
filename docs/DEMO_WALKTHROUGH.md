@@ -51,6 +51,8 @@ The script only **curl**s the Worker and Pages; it does not drive the browser th
 
 ## Manual demo script (narrative)
 
+For **speaker notes and discussion cues** (SAY / DO / CUE), see [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
+
 Do these in order in the **demo** tab. Keep the **dashboard** open in another tab and **refresh** it after steps 6 and 8.
 
 1. **Open the demo**  
