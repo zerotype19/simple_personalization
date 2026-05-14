@@ -22,3 +22,13 @@ Sporting Goods
 Toys & Games
 Vehicles & Parts
 General Merchandise
+Healthcare Services
+Financial Services
+Education & Training
+Travel & Hospitality
+Real Estate Services
+Home Services
+Restaurants & Food Service
+Consumer Services
+Events & Ticketing
+Business Software

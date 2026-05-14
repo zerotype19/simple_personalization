@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "docs:generate": "node scripts/generate-session-intelligence-docs.mjs",
-    "docs:copy-to-apps": "node scripts/copy-integration-docs.mjs"
+    "docs:copy-to-apps": "node scripts/copy-integration-docs.mjs",
+    "bundle:session-intelligence-review": "bash scripts/build-session-intelligence-review-bundle.sh"
   },
   "devDependencies": {
     "happy-dom": "^15.11.7",

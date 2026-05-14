@@ -1,4 +1,5 @@
 import type { SiteScanSummary } from "@si/shared";
+import { bucketCtaLabels } from "../siteSemantics/ctaClassifier";
 import { normalizeReadableText } from "../siteSemantics/normalizeText";
 
 const STOP = new Set([
@@ -84,6 +85,13 @@ function tokenize(text: string): string[] {
     .filter((w) => w.length > 2 && !STOP.has(w));
 }
 
+function addWeighted(counts: Map<string, number>, text: string, weight: number): void {
+  if (!text || weight <= 0) return;
+  for (const w of tokenize(text)) {
+    counts.set(w, (counts.get(w) ?? 0) + weight);
+  }
+}
+
 function topTermsFromCounts(counts: Map<string, number>, limit: number): string[] {
   return [...counts.entries()]
     .sort((a, b) => b[1] - a[1])
@@ -124,16 +132,33 @@ function collectJsonLdStrings(maxChars: number): string {
   return parts.join(" ").slice(0, maxChars);
 }
 
-function detectPrimaryCtas(): string[] {
-  const found = new Set<string>();
-  const re =
-    /\b(start|try|demo|pricing|sign\s*up|subscribe|book|contact|get\s+started|learn\s+more|join|free\s+trial|download)\b/i;
-  document.querySelectorAll<HTMLElement>("main a, main button, header a, header button").forEach((el, i) => {
-    if (i > 80) return;
-    const t = (el.textContent ?? "").trim();
-    if (t.length > 1 && t.length < 80 && re.test(t)) found.add(t.slice(0, 60));
+function collectUniqueNavFooterTexts(
+  selector: string,
+  maxEls: number,
+  maxLen: number,
+): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  document.querySelectorAll<HTMLElement>(selector).forEach((el, i) => {
+    if (i > maxEls) return;
+    const t = normalizeReadableText(el.textContent ?? "");
+    if (t.length < 2 || t.length > maxLen) return;
+    const k = t.toLowerCase();
+    if (seen.has(k)) return;
+    seen.add(k);
+    out.push(t);
   });
-  return [...found].slice(0, 8);
+  return out;
+}
+
+function collectCtaLinkTexts(maxEls: number): string[] {
+  const out: string[] = [];
+  document.querySelectorAll<HTMLElement>("main a, main button, header a, header button").forEach((el, i) => {
+    if (i > maxEls) return;
+    const t = (el.textContent ?? "").trim();
+    if (t.length > 1 && t.length < 80) out.push(t);
+  });
+  return out;
 }
 
 function inferContentThemes(terms: string[]): string[] {
@@ -159,41 +184,50 @@ export function runSiteScan(): SiteScanSummary {
   const domain = typeof window !== "undefined" ? window.location.hostname : "";
   const page_title =
     typeof document !== "undefined" ? normalizeReadableText(document.title) : "";
-  const chunks: string[] = [];
+  const counts = new Map<string, number>();
 
-  chunks.push(page_title);
-  chunks.push(readMeta("description"));
-  chunks.push(readMeta("og:title"));
-  chunks.push(readMeta("og:description"));
-  chunks.push(readMeta("og:site_name"));
+  addWeighted(counts, page_title, 5);
+  addWeighted(counts, readMeta("description"), 4);
+  addWeighted(counts, readMeta("og:title"), 4);
+  addWeighted(counts, readMeta("og:description"), 4);
+  addWeighted(counts, readMeta("og:site_name"), 3);
 
   try {
     const body = document.body?.innerText ?? "";
-    chunks.push(body.slice(0, 12000));
+    addWeighted(counts, body.slice(0, 8000), 1);
   } catch {
     /* ignore */
   }
 
-  document.querySelectorAll<HTMLElement>("h1, h2, h3").forEach((el, i) => {
-    if (i < 40) chunks.push(el.textContent ?? "");
+  document.querySelectorAll<HTMLElement>("h1").forEach((el, i) => {
+    if (i < 2) addWeighted(counts, el.textContent ?? "", i === 0 ? 5 : 3.5);
+  });
+  document.querySelectorAll<HTMLElement>("h2, h3").forEach((el, i) => {
+    if (i < 40) addWeighted(counts, el.textContent ?? "", 3);
   });
 
-  document.querySelectorAll<HTMLElement>("nav a").forEach((el, i) => {
-    if (i < 35) chunks.push(el.textContent ?? "");
-  });
+  for (const line of collectUniqueNavFooterTexts("nav a", 35, 48)) {
+    addWeighted(counts, line, 0.35);
+  }
+  for (const line of collectUniqueNavFooterTexts("footer a", 28, 48)) {
+    addWeighted(counts, line, 0.25);
+  }
 
-  chunks.push(collectJsonLdStrings(2500));
+  addWeighted(counts, collectJsonLdStrings(2500), 2.5);
 
-  const counts = new Map<string, number>();
-  for (const c of chunks) {
-    for (const w of tokenize(c)) {
-      counts.set(w, (counts.get(w) ?? 0) + 1);
-    }
+  for (const t of collectCtaLinkTexts(80)) {
+    addWeighted(counts, t, 2.5);
   }
 
   const top_terms = topTermsFromCounts(counts, 18);
   const content_themes = inferContentThemes(top_terms);
-  const primary_ctas = detectPrimaryCtas();
+
+  const ctaBuckets = bucketCtaLabels(collectCtaLinkTexts(80));
+  const cta_text_hard = ctaBuckets.hard.slice(0, 8);
+  const cta_text_soft = ctaBuckets.soft.slice(0, 8);
+  const cta_text_navigation = ctaBuckets.navigation.slice(0, 8);
+  const cta_text_support = ctaBuckets.support.slice(0, 6);
+  const primary_ctas = [...cta_text_hard, ...cta_text_soft].slice(0, 8);
 
   const site_name =
     readMeta("og:site_name") ||
@@ -205,6 +239,10 @@ export function runSiteScan(): SiteScanSummary {
     page_title,
     top_terms,
     primary_ctas,
+    cta_text_hard,
+    cta_text_soft,
+    cta_text_navigation,
+    cta_text_support,
     content_themes,
   };
 }

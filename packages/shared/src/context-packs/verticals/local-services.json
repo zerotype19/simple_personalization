@@ -1,0 +1,8 @@
+{
+  "id": "local_services",
+  "label": "Local services",
+  "likely_objectives": ["call", "booking", "lead_capture"],
+  "page_kinds": ["homepage", "service_page", "location", "lead_form"],
+  "archetypes": ["near_me_shopper", "appointment_seeker", "price_checker"],
+  "concept_pack_ids": ["universal_intent", "lead_generation", "content_engagement"]
+}

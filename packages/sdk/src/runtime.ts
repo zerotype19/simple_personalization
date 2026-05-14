@@ -4,6 +4,7 @@ import type {
   SDKConfig,
   SessionProfile,
 } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 import { computeConceptAffinityDetailed } from "@si/shared/contextBrain";
 import { Batcher } from "./batcher";
 import { DEFAULT_CONFIG } from "./defaults";
@@ -23,6 +24,8 @@ import {
   runSiteScan,
 } from "./siteIntelligence";
 import { buildActivationPayload, buildPersonalizationSignal } from "./siteSemantics/activationPayload";
+import { buildBehaviorSnapshot } from "./siteSemantics/behaviorSnapshot";
+import { appendIntelMilestones } from "./sessionIntel";
 import { inferActivationOpportunity } from "./siteSemantics/conversionArchitecture";
 import { runSiteSemantics } from "./siteSemantics/semanticScanner";
 import { buildSiteEnvironment, humanGenericPageLabel } from "./siteEnvironment";
@@ -340,6 +343,25 @@ export class SessionIntelRuntime {
       scan,
       semantics: this.profile.page_semantics,
     });
+
+    if (isNewPageContext) {
+      const steps = this.profile.page_journey ?? [];
+      steps.push({
+        path: window.location.pathname,
+        generic_kind: env.page.generic_kind,
+        title_snippet: scan.page_title ? scan.page_title.slice(0, 80) : null,
+        t: Date.now(),
+      });
+      if (steps.length > 36) steps.splice(0, steps.length - 36);
+      this.profile.page_journey = steps;
+    }
+
+    buildBehaviorSnapshot(this.profile);
+    appendIntelMilestones(this.profile, {
+      isNewPageContext,
+      pathname: urlNow,
+      genericKind: env.page.generic_kind,
+    });
     this.profile.personalization_signal = buildPersonalizationSignal(this.profile);
     this.profile.activation_payload = buildActivationPayload(this.profile);
 
@@ -354,7 +376,7 @@ export class SessionIntelRuntime {
     clearTreatments();
     this.profile.active_treatments = [];
 
-    if (this.personalizationEnabled && this.profile.site_context.vertical === "auto_retail") {
+    if (this.personalizationEnabled && isAutoSiteVertical(this.profile.site_context.vertical)) {
       const picks = selectTreatments(this.config.treatments, this.profile);
       for (const pick of picks) {
         const def = this.config.treatments.find((t) => t.id === pick.id);

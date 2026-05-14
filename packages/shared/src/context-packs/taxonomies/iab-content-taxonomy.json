@@ -28,6 +28,10 @@
     { "id": "IAB25", "name": "Style & Fashion", "examples": ["fashion", "style"] },
     { "id": "IAB26", "name": "Technology & Computing", "examples": ["software", "saas", "cloud"] },
     { "id": "IAB27", "name": "Travel", "examples": ["travel", "hotels", "flights"] },
-    { "id": "IAB28", "name": "Video Gaming", "examples": ["games", "gaming"] }
+    { "id": "IAB28", "name": "Video Gaming", "examples": ["games", "gaming"] },
+    { "id": "IAB29", "name": "Healthcare Services", "examples": ["hospital", "clinic", "patient care", "telehealth"] },
+    { "id": "IAB30", "name": "Financial Services", "examples": ["banking", "wealth", "mortgage", "insurance"] },
+    { "id": "IAB31", "name": "Consumer Services", "examples": ["appointments", "repairs", "memberships"] },
+    { "id": "IAB32", "name": "Software (B2B)", "examples": ["saas", "platform", "workflow", "api"] }
   ]
 }

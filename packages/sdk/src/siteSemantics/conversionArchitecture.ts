@@ -7,6 +7,7 @@ import type {
   SiteScanSummary,
   SiteVertical,
 } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 import { tryMatchActivationPlaybook } from "./matchActivationPlaybook";
 
 export function inferActivationOpportunity(input: {
@@ -43,7 +44,7 @@ export function inferActivationOpportunity(input: {
     inferred_need = "Confidence to purchase the right product";
     message_angle = "Help me choose and complete checkout";
     offer_type = "Product recommendation, incentive, or cart recovery prompt";
-  } else if (v === "publisher_content") {
+  } else if (v === "publisher_content" || v === "content_led_business") {
     primary_path_label = "Newsletter or subscription conversion";
     secondary_path_label = "Article depth and topic loyalty";
     soft_path_label = "Related reading and return visits";
@@ -57,7 +58,7 @@ export function inferActivationOpportunity(input: {
     inferred_need = "Proof the firm can solve their problem";
     message_angle = "Credibility-led progression into a conversation";
     offer_type = "Case study, diagnostic, or consultation CTA";
-  } else if (v === "auto_retail") {
+  } else if (isAutoSiteVertical(v)) {
     primary_path_label = "Vehicle inquiry, visit, or purchase";
     secondary_path_label = "Inventory comparison and financing research";
     soft_path_label = "Brand and model exploration";
@@ -65,13 +66,27 @@ export function inferActivationOpportunity(input: {
     message_angle = "Move from research to vehicle-specific action";
     offer_type = "Inventory, payment, or visit CTA";
     friction = "medium";
-  } else {
+  } else if (v === "b2b_saas" || v === "lead_generation") {
     primary_path_label = "Guide, demo, or implementation engagement";
     secondary_path_label = "Framework and product education";
     soft_path_label = "Related content depth and repeat visits";
     inferred_need = "Make the operating model practical for their team";
     message_angle = "Implementation support and practical next steps";
     offer_type = "Implementation guide, checklist, or soft demo CTA";
+  } else if (v === "nonprofit") {
+    primary_path_label = "Donation, volunteer, or mission engagement";
+    secondary_path_label = "Impact stories and program education";
+    soft_path_label = "Events and community content";
+    inferred_need = "Confidence that the mission matches their values";
+    message_angle = "Story-led progression into a low-friction ask";
+    offer_type = "Donation module, volunteer signup, or event CTA";
+  } else {
+    primary_path_label = "Primary next step (quote, booking, purchase, or signup)";
+    secondary_path_label = "Trust, proof, and FAQ depth";
+    soft_path_label = "Educational content and return visits";
+    inferred_need = "Confidence to take the right next action for their situation";
+    message_angle = "Match the ask to journey stage — proof before pressure";
+    offer_type = "Contextual guide, offer, consultation, or soft popup depending on vertical";
   }
 
   const visitorPersona = profile.persona ? profile.persona.replace(/_/g, " ") : null;
@@ -91,8 +106,10 @@ export function inferActivationOpportunity(input: {
   if (semantics.commerce_signal_hits.length === 0 && v !== "ecommerce")
     evidence.push("No cart/checkout retail pattern detected in sampled body text");
   if (pk === "homepage") evidence.push("Homepage layout and multi-section structure detected");
-  if (scan.primary_ctas.length === 0 && semantics.nav_link_sample.length)
-    evidence.push("Navigation sampled; no dominant hero CTA captured yet");
+  const convCtas =
+    (scan.cta_text_hard?.length ?? 0) + (scan.cta_text_soft?.length ?? 0) || scan.primary_ctas.length;
+  if (convCtas === 0 && semantics.nav_link_sample.length)
+    evidence.push("Navigation sampled; no dominant conversion CTA captured yet");
 
   const reason: string[] = [];
   if (s.return_visit) reason.push("Return visit increases readiness for a softer second ask");
@@ -111,7 +128,7 @@ export function inferActivationOpportunity(input: {
   );
 
   const opportunity_note =
-    scan.primary_ctas.length === 0
+    convCtas === 0
       ? "Activation opportunity: no dominant conversion CTA detected yet — consider a softer guide or checklist first."
       : "Activation opportunity: CTAs are present — align creative to the strongest concept and journey stage.";
 

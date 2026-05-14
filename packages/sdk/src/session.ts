@@ -63,7 +63,30 @@ export function createBlankSignals(): SessionSignals {
     return_visit: false,
     session_duration_ms: 0,
     category_hits: {},
+    landing_href: typeof window !== "undefined" ? window.location.href : "",
+    initial_referrer: typeof document !== "undefined" ? document.referrer || null : null,
+    path_sequence: typeof window !== "undefined" ? [window.location.pathname] : [],
+    tab_visible_ms: 0,
+    tab_hidden_ms: 0,
+    cta_hover_events: 0,
+    offer_surface_clicks: 0,
+    form_field_focus_events: 0,
+    onsite_search_events: 0,
   };
+}
+
+function migrateSessionSignals(s: SessionSignals): void {
+  if (!s.landing_href && typeof window !== "undefined") s.landing_href = window.location.href;
+  if (s.initial_referrer === undefined && typeof document !== "undefined") s.initial_referrer = document.referrer || null;
+  if (!Array.isArray(s.path_sequence)) {
+    s.path_sequence = typeof window !== "undefined" ? [window.location.pathname] : [];
+  }
+  s.tab_visible_ms ??= 0;
+  s.tab_hidden_ms ??= 0;
+  s.cta_hover_events ??= 0;
+  s.offer_surface_clicks ??= 0;
+  s.form_field_focus_events ??= 0;
+  s.onsite_search_events ??= 0;
 }
 
 export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
@@ -82,6 +105,12 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
       existing.activation_opportunity.playbook = null;
     if (!existing.personalization_signal) existing.personalization_signal = emptyPersonalizationSignal();
     if (!existing.activation_payload) existing.activation_payload = emptyActivationPayload();
+    if (!existing.intel_timeline) existing.intel_timeline = [];
+    if (!existing.intel_timeline_meta) existing.intel_timeline_meta = {};
+    if (existing.signals.session_duration_ms > 8000 || existing.signals.pages_viewed > 1) {
+      existing.intel_timeline_meta.arrival_logged = true;
+    }
+    migrateSessionSignals(existing.signals);
     return existing;
   }
   const session_id = generateId();
@@ -110,6 +139,8 @@ export function loadOrCreateProfile(initialPageType: PageType): SessionProfile {
     activation_opportunity: emptyActivationOpportunity(),
     personalization_signal: emptyPersonalizationSignal(),
     activation_payload: emptyActivationPayload(),
+    intel_timeline: [],
+    intel_timeline_meta: {},
   };
   safeSetJSON(SESSION_KEY, profile);
   return profile;

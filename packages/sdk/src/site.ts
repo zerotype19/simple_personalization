@@ -1,4 +1,5 @@
 import type { PageType, SiteScanSummary, SiteVertical } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 import { topicAffinityHitsFromScan } from "./siteIntelligence/dynamicSignalModel";
 
 const URL_PATTERNS: Array<{ type: PageType; re: RegExp }> = [
@@ -203,7 +204,7 @@ export function inferPageContext(opts?: {
   let category_hits: Record<string, number> = {};
   if (!opts?.minimal) {
     const v = opts?.vertical ?? "auto_retail";
-    if (v === "auto_retail") {
+    if (isAutoSiteVertical(v)) {
       category_hits = extractCategoryHits();
     } else if (opts?.scan) {
       category_hits = topicAffinityHitsFromScan(opts.scan);

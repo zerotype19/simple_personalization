@@ -9,5 +9,15 @@
   { "id": "FAQPage", "label": "FAQ page" },
   { "id": "WebPage", "label": "Web page" },
   { "id": "CollectionPage", "label": "Collection page" },
-  { "id": "ItemList", "label": "Item list" }
+  { "id": "ItemList", "label": "Item list" },
+  { "id": "MedicalOrganization", "label": "Medical organization" },
+  { "id": "Physician", "label": "Physician" },
+  { "id": "FinancialProduct", "label": "Financial product" },
+  { "id": "EducationalOrganization", "label": "Educational organization" },
+  { "id": "Hotel", "label": "Hotel" },
+  { "id": "RealEstateAgent", "label": "Real estate agent" },
+  { "id": "LocalBusiness", "label": "Local business" },
+  { "id": "Restaurant", "label": "Restaurant" },
+  { "id": "Event", "label": "Event" },
+  { "id": "SoftwareApplication", "label": "Software application" }
 ]

@@ -1,4 +1,5 @@
 import type { GenericPageKind, SiteScanSummary, SiteVertical } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 import { normalizeReadableText } from "../siteSemantics/normalizeText";
 
 function firstH1(): string | null {
@@ -28,7 +29,7 @@ export function inferPageObject(
   const h1 = firstH1();
   const topic = scan.content_themes[0] ?? scan.top_terms[0] ?? null;
 
-  if (vertical === "auto_retail") {
+  if (isAutoSiteVertical(vertical)) {
     return {
       object_type: "vehicle",
       object_name: objectDisplayName(h1, scan.page_title),

@@ -1,4 +1,5 @@
 import type { SessionSignals, SiteScanSummary, SiteVertical } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, Math.round(n)));
@@ -17,7 +18,7 @@ export function buildDynamicSignals(
   const durS = Math.round(signals.session_duration_ms / 1000);
   const cta = signals.cta_clicks;
 
-  if (vertical === "auto_retail") {
+  if (isAutoSiteVertical(vertical)) {
     return {
       Pages: String(pages),
       "VDP views": String(signals.vdp_views),
@@ -38,7 +39,11 @@ export function buildDynamicSignals(
     100,
   );
   const productInterest = clamp(cta * 12 + scroll * 0.22 + pages * 2.5, 0, 100);
-  const demoIntent = clamp(cta * 18 + (scan.primary_ctas.some((c) => /demo|trial|book/i.test(c)) ? 24 : 0), 0, 100);
+  const demoIntent = clamp(
+    cta * 18 + ((scan.cta_text_hard ?? []).some((c) => /demo|trial|book/i.test(c)) ? 24 : 0),
+    0,
+    100,
+  );
   const conversionReadiness = clamp(
     cta * 15 + (signals.return_visit ? 12 : 0) + scroll * 0.15,
     0,

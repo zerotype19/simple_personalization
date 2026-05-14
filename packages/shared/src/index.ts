@@ -1,5 +1,110 @@
 export type JourneyStage = "discovery" | "browsing" | "comparison" | "conversion";
 
+/**
+ * Finer-grained commercial journey read (orthogonal to legacy {@link JourneyStage} for integrations).
+ * Mapped heuristically from navigation, page roles, and engagement — not identity.
+ */
+export type CommercialJourneyPhase =
+  | "discovery"
+  | "research"
+  | "comparison"
+  | "evaluation"
+  | "validation"
+  | "conversion_ready"
+  | "retention_interest"
+  | "support_service";
+
+/** Inferred paid / owned / earned channel from URL parameters and referrer (first-party only). */
+export type TrafficChannelGuess =
+  | "paid_search"
+  | "paid_social"
+  | "display_or_programmatic"
+  | "email_or_crm"
+  | "affiliate_or_partner"
+  | "organic_social"
+  | "organic_search"
+  | "direct_or_unknown"
+  | "referral";
+
+export interface TrafficAcquisitionRead {
+  channel_guess: TrafficChannelGuess;
+  landing_path: string;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_term: string | null;
+  utm_content: string | null;
+  has_click_id: boolean;
+}
+
+export interface CampaignIntentRead {
+  keyword_themes: string[];
+  campaign_angle: string | null;
+  commercial_clues: string[];
+  confidence_0_100: number;
+}
+
+export interface ReferrerIntelligenceRead {
+  category:
+    | "search"
+    | "social"
+    | "ai_chat"
+    | "news_or_media"
+    | "partner_or_affiliate"
+    | "internal"
+    | "referral"
+    | "unknown";
+  host: string | null;
+  narrative: string;
+}
+
+export interface NavigationPatternRead {
+  journey_pattern: string;
+  journey_velocity: "rapid" | "deliberate" | "slow";
+  comparison_behavior: boolean;
+  high_intent_transition: boolean;
+  path_summary: string;
+}
+
+export interface EngagementQualityRead {
+  label: "deep_reader" | "skim_reader" | "rapid_scanner" | "comparison_reviewer" | "hesitant_converter" | "balanced_visitor";
+  rationale: string[];
+}
+
+export interface ActivationReadinessRead {
+  /** “Safe to interrupt?” — higher means softer surfaces are still appropriate. */
+  score_0_100: number;
+  interruption_posture: "observe_only" | "soft_cta_ready" | "hard_cta_ready" | "avoid_interrupt";
+  rationale: string[];
+}
+
+/** Session-level anonymous behavioral intelligence (no fingerprinting, no cross-site graph). */
+export interface BehaviorSnapshot {
+  traffic: TrafficAcquisitionRead;
+  campaign_intent: CampaignIntentRead;
+  referrer: ReferrerIntelligenceRead;
+  navigation: NavigationPatternRead;
+  engagement_quality: EngagementQualityRead;
+  activation_readiness: ActivationReadinessRead;
+  commercial_journey_phase: CommercialJourneyPhase;
+  /** Copy-safe similarity line — pattern-based, same-session only. */
+  anonymous_similarity_hint: string | null;
+  device_context: {
+    coarse_device: "mobile" | "tablet" | "desktop" | "unknown";
+    weekday: boolean;
+    hour_local: number;
+    viewport_bucket: "narrow" | "medium" | "wide" | "unknown";
+  };
+}
+
+export interface PageJourneyEntry {
+  path: string;
+  generic_kind: GenericPageKind;
+  /** Short title sample for sequence explainability (not full page dump). */
+  title_snippet: string | null;
+  t: number;
+}
+
 export type PageType =
   | "home"
   | "inventory"
@@ -13,13 +118,28 @@ export type PageType =
 /** Inferred site category for generic hosted-snippet behavior (no publisher config). */
 export type SiteVertical =
   | "auto_retail"
+  | "auto_oem"
   | "ecommerce"
   | "b2b_saas"
   | "publisher_content"
   | "lead_generation"
   | "professional_services"
   | "nonprofit"
-  | "unknown";
+  | "unknown"
+  | "general_business"
+  | "content_led_business"
+  | "healthcare"
+  | "financial_services"
+  | "education"
+  | "travel_hospitality"
+  | "real_estate"
+  | "home_services"
+  | "local_services";
+
+/** Automotive retail or OEM — shared gates for scoring, treatments, and auto-specific copy. */
+export function isAutoSiteVertical(vertical: SiteVertical): boolean {
+  return vertical === "auto_retail" || vertical === "auto_oem";
+}
 
 /** Generic page archetype (orthogonal to auto `PageType`). */
 export type GenericPageKind =
@@ -161,6 +281,10 @@ export interface PersonalizationSignal {
   recommended_friction_level: "low" | "medium" | "high";
   confidence: number;
   reason: string[];
+  /** Finer journey phase for GTM / experimentation (optional). */
+  commercial_journey_phase?: CommercialJourneyPhase;
+  /** “Safe to interrupt?” style readiness (optional). */
+  activation_readiness_score?: number;
 }
 
 export interface ActivationPayloadEnvelope {
@@ -174,7 +298,19 @@ export interface SiteScanSummary {
   site_name: string | null;
   page_title: string;
   top_terms: string[];
+  /**
+   * Conversion-oriented CTA samples (hard + soft). Kept for backward compatibility;
+   * prefer {@link cta_text_hard} / {@link cta_text_soft} for intent reads.
+   */
   primary_ctas: string[];
+  /** High-intent conversion CTAs (checkout, book demo, request quote, …). */
+  cta_text_hard?: string[];
+  /** Softer asks (learn more, guide, newsletter). */
+  cta_text_soft?: string[];
+  /** Nav-only labels (products, about, blog). */
+  cta_text_navigation?: string[];
+  /** Support / account / login. */
+  cta_text_support?: string[];
   content_themes: string[];
 }
 
@@ -239,6 +375,40 @@ export interface SessionProfile extends SessionScores {
   personalization_signal: PersonalizationSignal;
   /** dataLayer-style envelope (event + `si` object). */
   activation_payload: ActivationPayloadEnvelope;
+  /**
+   * Recent page transitions with generic page roles (first-party path only).
+   * Used for journey-pattern inference — not cross-site tracking.
+   */
+  page_journey?: PageJourneyEntry[];
+  /** Finer commercial phase than legacy {@link JourneyStage} alone. */
+  commercial_journey_phase?: CommercialJourneyPhase;
+  /**
+   * Anonymous behavioral intelligence snapshot (traffic, campaign hints, journey shape, attention proxies).
+   * No fingerprinting; refreshed each SDK tick from the current session only.
+   */
+  behavior_snapshot?: BehaviorSnapshot | null;
+  /**
+   * Lightweight, human-readable session milestones for the inspector (not keystrokes / not raw queries).
+   * Capped client-side; first-party only.
+   */
+  intel_timeline?: SessionIntelEvent[];
+  /** Dedupe / baselines for timeline emission — not sent to activation payloads. */
+  intel_timeline_meta?: IntelTimelineMeta;
+}
+
+/** One row in the inspector “session timeline” (anonymous, in-session). */
+export interface SessionIntelEvent {
+  t: number;
+  message: string;
+  dedupeKey?: string;
+}
+
+export interface IntelTimelineMeta {
+  arrival_logged?: boolean;
+  deep_scroll_paths?: string[];
+  cta_hover_friction_logged?: boolean;
+  /** Last activation readiness score used to detect a meaningful jump. */
+  last_readiness_pushed?: number;
 }
 
 export interface SessionSignals {
@@ -252,6 +422,24 @@ export interface SessionSignals {
   return_visit: boolean;
   session_duration_ms: number;
   category_hits: CategoryAffinity;
+  /** Full URL at first SDK boot (same-origin only in practice). */
+  landing_href: string;
+  /** `document.referrer` when the session started (may be empty). */
+  initial_referrer: string | null;
+  /** Recent pathnames visited this session (SPA-aware). */
+  path_sequence: string[];
+  /** Milliseconds document was visible (visibility API). */
+  tab_visible_ms: number;
+  /** Milliseconds document was hidden. */
+  tab_hidden_ms: number;
+  /** Pointer hovers over primary chrome CTAs (throttled). */
+  cta_hover_events: number;
+  /** Clicks on pricing / finance / coupon / calculator surfaces (heuristic). */
+  offer_surface_clicks: number;
+  /** Focus events in form fields (throttled). */
+  form_field_focus_events: number;
+  /** Detected onsite search submits (heuristic). */
+  onsite_search_events: number;
 }
 
 export type RecommendedTreatmentLevel = "observe" | "recommend_only" | "safe_personalization";

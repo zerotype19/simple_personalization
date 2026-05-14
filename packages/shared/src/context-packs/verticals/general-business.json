@@ -1,0 +1,8 @@
+{
+  "id": "general_business",
+  "label": "General business",
+  "likely_objectives": ["lead_capture", "contact", "purchase", "content_engagement"],
+  "page_kinds": ["homepage", "service_page", "article", "lead_form"],
+  "archetypes": ["curious_visitor", "researcher", "comparison_shopper", "returning_explorer"],
+  "concept_pack_ids": ["universal_intent", "content_engagement", "lead_generation"]
+}

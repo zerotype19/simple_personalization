@@ -34,15 +34,20 @@ function navSample(): string[] {
 }
 
 function detectB2bHits(scan: SiteScanSummary, vertical: SiteVertical): string[] {
-  if (
-    vertical !== "b2b_saas" &&
-    vertical !== "lead_generation" &&
-    vertical !== "professional_services" &&
-    vertical !== "unknown"
-  ) {
-    return [];
-  }
   const blob = `${scan.page_title} ${scan.top_terms.join(" ")} ${scan.content_themes.join(" ")}`.toLowerCase();
+  const saasish = /\b(saas|platform|software|\bapi\b|integration|demo|trial|pricing|b2b|subscription|dashboard)\b/i.test(
+    blob,
+  );
+  const verticalAllows =
+    vertical === "b2b_saas" ||
+    vertical === "lead_generation" ||
+    vertical === "professional_services" ||
+    ((vertical === "unknown" ||
+      vertical === "general_business" ||
+      vertical === "content_led_business") &&
+      saasish);
+  if (!verticalAllows) return [];
+
   const hits: string[] = [];
   if (/\b(demo|trial|pricing|request|contact|get started)\b/i.test(blob)) hits.push("conversion_language");
   if (/\b(case study|customers?|logo wall|integration)\b/i.test(blob)) hits.push("proof_language");

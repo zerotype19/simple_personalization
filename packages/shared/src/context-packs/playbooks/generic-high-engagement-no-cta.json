@@ -1,0 +1,24 @@
+{
+  "id": "generic_high_engagement_no_cta",
+  "label": "Generic — high engagement, no CTA click",
+  "when": {
+    "verticals": ["*"],
+    "exclude_verticals": ["b2b_saas", "lead_generation", "professional_services"],
+    "min_engagement_score": 58,
+    "max_cta_clicks": 0,
+    "min_pages_viewed": 2,
+    "min_scroll_depth": 50,
+    "momentum_match": "any_of_return_pages_or_scroll",
+    "concept_labels_any": [],
+    "min_concept_affinity_for_any": 0
+  },
+  "output": {
+    "inferred_need": "A clear, low-friction next step without feeling pushed",
+    "message_angle": "Reward the attention — offer something useful before a hard ask",
+    "offer_type": "Guide, checklist, coupon, short consult, or soft popup matched to the page context",
+    "surface": "Inline module or soft popup after meaningful scroll",
+    "timing": "After sustained scroll or a second page in the session",
+    "friction": "low",
+    "recommended_activation_summary": "Visitor is engaged but has not clicked a CTA — surface a low-friction offer (guide, coupon, consult, or contextual soft popup) aligned to what they have been reading."
+  }
+}

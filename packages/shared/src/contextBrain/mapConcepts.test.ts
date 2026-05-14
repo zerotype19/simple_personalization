@@ -31,6 +31,20 @@ describe("computeConceptAffinity", () => {
     expect(out["rhythm90"]).toBeUndefined();
   });
 
+  it("uses universal concepts for unknown / general business instead of only B2B marketing ops", () => {
+    const aff: CategoryAffinity = {};
+    const scanLocal = scan({
+      page_title: "Same day HVAC repair near you",
+      top_terms: ["repair", "local", "emergency", "price", "warranty", "reviews"],
+      domain: "coolair.example.com",
+      site_name: "CoolAir",
+    });
+    const out = computeConceptAffinity("general_business", scanLocal, aff);
+    expect(out["Local intent"]).toBeGreaterThan(0);
+    expect(out["Trust / proof seeking"]).toBeGreaterThan(0);
+    expect(out["Quarterly planning"]).toBeUndefined();
+  });
+
   it("normalizes scores to 0–1 and applies display floor", () => {
     const out = computeConceptAffinity("b2b_saas", scan(), {});
     for (const v of Object.values(out)) {

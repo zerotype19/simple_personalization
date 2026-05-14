@@ -12,14 +12,31 @@
     "verticals/ecommerce-b2b.json",
     "verticals/publisher.json",
     "verticals/professional-services.json",
-    "verticals/auto-retail.json"
+    "verticals/auto-retail.json",
+    "verticals/general-business.json",
+    "verticals/content-led-business.json",
+    "verticals/healthcare.json",
+    "verticals/financial-services.json",
+    "verticals/education.json",
+    "verticals/travel-hospitality.json",
+    "verticals/real-estate.json",
+    "verticals/home-services.json",
+    "verticals/local-services.json"
   ],
   "concepts": [
+    "concepts/universal-intent.json",
     "concepts/marketing-operations.json",
     "concepts/commerce-shopping.json",
     "concepts/lead-generation.json",
     "concepts/content-engagement.json"
   ],
   "stopwords": ["stopwords/global.json", "stopwords/site-boilerplate.json"],
-  "playbooks": ["playbooks/b2b-marketing-ops.json"]
+  "playbooks": [
+    "playbooks/b2b-marketing-ops.json",
+    "playbooks/generic-product-interest-no-cart.json",
+    "playbooks/generic-deep-content-no-signup.json",
+    "playbooks/generic-lead-intent-no-form-submit.json",
+    "playbooks/generic-return-visit-no-conversion.json",
+    "playbooks/generic-high-engagement-no-cta.json"
+  ]
 }

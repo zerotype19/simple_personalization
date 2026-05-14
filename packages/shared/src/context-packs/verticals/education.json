@@ -1,0 +1,8 @@
+{
+  "id": "education",
+  "label": "Education",
+  "likely_objectives": ["application", "lead_capture", "content_engagement"],
+  "page_kinds": ["program_page", "article", "homepage", "lead_form"],
+  "archetypes": ["student_prospect", "parent_researcher", "lifelong_learner"],
+  "concept_pack_ids": ["universal_intent", "content_engagement", "lead_generation"]
+}

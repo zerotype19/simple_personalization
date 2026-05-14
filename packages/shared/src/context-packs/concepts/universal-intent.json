@@ -1,0 +1,66 @@
+{
+  "id": "universal_intent",
+  "label": "Universal visitor intent",
+  "concepts": [
+    {
+      "id": "price_sensitivity",
+      "label": "Price sensitivity",
+      "terms": ["price", "pricing", "cost", "afford", "budget", "discount", "deal", "save", "promo", "financing", "payment plan"],
+      "intent_phrases": ["how much does it cost", "monthly payment", "best price"]
+    },
+    {
+      "id": "trust_proof_seeking",
+      "label": "Trust / proof seeking",
+      "terms": ["reviews", "testimonial", "trusted", "certified", "accredited", "guarantee", "warranty", "rating", "verified", "award", "partner"],
+      "intent_phrases": ["why choose us", "proven results", "customer stories"]
+    },
+    {
+      "id": "comparison_shopping",
+      "label": "Comparison shopping",
+      "terms": ["compare", "versus", "vs", "alternative", "options", "features", "specs", "side by side", "which is better"],
+      "intent_phrases": ["compare plans", "see how we stack up"]
+    },
+    {
+      "id": "urgency_availability",
+      "label": "Urgency / availability",
+      "terms": ["limited", "today", "now", "slots", "appointment", "availability", "in stock", "sold out", "deadline", "expires"],
+      "intent_phrases": ["book now", "limited time", "while supplies last"]
+    },
+    {
+      "id": "problem_education",
+      "label": "Problem education",
+      "terms": ["how to", "guide", "explained", "what is", "why", "symptoms", "causes", "faq", "basics", "overview", "introduction"],
+      "intent_phrases": ["everything you need to know", "common questions"]
+    },
+    {
+      "id": "local_intent",
+      "label": "Local intent",
+      "terms": ["near me", "local", "location", "hours", "directions", "visit", "neighborhood", "service area", "zip", "city"],
+      "intent_phrases": ["find a location", "schedule a visit"]
+    },
+    {
+      "id": "risk_reduction",
+      "label": "Risk reduction",
+      "terms": ["risk", "refund", "cancel", "no obligation", "free consultation", "insurance", "secure", "privacy", "compliance"],
+      "intent_phrases": ["money back", "no commitment"]
+    },
+    {
+      "id": "convenience_ease",
+      "label": "Convenience / ease",
+      "terms": ["easy", "simple", "fast", "quick", "online", "mobile", "same day", "one click", "hassle", "streamlined"],
+      "intent_phrases": ["get started in minutes", "we make it easy"]
+    },
+    {
+      "id": "premium_quality_seeking",
+      "label": "Premium / quality seeking",
+      "terms": ["premium", "luxury", "best in class", "top rated", "handcrafted", "quality", "professional grade", "enterprise"],
+      "intent_phrases": ["built to last", "white glove"]
+    },
+    {
+      "id": "implementation_howto",
+      "label": "Implementation / how-to",
+      "terms": ["setup", "install", "onboarding", "implementation", "steps", "checklist", "tutorial", "training", "support plan"],
+      "intent_phrases": ["how it works", "getting started"]
+    }
+  ]
+}

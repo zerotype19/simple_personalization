@@ -1,0 +1,8 @@
+{
+  "id": "travel_hospitality",
+  "label": "Travel & hospitality",
+  "likely_objectives": ["booking", "lead_capture", "browsing"],
+  "page_kinds": ["destination", "room_type", "article", "homepage"],
+  "archetypes": ["trip_planner", "deal_seeker", "loyal_guest"],
+  "concept_pack_ids": ["universal_intent", "commerce_shopping", "content_engagement"]
+}

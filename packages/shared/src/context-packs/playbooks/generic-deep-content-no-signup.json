@@ -1,0 +1,25 @@
+{
+  "id": "generic_deep_content_no_signup",
+  "label": "Generic — deep article read, no signup",
+  "when": {
+    "verticals": ["*"],
+    "exclude_verticals": [],
+    "min_engagement_score": 52,
+    "max_cta_clicks": 0,
+    "min_pages_viewed": 1,
+    "min_scroll_depth": 62,
+    "momentum_match": "any_of_return_pages_or_scroll",
+    "generic_page_kinds": ["article_page"],
+    "concept_labels_any": [],
+    "min_concept_affinity_for_any": 0
+  },
+  "output": {
+    "inferred_need": "Continue the learning journey without a hard wall",
+    "message_angle": "Offer the next chapter — related depth, not an immediate paywall",
+    "offer_type": "Related guide, email capture with clear value, or content series",
+    "surface": "Mid-article module or end-of-article recommendation",
+    "timing": "After deep scroll on long-form content",
+    "friction": "low",
+    "recommended_activation_summary": "Article-style page with deep reading and no CTA clicks — suggest a related guide, series, or soft email capture that extends the topic they already invested in."
+  }
+}

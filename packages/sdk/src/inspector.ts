@@ -1,6 +1,8 @@
 import type { SessionProfile } from "@si/shared";
 import { conceptSignalLabel } from "@si/shared/contextBrain";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
+import { isAutoSiteVertical } from "@si/shared";
+import { buildAnonymousVisitorRead } from "./anonymousVisitorRead";
 import INSPECTOR_PANEL_CSS from "./inspector-panel.txt";
 import { buildSafePersonalizationPlan } from "./contextBrain/safePersonalizationPlan";
 import { archetypePersonasForVertical } from "./recommendation/archetypes";
@@ -9,11 +11,11 @@ import { audienceForVertical, publicSiteTypeLabel } from "./siteIntelligence/pub
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
 import {
   liveSignalSectionTitle,
-  siteContextTitle,
   topicAffinitySectionTitle,
   verticalDisplayName,
 } from "./siteIntelligence/panelLabelMapper";
 import { humanGenericPageLabel } from "./siteEnvironment";
+import { formatTimelineClock } from "./sessionIntel";
 
 /** Set only in the hosted IIFE build (`SI_PUBLIC_INSPECTOR_CSS_URL`); empty in ESM. */
 declare const __SI_EMBED_INSPECTOR_CSS_URL__: string;
@@ -225,7 +227,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const sc = p.site_context;
     const liftPreview = demoLiftPreviewCopy(sc.vertical);
     const safePlanLines = buildSafePersonalizationPlan(p);
-    const isAuto = sc.vertical === "auto_retail";
+    const isAuto = isAutoSiteVertical(sc.vertical);
     const env = p.site_environment;
     const pm = p.page_semantics;
     const ao = p.activation_opportunity;
@@ -301,267 +303,383 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const certaintyLow = certainty.low.map((t) => `<li>${escHtml(t)}</li>`).join("") || "<li>—</li>";
 
     const primaryPromiseEsc = escHtml(pm.primary_promise ?? env.object.object_name ?? "—");
-    const siteIntelSummaryHtml = `
-      <div class="si-card">
-        <h3>Site intelligence summary</h3>
-        <p class="si-muted si-muted--block">
-          <b>What this site appears to be:</b> ${escHtml(publicSiteTypeLabel(env.site.site_type))}<br/>
-          <b>Likely audience:</b> ${escHtml(audienceForVertical(sc.vertical))}<br/>
-          <b>Likely objective:</b> ${escHtml(env.conversion.primary_objective.replace(/_/g, " "))}<br/>
-          <b>Confidence:</b> ${escHtml(confWord)} (${Math.round(sc.vertical_confidence)}% vertical read)
-        </p>
-      </div>
-      <div class="si-card">
-        <h3>Page understanding</h3>
+
+    const bs = p.behavior_snapshot;
+    const channelHuman = bs ? escHtml(bs.traffic.channel_guess.replace(/_/g, " ")) : "—";
+    const landingPathEsc = bs ? escHtml(bs.traffic.landing_path.slice(0, 120)) : "—";
+    const utmLine =
+      bs && (bs.traffic.utm_source || bs.traffic.utm_medium)
+        ? escHtml(
+            [bs.traffic.utm_source, bs.traffic.utm_medium, bs.traffic.utm_campaign].filter(Boolean).join(" · "),
+          )
+        : "—";
+    const keywordThemesEsc =
+      bs && bs.campaign_intent.keyword_themes.length
+        ? escHtml(bs.campaign_intent.keyword_themes.slice(0, 8).join(", "))
+        : "—";
+    const campaignAngleEsc = bs?.campaign_intent.campaign_angle ? escHtml(bs.campaign_intent.campaign_angle) : "—";
+    const cluesEsc =
+      bs && bs.campaign_intent.commercial_clues.length
+        ? escHtml(bs.campaign_intent.commercial_clues.map((c) => c.replace(/_/g, " ")).join(" · "))
+        : "—";
+    const landingIntentConf = bs ? `${bs.campaign_intent.confidence_0_100}%` : "—";
+    const refCatEsc = bs ? escHtml(bs.referrer.category.replace(/_/g, " ")) : "—";
+    const refNarrEsc = bs ? escHtml(bs.referrer.narrative) : "—";
+    const pathSummaryEsc = bs ? escHtml(bs.navigation.path_summary) : "—";
+    const journeyPatternEsc = bs ? escHtml(bs.navigation.journey_pattern.replace(/_/g, " ")) : "—";
+    const journeyVelEsc = bs ? escHtml(bs.navigation.journey_velocity) : "—";
+    const navFlags =
+      bs &&
+      [bs.navigation.comparison_behavior ? "comparison behavior" : null, bs.navigation.high_intent_transition ? "high-intent step" : null]
+        .filter(Boolean)
+        .join(" · ");
+    const navFlagsEsc = bs && navFlags ? escHtml(navFlags) : "—";
+    const engageLabelEsc = bs ? escHtml(bs.engagement_quality.label.replace(/_/g, " ")) : "—";
+    const engageWhy =
+      bs && bs.engagement_quality.rationale.length
+        ? `<ul class="si-reason">${bs.engagement_quality.rationale.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
+        : `<div class="si-muted">—</div>`;
+    const actScore = bs ? String(bs.activation_readiness.score_0_100) : "—";
+    const actPostureEsc = bs ? escHtml(bs.activation_readiness.interruption_posture.replace(/_/g, " ")) : "—";
+    const actWhy =
+      bs && bs.activation_readiness.rationale.length
+        ? `<ul class="si-reason">${bs.activation_readiness.rationale.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
+        : `<div class="si-muted">—</div>`;
+    const commPhaseEsc = bs ? escHtml(bs.commercial_journey_phase.replace(/_/g, " ")) : "—";
+    const cohortEsc = bs?.anonymous_similarity_hint ? escHtml(bs.anonymous_similarity_hint) : "—";
+    const devEsc = bs
+      ? escHtml(
+          `${bs.device_context.coarse_device} · viewport ${bs.device_context.viewport_bucket} · local hour ${bs.device_context.hour_local} · ${bs.device_context.weekday ? "weekday" : "weekend"}`,
+        )
+      : "—";
+
+    const trafficIntelHtml = bs
+      ? `<div class="si-card">
+        <h3>Traffic &amp; acquisition</h3>
         <div class="si-kv">
-          <div>Page type</div><div class="si-metric">${escHtml(humanGenericPageLabel(env.page.generic_kind))}</div>
-          <div>Page role</div><div class="si-muted">${escHtml(
-            env.page.generic_kind === "homepage"
-              ? "Positioning + multi-section marketing home"
-              : "Content-led discovery and conversion paths",
-          )}</div>
-          <div>Primary page promise</div><div class="si-muted si-metric--break">${primaryPromiseEsc}</div>
-          <div>Detected structure</div><div class="si-muted">${pm.heading_counts.h2} section headings · ${
-            pm.heading_counts.h3
-          } supporting headings</div>
+          <div>Arrival channel (guess)</div><div class="si-metric">${channelHuman}</div>
+          <div>Landing URL (capped)</div><div class="si-muted si-metric--break">${landingPathEsc}</div>
+          <div>UTM trail</div><div class="si-muted si-metric--break">${utmLine}</div>
+          <div>Campaign angle</div><div class="si-metric">${campaignAngleEsc}</div>
+          <div>Keyword themes</div><div class="si-muted">${keywordThemesEsc}</div>
+          <div>Commercial clues</div><div class="si-muted">${cluesEsc}</div>
+          <div>Landing intent confidence</div><div class="si-metric">${escHtml(landingIntentConf)}</div>
+          <div>Referrer category</div><div class="si-metric">${refCatEsc}</div>
+          <div>Referrer read</div><div class="si-muted si-metric--break">${refNarrEsc}</div>
         </div>
-      </div>
-      <div class="si-card">
-        <h3>Activation opportunity</h3>
-        <p class="si-muted si-muted--block">${escHtml(ao.visitor_read)}</p>
+      </div>`
+      : "";
+
+    const journeyIntelHtml = bs
+      ? `<div class="si-card">
+        <h3>Session journey &amp; engagement</h3>
         <div class="si-kv">
-          <div>Primary path</div><div class="si-metric si-metric--break">${escHtml(ao.primary_path_label)}</div>
-          <div>Secondary path</div><div class="si-muted">${escHtml(ao.secondary_path_label)}</div>
-          <div>Soft path</div><div class="si-muted">${escHtml(ao.soft_path_label)}</div>
-          <div>Inferred need</div><div class="si-metric si-metric--break">${escHtml(ao.inferred_need)}</div>
-          <div>Message angle</div><div class="si-muted">${escHtml(ao.message_angle)}</div>
-          <div>Offer type</div><div class="si-muted">${escHtml(ao.offer_type)}</div>
-          <div>Best surface</div><div class="si-muted">${escHtml(ao.surface)}</div>
-          <div>Timing</div><div class="si-muted">${escHtml(ao.timing)}</div>
-          <div>Activation note</div><div class="si-muted">${escHtml(ao.opportunity_note ?? "—")}</div>
+          <div>Commercial journey phase</div><div class="si-metric">${commPhaseEsc}</div>
+          <div>Path pattern (recent)</div><div class="si-muted si-metric--break">${pathSummaryEsc}</div>
+          <div>Journey pattern</div><div class="si-metric">${journeyPatternEsc}</div>
+          <div>Journey velocity</div><div class="si-metric">${journeyVelEsc}</div>
+          <div>Navigation flags</div><div class="si-muted">${navFlagsEsc}</div>
+          <div>Engagement quality</div><div class="si-metric">${engageLabelEsc}</div>
+          <div>Activation readiness (0–100)</div><div class="si-metric">${escHtml(actScore)}</div>
+          <div>Interruption posture</div><div class="si-metric">${actPostureEsc}</div>
+          <div>Device context</div><div class="si-muted">${devEsc}</div>
+          <div>Journey stage</div><div><span class="si-pill">${escHtml(p.journey_stage)}</span></div>
+          <div>Pages viewed</div><div class="si-metric">${p.signals.pages_viewed}</div>
+          <div>Intent / urgency / engagement</div><div class="si-metric">${p.intent_score} · ${p.urgency_score} · ${p.engagement_score}</div>
         </div>
-        ${
-          ao.playbook
-            ? `<div class="si-muted si-muted--block si-muted--mb6" style="margin-top:10px"><b>Activation playbook matched</b> — ${escHtml(
-                ao.playbook.label,
-              )}</div>
-        <div class="si-muted si-muted--mb6">Why</div>
-        <ul class="si-reason">${ao.playbook.why.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>
-        <div class="si-muted si-muted--mb6" style="margin-top:8px">Recommended activation</div>
-        <p class="si-muted si-muted--block">${escHtml(ao.playbook.recommended_activation_summary)}</p>`
-            : ""
-        }
-        <div class="si-muted si-muted--mb6">Evidence</div>
-        <ul class="si-reason">${ao.evidence.map((x) => `<li>${escHtml(x)}</li>`).join("") || "<li>—</li>"}</ul>
-      </div>
-      <div class="si-card">
-        <h3>Recommended personalization signal</h3>
-        <div class="si-kv">
-          <div>Inferred need</div><div class="si-metric si-metric--break">${escHtml(sig.inferred_need)}</div>
-          <div>Message angle</div><div class="si-muted">${escHtml(sig.recommended_message_angle)}</div>
-          <div>Offer</div><div class="si-muted">${escHtml(sig.recommended_offer_type)}</div>
-          <div>Surface</div><div class="si-muted">${escHtml(sig.recommended_surface)}</div>
-          <div>Timing</div><div class="si-muted">${escHtml(sig.recommended_timing)}</div>
-          <div>Friction</div><div class="si-muted">${escHtml(sig.recommended_friction_level)}</div>
-          <div>Conversion readiness</div><div class="si-metric">${sig.conversion_readiness}</div>
-          <div>Signal confidence</div><div class="si-metric">${(sig.confidence * 100).toFixed(0)}%</div>
+        <div class="si-muted si-muted--mb6" style="margin-top:10px">Why engagement quality</div>
+        ${engageWhy}
+        <div class="si-muted si-muted--mb6" style="margin-top:10px">Why activation readiness</div>
+        ${actWhy}
+        <div class="si-muted si-muted--mb6" style="margin-top:10px">Anonymous cohort hint (same-session patterns only)</div>
+        <p class="si-muted si-muted--block">${cohortEsc}</p>
+      </div>`
+      : "";
+
+    const behaviorWarmupHtml = !bs
+      ? `<div class="si-card">
+        <h3>Traffic &amp; behavioral intelligence</h3>
+        <p class="si-muted si-muted--block">Behavior snapshot is not loaded yet — open the panel after the tag has run a tick, or browse to warm session signals.</p>
+      </div>`
+      : "";
+
+    const visitorRead = buildAnonymousVisitorRead(p);
+    const timelineRows =
+      (p.intel_timeline?.length ? p.intel_timeline : [])
+        .slice(-15)
+        .map(
+          (ev) =>
+            `<li><time>${escHtml(formatTimelineClock(p.started_at, ev.t))}</time><span>${escHtml(ev.message)}</span></li>`,
+        )
+        .join("") ||
+      `<li class="si-timeline-empty"><span class="si-muted">No milestones yet — navigate, scroll, or use CTAs to populate this view.</span></li>`;
+
+    const heroHtml = `
+      <div class="si-hero-stack">
+        <div class="si-card si-card--hero">
+          <h3>Anonymous visitor read</h3>
+          <p class="si-visitor-lead">${escHtml(visitorRead.paragraphs[0] ?? "")}</p>
+          <p class="si-visitor-body">${escHtml(visitorRead.paragraphs[1] ?? "")}</p>
+          <p class="si-visitor-body">${escHtml(visitorRead.paragraphs[2] ?? "")}</p>
+          <div class="si-rec-box">
+            <div class="si-rec-label">Recommended activation</div>
+            <p class="si-rec-text">${escHtml(visitorRead.recommended_activation)}</p>
+          </div>
+        </div>
+        <div class="si-card si-card--timeline">
+          <h3>Session timeline</h3>
+          <p class="si-muted si-muted--block si-timeline-hint">Meaningful in-session milestones only — no keystrokes, no raw search queries, no cross-site identity graph.</p>
+          <ul class="si-timeline">${timelineRows}</ul>
         </div>
       </div>`;
 
-    const activationPreview = escHtml(JSON.stringify(p.activation_payload, null, 2));
+    const sitePageHtml = `
+      <div class="si-panel-section">
+        <div class="si-section-label">Site &amp; page</div>
+        <div class="si-card">
+          <h3>Site &amp; page understanding</h3>
+          <p class="si-site-summary">
+            <b>Site read:</b> ${escHtml(publicSiteTypeLabel(env.site.site_type))} ·
+            <b>Audience:</b> ${escHtml(audienceForVertical(sc.vertical))} ·
+            <b>Objective:</b> ${escHtml(env.conversion.primary_objective.replace(/_/g, " "))} ·
+            <b>Vertical confidence:</b> ${escHtml(confWord)} (${Math.round(sc.vertical_confidence)}%)
+          </p>
+          <p class="si-muted si-muted--block">${escHtml(env.ladder.detail)} <span class="si-pill">Ladder ${env.ladder.level} — ${escHtml(env.ladder.label)}</span></p>
+          <div class="si-kv">
+            <div>Domain</div><div class="si-metric si-metric--break">${escHtml(sc.domain)}</div>
+            <div>Site name</div><div class="si-metric">${escHtml(sc.site_name ?? "—")}</div>
+            <div>Detected type</div><div><span class="si-pill">${escHtml(verticalDisplayName(sc.vertical))}</span></div>
+            <div>Page kind (funnel read)</div><div><span class="si-pill">${escHtml(sc.page_kind)}</span></div>
+            <div>Content themes</div><div class="si-muted">${themes}</div>
+            ${
+              showTopTermsRow
+                ? `<div>${escHtml(topTermsLabel)}</div><div class="si-muted">${termsPreview}</div>`
+                : ""
+            }
+            <div>Page type</div><div class="si-metric">${escHtml(humanGenericPageLabel(env.page.generic_kind))}</div>
+            <div>Primary page promise</div><div class="si-muted si-metric--break">${primaryPromiseEsc}</div>
+            <div>Page structure</div><div class="si-muted">${pm.heading_counts.h2} section headings · ${pm.heading_counts.h3} supporting headings</div>
+            <div>Page signals</div><div class="si-muted">${envSignals}</div>
+            <div>Objective confidence</div><div class="si-metric">${Math.round(env.conversion.confidence * 100)}%</div>
+            <div>Conversion elements</div><div class="si-muted">${escHtml(env.conversion.detected_elements.join(", ") || "—")}</div>
+            <div>Platform guess</div><div><span class="si-pill">${escHtml(env.site.platform_guess)}</span></div>
+          </div>
+          <h4 class="si-subh">${escHtml(conceptCardTitle)}</h4>
+          <div class="si-muted">${affinityEmpty ? "No strong signals yet — keep browsing." : ""}</div>
+          ${affinityBlock}
+        </div>
+      </div>`;
 
-    const html = `
-      ${siteIntelSummaryHtml}
-      <div class="si-card">
-        <h3>${siteContextTitle()}</h3>
-        <div class="si-kv">
-          <div>Domain</div><div class="si-metric si-metric--break">${escHtml(sc.domain)}</div>
-          <div>Site name</div><div class="si-metric">${escHtml(sc.site_name ?? "—")}</div>
-          <div>Detected type</div><div><span class="si-pill">${escHtml(verticalDisplayName(sc.vertical))}</span></div>
-          <div>Type confidence</div><div class="si-metric">${Math.round(sc.vertical_confidence)}%</div>
-          <div>Page kind</div><div><span class="si-pill">${escHtml(sc.page_kind)}</span></div>
-          <div>Content themes</div><div class="si-muted">${themes}</div>
+    const activationSectionHtml = `
+      <div class="si-panel-section">
+        <div class="si-section-label">Activation</div>
+        <div class="si-card">
+          <h3>Activation opportunity</h3>
+          <p class="si-muted si-muted--block">${escHtml(ao.visitor_read)}</p>
+          <div class="si-kv">
+            <div>Primary path</div><div class="si-metric si-metric--break">${escHtml(ao.primary_path_label)}</div>
+            <div>Secondary path</div><div class="si-muted">${escHtml(ao.secondary_path_label)}</div>
+            <div>Soft path</div><div class="si-muted">${escHtml(ao.soft_path_label)}</div>
+            <div>Inferred need</div><div class="si-metric si-metric--break">${escHtml(ao.inferred_need)}</div>
+            <div>Message angle</div><div class="si-muted">${escHtml(ao.message_angle)}</div>
+            <div>Offer type</div><div class="si-muted">${escHtml(ao.offer_type)}</div>
+            <div>Best surface</div><div class="si-muted">${escHtml(ao.surface)}</div>
+            <div>Timing</div><div class="si-muted">${escHtml(ao.timing)}</div>
+            <div>Activation note</div><div class="si-muted">${escHtml(ao.opportunity_note ?? "—")}</div>
+          </div>
           ${
-            showTopTermsRow
-              ? `<div>${escHtml(topTermsLabel)}</div><div class="si-muted">${termsPreview}</div>`
+            ao.playbook
+              ? `<div class="si-muted si-muted--block si-muted--mb6" style="margin-top:10px"><b>Playbook</b> — ${escHtml(ao.playbook.label)}</div>
+          <div class="si-muted si-muted--mb6">Why</div>
+          <ul class="si-reason">${ao.playbook.why.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>
+          <div class="si-muted si-muted--mb6" style="margin-top:8px">Playbook recommendation</div>
+          <p class="si-muted si-muted--block">${escHtml(ao.playbook.recommended_activation_summary)}</p>`
+              : ""
+          }
+          <div class="si-muted si-muted--mb6">Evidence</div>
+          <ul class="si-reason">${ao.evidence.map((x) => `<li>${escHtml(x)}</li>`).join("") || "<li>—</li>"}</ul>
+          <h4 class="si-subh">Personalization signal (integration shape)</h4>
+          <div class="si-kv si-kv--tight">
+            <div>Inferred need</div><div class="si-metric si-metric--break">${escHtml(sig.inferred_need)}</div>
+            <div>Surface / timing</div><div class="si-muted">${escHtml(sig.recommended_surface)} · ${escHtml(sig.recommended_timing)}</div>
+            <div>Friction</div><div class="si-muted">${escHtml(sig.recommended_friction_level)}</div>
+            <div>Conversion readiness</div><div class="si-metric">${sig.conversion_readiness}</div>
+            <div>Signal confidence</div><div class="si-metric">${(sig.confidence * 100).toFixed(0)}%</div>
+          </div>
+          ${
+            nba
+              ? `<h4 class="si-subh">Next best action</h4>
+          <div class="si-nba-body">${escHtml(nba.next_best_action)}</div>
+          <div class="si-kv si-kv--tight si-kv--nba-meta">
+            <div>Objective</div><div class="si-metric">${nbaObjectiveEsc}</div>
+            <div>Level</div><div><span class="si-pill">${nbaLevelEsc}</span></div>
+            <div>Surface</div><div><span class="si-pill">${nbaSurfaceTargetEsc}</span></div>
+            <div>Surfaces detected</div><div class="si-muted">${nbaSurfaceEsc}</div>
+            <div>Confidence</div><div class="si-metric">${(nba.confidence * 100).toFixed(0)}%</div>
+          </div>
+          <ul class="si-reason">${nba.reason.map((r) => `<li>${escHtml(r)}</li>`).join("")}</ul>`
               : ""
           }
         </div>
-      </div>
+      </div>`;
 
-      <div class="si-card">
-        <h3>Environment inference</h3>
-        <p class="si-muted si-muted--block">${escHtml(env.ladder.detail)}</p>
-        <div class="si-kv">
-          <div>Ladder</div><div><span class="si-pill">Level ${env.ladder.level} — ${escHtml(env.ladder.label)}</span></div>
-          <div>Inferred site type</div><div class="si-metric si-metric--break">${escHtml(publicSiteTypeLabel(env.site.site_type))}</div>
-          <div>Site confidence</div><div class="si-metric">${Math.round(env.site.confidence * 100)}%</div>
-          <div>Generic page kind</div><div class="si-metric">${escHtml(env.page.generic_kind.replace(/_/g, " "))}</div>
-          <div>Page confidence</div><div class="si-metric">${Math.round(env.page.confidence * 100)}%</div>
-          <div>Page signals</div><div class="si-muted">${envSignals}</div>
-          <div>Likely objective</div><div class="si-metric si-metric--break">${escHtml(env.conversion.primary_objective.replace(/_/g, " "))}</div>
-          <div>Secondary</div><div class="si-muted">${escHtml(env.conversion.secondary_objective ?? "—")}</div>
-          <div>Objective confidence</div><div class="si-metric">${Math.round(env.conversion.confidence * 100)}%</div>
-          <div>Conversion elements</div><div class="si-muted">${escHtml(env.conversion.detected_elements.join(", ") || "—")}</div>
-          <div>Page object</div><div class="si-muted">${escHtml(env.object.object_type)} — ${primaryPromiseEsc}</div>
-          <div>Topic cluster</div><div class="si-muted">${escHtml(env.object.topic_cluster ?? "—")}</div>
-          <div>Platform guess</div><div><span class="si-pill">${escHtml(env.site.platform_guess)}</span></div>
+    const explainSectionHtml = `
+      <div class="si-panel-section">
+        <div class="si-section-label">Explainability &amp; confidence</div>
+        <div class="si-card">
+          <h3>What we know vs. gaps</h3>
+          <div class="si-muted si-muted--mb6">High confidence</div>
+          <ul class="si-reason">${certaintyHigh}</ul>
+          <div class="si-muted si-muted--mb6">Medium confidence</div>
+          <ul class="si-reason">${certaintyMed}</ul>
+          <div class="si-muted si-muted--mb6">Low confidence / gaps</div>
+          <ul class="si-reason">${certaintyLow}</ul>
         </div>
-      </div>
-
-      <div class="si-card">
-        <h3>How the tag inferred this site</h3>
-        <p class="si-muted si-muted--block">${howInferredLines}</p>
-      </div>
-
-      <div class="si-card">
-        <h3>Session profile</h3>
-        <div class="si-kv">
-          <div>Session ID</div><div class="si-metric si-metric--break">${escHtml(p.session_id)}</div>
-          <div>Journey stage</div><div><span class="si-pill">${p.journey_stage}</span></div>
-          <div>Page type (signals)</div><div><span class="si-pill">${p.page_type}</span></div>
-          <div>Persona</div><div><span class="si-pill">${p.persona ?? "auto"}</span></div>
-          <div>Intent</div><div class="si-metric">${p.intent_score}</div>
-          <div>Urgency</div><div class="si-metric">${p.urgency_score}</div>
-          <div>Engagement</div><div class="si-metric">${p.engagement_score}</div>
+        <div class="si-card">
+          <h3>How the tag inferred this page</h3>
+          <p class="si-muted si-muted--block">${howInferredLines}</p>
         </div>
-      </div>
-
-      <div class="si-card">
-        <h3>${escHtml(liveSignalSectionTitle(sc.vertical))}</h3>
-        <div class="si-kv">
-          ${signalRows}
+        <div class="si-card si-card--privacy">
+          <h3>Privacy posture</h3>
+          <p class="si-muted si-muted--block">
+            Session Intelligence stays on <b>anonymous, first-party, in-session</b> reads: no fingerprinting, no keystroke logging,
+            no raw search query capture, and no cross-site identity stitching. Timeline rows are short labels derived from
+            navigation and coarse engagement signals only.
+          </p>
         </div>
-      </div>
+      </div>`;
 
-      <div class="si-card">
-        <h3>${escHtml(conceptCardTitle)}</h3>
-        <div class="si-muted">${affinityEmpty ? "No strong signals yet — keep browsing." : ""}</div>
-        ${affinityBlock}
-      </div>
+    const liveSignalsHtml = urlHasSiDebug()
+      ? `<div class="si-panel-section">
+        <div class="si-section-label">Debug</div>
+        <div class="si-card">
+          <h3>${escHtml(liveSignalSectionTitle(sc.vertical))}</h3>
+          <div class="si-kv">${signalRows}</div>
+        </div>
+      </div>`
+      : "";
 
-      <div class="si-card">
-        <h3>Objective-aware NBA</h3>
-        ${
-          nba
-            ? `<div class="si-nba-body">${escHtml(nba.next_best_action)}</div>
-               <div class="si-kv si-kv--tight si-kv--nba-meta">
-                 <div>Objective</div><div class="si-metric">${nbaObjectiveEsc}</div>
-                 <div>Personalization level</div><div><span class="si-pill">${nbaLevelEsc}</span></div>
-                 <div>Recommended surface</div><div><span class="si-pill">${nbaSurfaceTargetEsc}</span></div>
-                 <div>Detected conversion surfaces</div><div class="si-muted">${nbaSurfaceEsc}</div>
-                 <div>Model confidence</div><div class="si-metric">${(nba.confidence * 100).toFixed(0)}%</div>
-               </div>
-               <div class="si-muted si-muted--mb6">Why now</div>
-               <ul class="si-reason">${nba.reason.map((r) => `<li>${escHtml(r)}</li>`).join("")}</ul>`
-            : `<div class="si-muted">No recommendation yet — keep browsing.</div>`
-        }
-      </div>
-
-      ${
-        !isAuto && safePlanLines.length
-          ? `<div class="si-card">
+    const safePlanHtml =
+      !isAuto && safePlanLines.length
+        ? `<div class="si-card">
         <h3>Recommended safe personalization</h3>
-        <p class="si-muted si-muted--block">What the tag would recommend next on this host. The snippet stays observe-only here — no DOM rewrites until you opt in.</p>
+        <p class="si-muted si-muted--block">Observe-only on this host until you opt in to DOM rewrites.</p>
         <ul class="si-reason">${safePlanLines.map((line) => `<li>${escHtml(line)}</li>`).join("")}</ul>
       </div>`
-          : ""
-      }
+        : "";
 
-      <div class="si-card">
-        <h3>What we know vs. what we are unsure about</h3>
-        <div class="si-muted si-muted--mb6">High confidence</div>
-        <ul class="si-reason">${certaintyHigh}</ul>
-        <div class="si-muted si-muted--mb6">Medium confidence</div>
-        <ul class="si-reason">${certaintyMed}</ul>
-        <div class="si-muted si-muted--mb6">Low confidence / gaps</div>
-        <ul class="si-reason">${certaintyLow}</ul>
-      </div>
+    const trafficJourneySectionHtml = `${behaviorWarmupHtml}${trafficIntelHtml}${journeyIntelHtml}`;
 
-      <div class="si-card">
-        <h3>Active personalization</h3>
-        <div class="si-muted si-muted--mb6">Personalization: <b>${persoOn ? "ON" : "OFF"}</b>${
-          !isAuto
-            ? "<br/><span class=\"si-muted\">Observe-only on non-retail sites: no demo-site DOM rewrites.</span>"
-            : ""
-        }</div>
-        ${
-          p.active_treatments.length
-            ? p.active_treatments
-                .map(
-                  (t) =>
-                    `<div class="si-treat-row"><span class="si-pill">${t.source}</span> <code>${escHtml(t.treatment_id)}</code><div class="si-muted">slots: ${t.applied_slots.map(escHtml).join(", ") || "—"}</div></div>`,
-                )
-                .join("")
-            : `<div class="si-muted">No active treatments.</div>`
-        }
-      </div>
+    const activationPreview = escHtml(JSON.stringify(p.activation_payload, null, 2));
 
-      <div class="si-card">
-        <h3>Experiment assignment</h3>
-        ${
-          exp
-            ? `<div class="si-kv">
+    const platformSectionHtml = `
+      <div class="si-panel-section">
+        <div class="si-section-label">Platform activation</div>
+        <div class="si-card">
+          <h3>Activation payload (GTM / Adobe / Optimizely)</h3>
+          <p class="si-muted si-muted--block">
+            Use <code class="si-code">getActivationPayload()</code>, <code class="si-code">getPersonalizationSignal()</code>, or
+            <code class="si-code">pushPersonalizationSignalToDataLayer()</code> (and vendor equivalents).
+            <code class="si-code">pushPersonalizationSignalAll()</code> fans out to common targets and dispatches
+            <code class="si-code">si:personalization-signal</code> / <code class="si-code">si:activation</code> when the signal meaningfully changes.
+          </p>
+          <pre class="si-pre">${activationPreview}</pre>
+        </div>
+      </div>`;
+
+    const sessionOpsHtml = `
+      <div class="si-panel-section">
+        <div class="si-section-label">Session &amp; controls</div>
+        ${safePlanHtml}
+        <div class="si-card">
+          <h3>Session &amp; experiments</h3>
+          <div class="si-kv si-kv--tight">
+            <div>Session ID</div><div class="si-metric si-metric--break"><code class="si-code">${escHtml(p.session_id)}</code></div>
+            <div>Persona (debug)</div><div><span class="si-pill">${escHtml(p.persona ?? "auto")}</span></div>
+            <div>Page type (signals)</div><div><span class="si-pill">${escHtml(p.page_type)}</span></div>
+          </div>
+        </div>
+        <div class="si-card">
+          <h3>Active personalization</h3>
+          <div class="si-muted si-muted--mb6">Personalization: <b>${persoOn ? "ON" : "OFF"}</b>${
+            !isAuto
+              ? "<br/><span class=\"si-muted\">Observe-only on non-retail sites: no demo-site DOM rewrites.</span>"
+              : ""
+          }</div>
+          ${
+            p.active_treatments.length
+              ? p.active_treatments
+                  .map(
+                    (t) =>
+                      `<div class="si-treat-row"><span class="si-pill">${t.source}</span> <code>${escHtml(t.treatment_id)}</code><div class="si-muted">slots: ${t.applied_slots.map(escHtml).join(", ") || "—"}</div></div>`,
+                  )
+                  .join("")
+              : `<div class="si-muted">No active treatments.</div>`
+          }
+        </div>
+        <div class="si-card">
+          <h3>Experiment assignment</h3>
+          ${
+            exp
+              ? `<div class="si-kv">
                  <div>Experiment</div><div><code>${escHtml(exp.experiment_id)}</code></div>
                  <div>Variant</div><div><span class="si-pill">${escHtml(exp.variant_id)}</span></div>
                  <div>Treatment</div><div><code>${escHtml(exp.treatment_id ?? "none")}</code></div>
                  <div>Holdout</div><div class="si-metric">${exp.is_control ? "yes (control)" : "no"}</div>
                </div>`
-            : `<div class="si-muted">No experiment running.</div>`
-        }
-      </div>
-
-      <div class="si-card">
-        <h3>Lift preview (demo seed)</h3>
-        <p class="si-muted si-muted--block">
-          ${
-            isAuto
-              ? `Same numbers merged into the dashboard experiment table when no live D1 rows exist
-          (<code class="si-code">@si/shared/demoMetrics</code> + worker <code class="si-code">mergeExperiment</code>).`
-              : `${escHtml(liftPreview.cohortLabel)} — vertical-specific seeded rates for the inspector; the worker dashboard still merges against the retail demo pool unless live D1 rows exist.`
+              : `<div class="si-muted">No experiment running.</div>`
           }
-        </p>
-        <div class="si-kv">
-          <div>${escHtml(liftPreview.ctaMetricLabel)}</div><div><span class="si-pill">${escHtml(liftPreview.ctaLine)}</span></div>
-          <div>${escHtml(liftPreview.leadMetricLabel)}</div><div><span class="si-pill">${escHtml(liftPreview.leadLine)}</span></div>
         </div>
-      </div>
-
-      <div class="si-card">
-        <h3>Activation payload (integrations)</h3>
-        <p class="si-muted si-muted--block">
-          Use <code class="si-code">getActivationPayload()</code> / <code class="si-code">getPersonalizationSignal()</code>, or
-          <code class="si-code">pushPersonalizationSignalToDataLayer()</code> (and Adobe/Optimizely equivalents — same behavior as
-          <code class="si-code">pushToDataLayer()</code>, etc.).
-          <code class="si-code">pushPersonalizationSignalAll()</code> pushes to all three targets and dispatches
-          <code class="si-code">si:personalization-signal</code> and <code class="si-code">si:activation</code>.
-          During scoring, those two events also fire when the personalization signal changes meaningfully.
-        </p>
-        <pre class="si-pre">${activationPreview}</pre>
-      </div>
-
-      <div class="si-card">
-        <h3>Session storage</h3>
-        <p class="si-muted si-muted--block">
-          SI keeps one anonymous profile in <b>sessionStorage</b> under key <code class="si-code">si:session</code>
-          (not a cookie). Clearing it gives you a new session id and a fresh A/B coin flip.
-        </p>
-        <div class="si-btn-row">
-          <button class="si-btn primary" id="si-soft-reset">Clear session (no reload)</button>
-          <button class="si-btn danger" id="si-hard-reset">Clear session &amp; reload</button>
+        <div class="si-card">
+          <h3>Lift preview (demo seed)</h3>
+          <p class="si-muted si-muted--block">
+            ${
+              isAuto
+                ? `Seeded numbers merge into the dashboard experiment table when no live D1 rows exist
+            (<code class="si-code">@si/shared/demoMetrics</code> + worker <code class="si-code">mergeExperiment</code>).`
+                : `${escHtml(liftPreview.cohortLabel)} — vertical-specific seeded rates for the inspector.`
+            }
+          </p>
+          <div class="si-kv">
+            <div>${escHtml(liftPreview.ctaMetricLabel)}</div><div><span class="si-pill">${escHtml(liftPreview.ctaLine)}</span></div>
+            <div>${escHtml(liftPreview.leadMetricLabel)}</div><div><span class="si-pill">${escHtml(liftPreview.leadLine)}</span></div>
+          </div>
         </div>
-      </div>
-
-      <div class="si-card">
-        <h3>Controls</h3>
-        <div class="si-muted si-muted--mb8">Personalization: <b>${persoOn ? "ON" : "OFF"}</b></div>
-        <div class="si-btn-row">
-          <button class="si-btn primary" id="si-toggle-perso">${persoOn ? "Disable" : "Enable"} personalization</button>
-          <button class="si-btn" id="si-export">Export state</button>
+        <div class="si-card">
+          <h3>Session storage</h3>
+          <p class="si-muted si-muted--block">
+            One anonymous profile in <b>sessionStorage</b> under <code class="si-code">si:session</code> (not a cookie).
+            Clearing it issues a new session id and a fresh A/B assignment.
+          </p>
+          <div class="si-btn-row">
+            <button class="si-btn primary" id="si-soft-reset">Clear session (no reload)</button>
+            <button class="si-btn danger" id="si-hard-reset">Clear session &amp; reload</button>
+          </div>
         </div>
-        <div class="si-muted si-muted--persona">${escHtml(personaControlLabel)}</div>
-        <div class="si-btn-row" id="si-personas"></div>
+        <div class="si-card">
+          <h3>Controls</h3>
+          <div class="si-muted si-muted--mb8">Personalization: <b>${persoOn ? "ON" : "OFF"}</b></div>
+          <div class="si-btn-row">
+            <button class="si-btn primary" id="si-toggle-perso">${persoOn ? "Disable" : "Enable"} personalization</button>
+            <button class="si-btn" id="si-export">Export state</button>
+          </div>
+          <div class="si-muted si-muted--persona">${escHtml(personaControlLabel)}</div>
+          <div class="si-btn-row" id="si-personas"></div>
+        </div>
+      </div>`;
+
+    const html = `
+      ${heroHtml}
+      <div class="si-panel-section">
+        <div class="si-section-label">Traffic &amp; acquisition</div>
+        ${trafficJourneySectionHtml}
       </div>
+      ${sitePageHtml}
+      ${activationSectionHtml}
+      ${platformSectionHtml}
+      ${explainSectionHtml}
+      ${liveSignalsHtml}
+      ${sessionOpsHtml}
     `;
     try {
       replaceChildrenFromHtml(body, html);

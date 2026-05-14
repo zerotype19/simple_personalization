@@ -1,10 +1,10 @@
-import type {
-  PersonalizationLadderLevel,
-  Recommendation,
-  RecommendedSurface,
-  RecommendedTreatmentLevel,
-  SessionProfile,
-  SiteVertical,
+import {
+  isAutoSiteVertical,
+  type PersonalizationLadderLevel,
+  type Recommendation,
+  type RecommendedSurface,
+  type RecommendedTreatmentLevel,
+  type SessionProfile,
 } from "@si/shared";
 import { publicSiteTypeLabel } from "../siteIntelligence/publicLabels";
 
@@ -23,7 +23,7 @@ function brandHint(p: SessionProfile): string {
 
 /**
  * Objective- and page-aware next-best-action. Uses `site_environment`, scores, and signals.
- * Auto-dealer language only when `vertical === "auto_retail"`.
+ * Auto-dealer language only for automotive verticals (`auto_retail`, `auto_oem`).
  */
 export function buildObjectiveAwareRecommendation(p: SessionProfile): Recommendation {
   const env = p.site_environment;
@@ -52,7 +52,7 @@ export function buildObjectiveAwareRecommendation(p: SessionProfile): Recommenda
   let objective = po;
   let conf = 0.55 + Math.min(0.25, (page.confidence + conversion.confidence) / 8);
 
-  if (vertical === "auto_retail") {
+  if (isAutoSiteVertical(vertical)) {
     if (pk === "product_detail_page" && s.cta_clicks === 0 && p.engagement_score >= 58) {
       next = "Promote add-to-cart, test drive, or financing next step — reduce purchase friction.";
       surface = "primary_cta";
@@ -126,7 +126,7 @@ export function buildObjectiveAwareRecommendation(p: SessionProfile): Recommenda
     }
   } else {
     if (pk === "article_page" && p.engagement_score >= 55 && s.cta_clicks === 0) {
-      next = `Offer an implementation-oriented or educational next step for ${brand}.`;
+      next = `Offer a relevant educational or soft next step for ${brand} — the reader is engaged but has not converted yet.`;
       surface = "related_content";
     } else {
       next = "Keep the visitor on a clear path to the strongest conversion surface detected this session.";

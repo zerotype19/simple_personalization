@@ -3,13 +3,23 @@ import contentEngagement from "../context-packs/concepts/content-engagement.json
 import commerceShopping from "../context-packs/concepts/commerce-shopping.json";
 import leadGeneration from "../context-packs/concepts/lead-generation.json";
 import marketingOperations from "../context-packs/concepts/marketing-operations.json";
+import universalIntent from "../context-packs/concepts/universal-intent.json";
 import globalStop from "../context-packs/stopwords/global.json";
 import siteBoilerplate from "../context-packs/stopwords/site-boilerplate.json";
 import verticalAuto from "../context-packs/verticals/auto-retail.json";
 import verticalB2b from "../context-packs/verticals/b2b-saas.json";
+import verticalContentLed from "../context-packs/verticals/content-led-business.json";
 import verticalEcomB2c from "../context-packs/verticals/ecommerce-b2c.json";
+import verticalEducation from "../context-packs/verticals/education.json";
+import verticalFinancial from "../context-packs/verticals/financial-services.json";
+import verticalGeneral from "../context-packs/verticals/general-business.json";
+import verticalHealthcare from "../context-packs/verticals/healthcare.json";
+import verticalHomeServices from "../context-packs/verticals/home-services.json";
+import verticalLocal from "../context-packs/verticals/local-services.json";
 import verticalProf from "../context-packs/verticals/professional-services.json";
 import verticalPublisher from "../context-packs/verticals/publisher.json";
+import verticalRealEstate from "../context-packs/verticals/real-estate.json";
+import verticalTravel from "../context-packs/verticals/travel-hospitality.json";
 
 /** Do not show concepts weaker than this after normalization (0–1). */
 export const CONCEPT_DISPLAY_MIN_SCORE = 0.15;
@@ -44,6 +54,7 @@ export interface ConceptAffinityComputeResult {
 }
 
 const PACK_BY_ID: Record<string, ConceptPackFile> = {
+  universal_intent: universalIntent as ConceptPackFile,
   marketing_operations: marketingOperations as ConceptPackFile,
   commerce_shopping: commerceShopping as ConceptPackFile,
   lead_generation: leadGeneration as ConceptPackFile,
@@ -52,23 +63,37 @@ const PACK_BY_ID: Record<string, ConceptPackFile> = {
 
 const VERTICAL_META: Partial<Record<SiteVertical, VerticalPackFile>> = {
   auto_retail: verticalAuto as VerticalPackFile,
+  auto_oem: verticalAuto as VerticalPackFile,
   b2b_saas: verticalB2b as VerticalPackFile,
   ecommerce: verticalEcomB2c as VerticalPackFile,
   publisher_content: verticalPublisher as VerticalPackFile,
   professional_services: verticalProf as VerticalPackFile,
   lead_generation: verticalB2b as VerticalPackFile,
   nonprofit: verticalPublisher as VerticalPackFile,
-  unknown: verticalB2b as VerticalPackFile,
+  unknown: verticalGeneral as VerticalPackFile,
+  general_business: verticalGeneral as VerticalPackFile,
+  content_led_business: verticalContentLed as VerticalPackFile,
+  healthcare: verticalHealthcare as VerticalPackFile,
+  financial_services: verticalFinancial as VerticalPackFile,
+  education: verticalEducation as VerticalPackFile,
+  travel_hospitality: verticalTravel as VerticalPackFile,
+  real_estate: verticalRealEstate as VerticalPackFile,
+  home_services: verticalHomeServices as VerticalPackFile,
+  local_services: verticalLocal as VerticalPackFile,
 };
+
+const UNIVERSAL_PACK_ID = "universal_intent";
 
 function verticalPlaybook(vertical: SiteVertical): VerticalPackFile {
   if (vertical === "ecommerce") return verticalEcomB2c as VerticalPackFile;
-  return VERTICAL_META[vertical] ?? (verticalB2b as VerticalPackFile);
+  return VERTICAL_META[vertical] ?? (verticalGeneral as VerticalPackFile);
 }
 
 function collectPackIds(vertical: SiteVertical): string[] {
   const pb = verticalPlaybook(vertical);
-  return [...(pb?.concept_pack_ids ?? ["marketing_operations", "content_engagement"])];
+  const ids = [...(pb?.concept_pack_ids ?? ["content_engagement", "lead_generation"])];
+  if (!ids.includes(UNIVERSAL_PACK_ID)) ids.unshift(UNIVERSAL_PACK_ID);
+  return ids;
 }
 
 function tokenizeBrandAndDomain(domain: string, siteName: string | null): Set<string> {

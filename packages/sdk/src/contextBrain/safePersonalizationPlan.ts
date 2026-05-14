@@ -1,10 +1,11 @@
 import type { SessionProfile } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 
 /**
  * Non-destructive “consultant in the tag” plan for hosts where we do not apply DOM treatments (non–auto-retail).
  */
 export function buildSafePersonalizationPlan(p: SessionProfile): string[] {
-  if (p.site_context.vertical === "auto_retail") return [];
+  if (isAutoSiteVertical(p.site_context.vertical)) return [];
 
   const lines: string[] = [];
   const scroll = p.signals.max_scroll_depth;

@@ -1,0 +1,25 @@
+{
+  "id": "generic_return_visit_no_conversion",
+  "label": "Generic — return visit, no conversion",
+  "when": {
+    "verticals": ["*"],
+    "exclude_verticals": ["b2b_saas", "lead_generation", "professional_services"],
+    "requires_return_visit": true,
+    "min_engagement_score": 42,
+    "max_cta_clicks": 0,
+    "min_pages_viewed": 1,
+    "min_scroll_depth": 38,
+    "momentum_match": "any_of_return_pages_or_scroll",
+    "concept_labels_any": [],
+    "min_concept_affinity_for_any": 0
+  },
+  "output": {
+    "inferred_need": "Confidence to act on a repeat pass — often comparison or timing",
+    "message_angle": "Acknowledge the return — reduce uncertainty with proof or a tailored nudge",
+    "offer_type": "Reminder of value, social proof, limited-time incentive, or easy re-engagement path",
+    "surface": "Banner, inline strip, or light modal on return",
+    "timing": "Early in the return session after orientation",
+    "friction": "low",
+    "recommended_activation_summary": "Return visitor with no CTA clicks — try proof-led messaging, a small incentive, or a one-click path back to the most relevant offer they viewed before."
+  }
+}

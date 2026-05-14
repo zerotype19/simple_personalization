@@ -1,0 +1,8 @@
+{
+  "id": "real_estate",
+  "label": "Real estate",
+  "likely_objectives": ["lead_capture", "tour_request", "listing_view"],
+  "page_kinds": ["listing", "agent_bio", "neighborhood", "lead_form"],
+  "archetypes": ["buyer", "seller", "renter", "investor"],
+  "concept_pack_ids": ["universal_intent", "lead_generation", "content_engagement"]
+}

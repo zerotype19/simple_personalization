@@ -1,0 +1,8 @@
+{
+  "id": "home_services",
+  "label": "Home services",
+  "likely_objectives": ["quote_request", "appointment", "lead_capture"],
+  "page_kinds": ["service_area", "service_line", "homepage", "lead_form"],
+  "archetypes": ["homeowner", "urgent_repair", "comparison_shopper"],
+  "concept_pack_ids": ["universal_intent", "lead_generation", "content_engagement"]
+}

@@ -54,20 +54,23 @@ const PUBLISHER_SEED: LiftSeed = {
   sessions: 5200,
 };
 
+const GENERAL_BUSINESS_SEED: LiftSeed = {
+  cohortLabel: "Session Intelligence demo cohort (general / mixed vertical benchmark)",
+  ctaMetricLabel: "Primary engagement CTA",
+  leadMetricLabel: "Lead or conversion start",
+  control: { cta_ctr: 0.038, conversion_rate: 0.014, avg_engagement: 54 },
+  treatment: { cta_ctr: 0.044, conversion_rate: 0.016, avg_engagement: 58 },
+  sessions: 5000,
+};
+
 function pickLiftSeed(vertical: SiteVertical): LiftSeed {
-  if (vertical === "auto_retail") return RETAIL_SEED;
+  if (vertical === "auto_retail" || vertical === "auto_oem") return RETAIL_SEED;
   if (vertical === "ecommerce") return ECOMMERCE_SEED;
   if (vertical === "publisher_content") return PUBLISHER_SEED;
-  if (
-    vertical === "b2b_saas" ||
-    vertical === "lead_generation" ||
-    vertical === "professional_services" ||
-    vertical === "nonprofit" ||
-    vertical === "unknown"
-  ) {
+  if (vertical === "b2b_saas" || vertical === "lead_generation" || vertical === "professional_services") {
     return B2B_SEED;
   }
-  return B2B_SEED;
+  return GENERAL_BUSINESS_SEED;
 }
 
 function experimentFromSeed(seed: LiftSeed): ExperimentReport {

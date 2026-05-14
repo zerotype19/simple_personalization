@@ -1,4 +1,5 @@
 import type { Recommendation, SessionProfile } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 import { buildObjectiveAwareRecommendation } from "./recommendation/objectiveAwareNba";
 
 /**
@@ -18,7 +19,7 @@ export function chooseRecommendation(
   const objectiveRec = finalizeReasons(buildObjectiveAwareRecommendation(profile), profile);
   const vertical = profile.site_context.vertical;
 
-  if (vertical === "auto_retail") {
+  if (isAutoSiteVertical(vertical)) {
     const legacy = defaultRecommendation(profile);
     if (legacy && legacy.confidence >= 0.57 && legacy.treatment_hint) {
       return finalizeReasons(legacy, profile);
@@ -80,17 +81,35 @@ function defaultRecommendation(p: SessionProfile): Recommendation | null {
   return null;
 }
 
+/** Auto-dealer jargon that must not appear in `reason` lines for non-automotive verticals. */
+const AUTO_REASON_JARGON =
+  /\b(test drive|inventory|dealer|trim|\bvdp\b|\bsuv\b|sedan)\b/i;
+
 function collectReasons(p: SessionProfile, extra: string[]): string[] {
+  const vertical = p.site_context.vertical;
+  const auto = isAutoSiteVertical(vertical);
   const reasons: string[] = [];
-  if (p.signals.vdp_views >= 2) reasons.push(`${p.signals.vdp_views} VDP views`);
+  if (p.signals.vdp_views >= 2) {
+    const n = p.signals.vdp_views;
+    reasons.push(auto ? `${n} VDP views` : `${n} detail-page views`);
+  }
   if (p.signals.pricing_views) reasons.push(`${p.signals.pricing_views} pricing views`);
   if (p.signals.finance_interactions) {
     reasons.push(`${p.signals.finance_interactions} finance interactions`);
   }
   if (p.signals.return_visit) reasons.push("Return visit");
   if (p.signals.compare_interactions) reasons.push("Comparison started");
-  for (const e of extra) reasons.push(e);
+  const extras = auto ? extra : extra.filter((e) => !AUTO_REASON_JARGON.test(e));
+  for (const e of extras) reasons.push(e);
   return Array.from(new Set(reasons)).slice(0, 5);
+}
+
+/**
+ * Supplemental reason bullets when a recommendation’s `reason` array is empty.
+ * Exposed for tests (same path as {@link finalizeReasons}).
+ */
+export function collectReasonSupplementsForTests(p: SessionProfile): string[] {
+  return collectReasons(p, []);
 }
 
 function finalizeReasons(rec: Recommendation, p: SessionProfile): Recommendation {

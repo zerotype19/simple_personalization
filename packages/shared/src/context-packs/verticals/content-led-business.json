@@ -1,0 +1,8 @@
+{
+  "id": "content_led_business",
+  "label": "Content-led business",
+  "likely_objectives": ["newsletter", "lead_capture", "content_engagement"],
+  "page_kinds": ["article", "resource_hub", "homepage"],
+  "archetypes": ["reader", "subscriber_prospect", "researcher", "return_visitor"],
+  "concept_pack_ids": ["universal_intent", "content_engagement", "lead_generation"]
+}

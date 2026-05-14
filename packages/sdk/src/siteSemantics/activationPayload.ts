@@ -1,5 +1,55 @@
 import type { ActivationPayloadEnvelope, PersonalizationSignal, SessionProfile } from "@si/shared";
+import { formatTimelineClock } from "../sessionIntel";
 import { publicSiteTypeLabel } from "../siteIntelligence/publicLabels";
+
+const TIMELINE_PREVIEW_CAP = 5;
+
+/** Strip accidental full URLs from timeline lines bound for vendor payloads (keep path + search when parseable). */
+function sanitizeTimelineMessageForPayload(message: string): string {
+  return message.replace(/https?:\/\/[^\s)]+/gi, (raw) => {
+    try {
+      const u = new URL(raw);
+      return `${u.pathname}${u.search}`.slice(0, 200) || "/";
+    } catch {
+      return "[url]";
+    }
+  });
+}
+
+function buildTimelinePreviewForPayload(p: SessionProfile): string[] {
+  const rows = p.intel_timeline ?? [];
+  if (!rows.length) return [];
+  return rows.slice(-TIMELINE_PREVIEW_CAP).map((ev) => {
+    const clock = formatTimelineClock(p.started_at, ev.t);
+    const msg = sanitizeTimelineMessageForPayload(ev.message);
+    return `${clock} ${msg}`;
+  });
+}
+
+function summarizeBehavior(p: SessionProfile): Record<string, unknown> | null {
+  const b = p.behavior_snapshot;
+  if (!b) return null;
+  // `behavior` is activation / debug context for vendors — not the primary personalization_signal.
+  return {
+    context: "activation_debug_preview",
+    arrival_channel: b.traffic.channel_guess,
+    campaign_clues: b.campaign_intent.commercial_clues,
+    keyword_themes: b.campaign_intent.keyword_themes.slice(0, 10),
+    campaign_angle: b.campaign_intent.campaign_angle,
+    referrer_category: b.referrer.category,
+    journey_pattern: b.navigation.journey_pattern,
+    journey_velocity: b.navigation.journey_velocity,
+    comparison_behavior: b.navigation.comparison_behavior,
+    path_summary: b.navigation.path_summary,
+    engagement_quality: b.engagement_quality.label,
+    activation_readiness: b.activation_readiness.score_0_100,
+    interruption_posture: b.activation_readiness.interruption_posture,
+    commercial_phase: b.commercial_journey_phase,
+    anonymous_similarity_hint: b.anonymous_similarity_hint,
+    device: b.device_context,
+    timeline_preview: buildTimelinePreviewForPayload(p),
+  };
+}
 
 function conceptSlug(label: string): string {
   return label
@@ -41,6 +91,8 @@ export function buildPersonalizationSignal(profile: SessionProfile): Personaliza
     recommended_friction_level: opp.friction,
     confidence: Math.round(opp.confidence * 100) / 100,
     reason: opp.reason.slice(0, 8),
+    commercial_journey_phase: profile.behavior_snapshot?.commercial_journey_phase,
+    activation_readiness_score: profile.behavior_snapshot?.activation_readiness?.score_0_100,
   };
 }
 
@@ -92,6 +144,7 @@ export function buildActivationPayload(profile: SessionProfile): ActivationPaylo
       activation: profile.activation_opportunity,
       playbook_match: profile.activation_opportunity.playbook,
       personalization_signal: sig,
+      behavior: summarizeBehavior(profile),
     },
   };
 }

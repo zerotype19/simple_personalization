@@ -1,4 +1,4 @@
-import type { JourneyStage, SessionProfile, SessionSignals, SiteVertical } from "@si/shared";
+import { isAutoSiteVertical, type JourneyStage, type SessionProfile, type SessionSignals, type SiteVertical } from "@si/shared";
 
 function clamp(v: number, min = 0, max = 100): number {
   return Math.max(min, Math.min(max, Math.round(v)));
@@ -15,7 +15,7 @@ export function computeClampedScores(
   urgency_score: number;
   engagement_score: number;
 } {
-  if (vertical === "auto_retail") {
+  if (isAutoSiteVertical(vertical)) {
     const intent =
       s.vdp_views * 14 +
       s.pricing_views * 12 +
@@ -116,7 +116,7 @@ export function recomputeScores(profile: SessionProfile): SessionProfile {
 
 function pickJourneyStage(p: SessionProfile, vertical: SiteVertical): JourneyStage {
   const s = p.signals;
-  if (vertical === "auto_retail") {
+  if (isAutoSiteVertical(vertical)) {
     if (p.intent_score >= 75 || s.cta_clicks >= 3 || s.finance_interactions >= 2) {
       return "conversion";
     }

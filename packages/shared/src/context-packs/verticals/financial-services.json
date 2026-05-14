@@ -1,0 +1,8 @@
+{
+  "id": "financial_services",
+  "label": "Financial services",
+  "likely_objectives": ["lead_capture", "application_start", "education"],
+  "page_kinds": ["product_page", "rates", "article", "lead_form"],
+  "archetypes": ["rate_shopper", "applicant", "advisor_seeker"],
+  "concept_pack_ids": ["universal_intent", "lead_generation", "content_engagement"]
+}

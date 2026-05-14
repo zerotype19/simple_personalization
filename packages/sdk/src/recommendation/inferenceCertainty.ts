@@ -31,8 +31,13 @@ export function buildInferenceCertaintyBands(p: SessionProfile): InferenceCertai
   if (conversion.confidence >= 0.62) medium.push("Conversion objective inference is reasonably grounded");
   else low.push("Conversion objective is tentative — few CTA or funnel cues");
 
-  if (p.site_context.scan.primary_ctas.length >= 2) high.push("Primary conversion surfaces detected from CTA text");
-  else if (p.site_context.scan.primary_ctas.length === 1) medium.push("Limited CTA diversity on this page sample");
+  const hardCtas = p.site_context.scan.cta_text_hard?.length ?? 0;
+  const softCtas = p.site_context.scan.cta_text_soft?.length ?? 0;
+  const convSamples = hardCtas + softCtas > 0 ? hardCtas + softCtas : p.site_context.scan.primary_ctas.length;
+
+  if (hardCtas >= 2) high.push("High-intent conversion CTAs detected (checkout, demo, quote, …)");
+  else if (hardCtas === 1 || convSamples >= 2) medium.push("Conversion-oriented CTA text sampled in header/main");
+  else if (convSamples === 1) medium.push("Limited CTA diversity on this page sample");
   else low.push("No dominant conversion CTA detected yet in the sampled chrome");
 
   if (env.ladder.level === 1) low.push("Personalization ladder is observe-only until confidence rises");
@@ -46,7 +51,10 @@ export function buildInferenceCertaintyBands(p: SessionProfile): InferenceCertai
 
 export function describeConversionSurfaces(p: SessionProfile): string[] {
   const out: string[] = [];
-  const ctas = p.site_context.scan.primary_ctas.join(" ").toLowerCase();
+  const ctas = [...(p.site_context.scan.cta_text_hard ?? []), ...(p.site_context.scan.cta_text_soft ?? [])]
+    .concat(p.site_context.scan.primary_ctas)
+    .join(" ")
+    .toLowerCase();
   const el = p.site_environment.conversion.detected_elements;
 
   if (/newsletter|subscribe/i.test(ctas)) out.push("Newsletter / subscribe");

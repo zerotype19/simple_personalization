@@ -1,0 +1,25 @@
+{
+  "id": "generic_lead_intent_no_form_submit",
+  "label": "Generic — lead intent signals, no CTA click",
+  "when": {
+    "verticals": ["*"],
+    "exclude_verticals": ["ecommerce", "publisher_content", "auto_retail"],
+    "min_engagement_score": 46,
+    "max_cta_clicks": 0,
+    "min_pages_viewed": 2,
+    "min_scroll_depth": 48,
+    "momentum_match": "any_of_return_pages_or_scroll",
+    "min_hard_ctas_on_scan": 1,
+    "concept_labels_any": [],
+    "min_concept_affinity_for_any": 0
+  },
+  "output": {
+    "inferred_need": "A safer step before filling a form — clarity on what happens next",
+    "message_angle": "Mirror the intent on the page (quote, demo, consult) with a lighter first step",
+    "offer_type": "Micro-conversion: callback request, shorter form, calendar link, or downloadable proof",
+    "surface": "Sticky footer CTA copy test, inline form step-down, or chat prompt",
+    "timing": "After scroll depth shows they read the value prop",
+    "friction": "low",
+    "recommended_activation_summary": "Page shows a hard conversion ask and the visitor is engaged, but they have not clicked — offer a lower-commitment path (shorter form, callback, calendar, or proof asset) that matches the same intent."
+  }
+}

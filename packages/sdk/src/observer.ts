@@ -1,4 +1,5 @@
 import type { PageType, SessionProfile } from "@si/shared";
+import { pushIntelEvent } from "./sessionIntel";
 
 type Update = (mut: (p: SessionProfile) => void) => void;
 
@@ -9,15 +10,36 @@ function eventTargetElement(ev: Event): Element | null {
   return t.nodeType === Node.ELEMENT_NODE ? (t as Element) : t.parentElement;
 }
 
+function appendPathIfNew(p: SessionProfile, pathname: string): void {
+  const seq = p.signals.path_sequence;
+  const last = seq[seq.length - 1];
+  if (last === pathname) return;
+  seq.push(pathname);
+  if (seq.length > 35) seq.splice(0, seq.length - 35);
+}
+
+function seedLanding(p: SessionProfile): void {
+  if (!p.signals.landing_href) {
+    p.signals.landing_href = window.location.href;
+    p.signals.initial_referrer = document.referrer || null;
+  }
+  if (!p.signals.path_sequence.length) {
+    appendPathIfNew(p, window.location.pathname);
+  }
+}
+
 /**
  * Wire up DOM observers and event listeners. We aim for low-frequency,
  * high-signal events rather than streaming raw telemetry.
  */
 export function startObserver(getPageType: () => PageType, update: Update): () => void {
   const start = Date.now();
+  let visMark = performance.now();
+  let docVisible = !document.hidden;
 
   const tickDuration = window.setInterval(() => {
     update((p) => {
+      seedLanding(p);
       p.signals.session_duration_ms = Date.now() - start;
     });
   }, 5000);
@@ -29,14 +51,85 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
     );
     const pct = Math.min(100, Math.round((window.scrollY / docHeight) * 100));
     update((p) => {
+      seedLanding(p);
       if (pct > p.signals.max_scroll_depth) p.signals.max_scroll_depth = pct;
     });
   }, 400);
   window.addEventListener("scroll", scrollHandler, { passive: true });
 
+  const hoverHandler = throttle((e: Event) => {
+    const el = eventTargetElement(e);
+    if (!el || el.closest("#si-inspector-root")) return;
+    if (!el.closest("main a, main button, header a, header button")) return;
+    update((p) => {
+      seedLanding(p);
+      p.signals.cta_hover_events++;
+    });
+  }, 900);
+  document.addEventListener("mouseover", hoverHandler, { passive: true, capture: true });
+
+  const focusHandler = throttle((e: Event) => {
+    const el = eventTargetElement(e);
+    if (!el || el.closest("#si-inspector-root")) return;
+    if (!el.matches("input, textarea, select") && !el.closest("form input, form textarea, form select")) return;
+    update((p) => {
+      seedLanding(p);
+      p.signals.form_field_focus_events++;
+    });
+  }, 1200);
+  document.addEventListener("focusin", focusHandler, { passive: true, capture: true });
+
+  const submitHandler = (e: Event) => {
+    const form = (e.target as HTMLElement | null)?.closest?.("form");
+    if (!form) return;
+    const action = (form.getAttribute("action") ?? "").toLowerCase();
+    const hasSearch =
+      action.includes("search") ||
+      !!form.querySelector('input[name="q"],input[name="query"],input[type="search"]');
+    if (!hasSearch) return;
+    update((p) => {
+      seedLanding(p);
+      p.signals.onsite_search_events++;
+      pushIntelEvent(
+        p,
+        "Submitted an on-site search (query text is not captured)",
+        `onsite_search:${p.signals.onsite_search_events}`,
+      );
+    });
+  };
+  document.addEventListener("submit", submitHandler, { passive: true, capture: true });
+
+  const visibilityHandler = () => {
+    const now = performance.now();
+    const delta = Math.max(0, now - visMark);
+    visMark = now;
+    const wasVisible = docVisible;
+    update((p) => {
+      seedLanding(p);
+      if (wasVisible) p.signals.tab_visible_ms += delta;
+      else p.signals.tab_hidden_ms += delta;
+    });
+    docVisible = !document.hidden;
+  };
+  document.addEventListener("visibilitychange", visibilityHandler);
+
   const clickHandler = (e: Event) => {
     const el = eventTargetElement(e);
     if (!el || el.closest("#si-inspector-root")) return;
+
+    const offerHit =
+      el.closest(
+        "[data-si-price], [data-si-finance], .price, .pricing, [href*='financ'], [href*='lease'], [href*='payment'], [class*='coupon'], [class*='promo'], [class*='calculator']",
+      ) || /\b(coupon|promo|apr|lease|financ|estimate payment|payment calculator)\b/i.test(el.textContent ?? "");
+    if (offerHit) {
+      update((p) => {
+        seedLanding(p);
+        p.signals.offer_surface_clicks++;
+        if (p.signals.offer_surface_clicks === 1) {
+          pushIntelEvent(p, "Explored pricing or offer-related content", "offer_surface_first");
+        }
+      });
+    }
 
     const ctaEl = el.closest<HTMLElement>(
       "[data-si-cta], button.primary, a.cta",
@@ -44,24 +137,41 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
     if (ctaEl) {
       const role = ctaEl.getAttribute("data-si-cta") ?? "generic";
       update((p) => {
+        seedLanding(p);
         p.signals.cta_clicks++;
+        if (p.signals.cta_clicks === 1) {
+          pushIntelEvent(p, "Clicked a primary call-to-action", "cta_first_click");
+        }
         if (role === "finance") p.signals.finance_interactions++;
         if (role === "compare") p.signals.compare_interactions++;
       });
     } else if (el.closest("main a[href], main button")) {
       // Nav links and in-page buttons without data-si-cta still move scores (demo feedback).
       update((p) => {
+        seedLanding(p);
         p.signals.cta_clicks++;
       });
     }
     if (el.closest("[data-si-price]")) {
-      update((p) => p.signals.pricing_views++);
+      update((p) => {
+        seedLanding(p);
+        p.signals.pricing_views++;
+      });
     }
     if (el.closest("[data-si-compare-item]")) {
-      update((p) => p.signals.compare_interactions++);
+      update((p) => {
+        seedLanding(p);
+        p.signals.compare_interactions++;
+        if (p.signals.compare_interactions === 1) {
+          pushIntelEvent(p, "Used compare or shortlist tooling", "compare_first");
+        }
+      });
     }
     if (el.closest("[data-si-finance]")) {
-      update((p) => p.signals.finance_interactions++);
+      update((p) => {
+        seedLanding(p);
+        p.signals.finance_interactions++;
+      });
     }
   };
   document.addEventListener("click", clickHandler, { passive: true, capture: true });
@@ -70,7 +180,10 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
     const el = eventTargetElement(e);
     if (!el) return;
     if (el.closest("[data-si-finance]")) {
-      update((p) => p.signals.finance_interactions++);
+      update((p) => {
+        seedLanding(p);
+        p.signals.finance_interactions++;
+      });
     }
   };
   document.addEventListener("input", throttle(formHandler, 800), { passive: true });
@@ -82,9 +195,11 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
     if (url === lastUrl) return;
     lastUrl = url;
     update((p) => {
+      seedLanding(p);
       const t = getPageType();
       p.page_type = t;
       p.signals.pages_viewed++;
+      appendPathIfNew(p, window.location.pathname);
       if (t === "vdp") p.signals.vdp_views++;
       if (t === "finance") p.signals.finance_interactions++;
       if (t === "compare") p.signals.compare_interactions++;
@@ -92,7 +207,9 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
   };
   // Initial increment
   update((p) => {
+    seedLanding(p);
     p.signals.pages_viewed = Math.max(1, p.signals.pages_viewed + 1);
+    appendPathIfNew(p, window.location.pathname);
     const t = getPageType();
     if (t === "vdp") p.signals.vdp_views++;
   });
@@ -117,6 +234,10 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
   return () => {
     window.clearInterval(tickDuration);
     window.removeEventListener("scroll", scrollHandler);
+    document.removeEventListener("mouseover", hoverHandler, true);
+    document.removeEventListener("focusin", focusHandler, true);
+    document.removeEventListener("submit", submitHandler, true);
+    document.removeEventListener("visibilitychange", visibilityHandler);
     document.removeEventListener("click", clickHandler, true);
     window.removeEventListener("popstate", popHandler);
     history.pushState = origPush;

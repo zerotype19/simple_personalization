@@ -1,4 +1,5 @@
 import type { Recommendation, SessionProfile, SiteVertical } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 
 function reasonsGeneric(p: SessionProfile, extra: string[]): string[] {
   const r: string[] = [];
@@ -17,7 +18,7 @@ export function defaultRecommendationForSite(
   p: SessionProfile,
   vertical: SiteVertical,
 ): Recommendation | null {
-  if (vertical === "auto_retail") return null;
+  if (isAutoSiteVertical(vertical)) return null;
 
   const scan = p.site_context.scan;
   const engagement = p.engagement_score;
@@ -35,13 +36,14 @@ export function defaultRecommendationForSite(
     };
   }
 
-  if (scan.content_themes.length >= 2) {
+  if (scan.content_themes.length >= 2 && (vertical === "b2b_saas" || vertical === "lead_generation")) {
     return {
       next_best_action: "Recommend related framework or implementation content",
       treatment_hint: null,
       confidence: 0.66,
       reason: reasonsGeneric(p, [
         `Themes detected: ${scan.content_themes.slice(0, 3).join(", ")}`,
+        "Consider related educational or offer content",
       ]),
     };
   }

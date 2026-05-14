@@ -1,0 +1,24 @@
+{
+  "id": "generic_product_interest_no_cart",
+  "label": "Generic — product interest, no cart/checkout click",
+  "when": {
+    "verticals": ["ecommerce"],
+    "exclude_verticals": [],
+    "min_engagement_score": 48,
+    "max_cta_clicks": 0,
+    "min_pages_viewed": 2,
+    "min_scroll_depth": 45,
+    "momentum_match": "any_of_return_pages_or_scroll",
+    "concept_labels_any": [],
+    "min_concept_affinity_for_any": 0
+  },
+  "output": {
+    "inferred_need": "Confidence to add to cart — shipping, fit, trust, or price clarity",
+    "message_angle": "De-risk the purchase with reviews, guarantees, or a nudge tied to what they viewed",
+    "offer_type": "Cart-saving prompt, shipping clarity, bundle, or small incentive",
+    "surface": "Product page inline or exit-intent light touch",
+    "timing": "After multi-product browsing or deep scroll on PDP",
+    "friction": "low",
+    "recommended_activation_summary": "E-commerce visitor browsing deeply across products without cart/checkout clicks — reinforce trust and value (reviews, shipping/returns, bundle) before a harder checkout push."
+  }
+}

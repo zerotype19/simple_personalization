@@ -1,4 +1,5 @@
 import type { GenericPageKind, SiteScanSummary, SiteVertical } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 
 const ECOMMERCE = /\b(add\s*to\s*cart|buy\s*now|checkout|cart|basket|sku|shipping|coupon|promo\s*code)\b/i;
 const LEAD = /\b(book\s*a\s*demo|request\s*a\s*demo|talk\s*to\s*sales|contact\s*sales|get\s*started|start\s*free|free\s*trial|subscribe|newsletter|contact\s*us|get\s*in\s*touch|schedule)\b/i;
@@ -17,7 +18,14 @@ export function inferConversionObjectives(
 } {
   const detected: string[] = [];
   const path = pathname.toLowerCase();
-  const ctaBlob = [...scan.primary_ctas, ...scan.top_terms.slice(0, 8)].join(" | ").toLowerCase();
+  const ctaBlob = [
+    ...(scan.cta_text_hard ?? []),
+    ...(scan.cta_text_soft ?? []),
+    ...scan.primary_ctas,
+    ...scan.top_terms.slice(0, 8),
+  ]
+    .join(" | ")
+    .toLowerCase();
 
   const pushCtaHits = (rx: RegExp, label: string) => {
     if (rx.test(ctaBlob) || rx.test(path)) detected.push(label);
@@ -54,7 +62,7 @@ export function inferConversionObjectives(
     primary = "contact_or_consultation";
     secondary = "credibility_depth";
     confidence = 0.64;
-  } else if (vertical === "auto_retail") {
+  } else if (isAutoSiteVertical(vertical)) {
     primary = "vehicle_inquiry_or_visit";
     secondary = "financing_research";
     confidence = 0.7;

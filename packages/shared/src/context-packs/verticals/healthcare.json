@@ -1,0 +1,8 @@
+{
+  "id": "healthcare",
+  "label": "Healthcare",
+  "likely_objectives": ["appointment", "lead_capture", "patient_education"],
+  "page_kinds": ["service_line", "location", "article", "lead_form"],
+  "archetypes": ["patient_researcher", "caregiver", "appointment_seeker"],
+  "concept_pack_ids": ["universal_intent", "lead_generation", "content_engagement"]
+}

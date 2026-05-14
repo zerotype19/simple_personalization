@@ -1,0 +1,768 @@
+# Reference site archetypes — commercial web behavior patterns (not brand-specific rules).
+# Used for: matrix docs, future fixtures, vertical-pack tuning, playbook targets, classifier stress tests.
+version: 1
+positioning: >-
+  Anonymous Activation Intelligence: teach the engine what major commercial interaction models look like
+  (visitor psychology, conversion mechanics, personalization levers) — not “hardcode rules for Jeep.”
+
+archetypes:
+  - id: apple_premium_ecosystem_commerce
+    label: Premium consumer electronics ecosystem commerce
+    representative_sites: [Apple.com]
+    site_type: dtc_premium_commerce
+    business_model: hardware_plus_services_subscriptions_accessories
+    primary_objective: configure_and_purchase_high_consideration_devices
+    secondary_objective: ecosystem_attachment_trade_in_financing
+    typical_page_roles: [product_detail, compare, trade_in, financing, accessory_cross_sell, support_docs]
+    common_conversion_paths:
+      - explore_compare → configure → trade_in_estimate → finance → checkout
+      - education_content → product → accessory_bundle
+    common_personalization_needs:
+      - help_me_choose_and_compare
+      - trade_in_and_upgrade_prompts
+      - ecosystem_bundle_surfacing
+      - financing_clarity
+    key_concepts:
+      - Comparison shopping
+      - Premium / quality seeking
+      - Trust / proof seeking
+      - Convenience / ease
+    typical_ctas:
+      hard: [Buy, Choose your model, Check out with Apple Pay, Trade in]
+      soft: [Learn more, Which Mac is right for you, Watch film]
+    typical_activation_surfaces: [pdp_sticky_cta, compare_modal, trade_in_inline, financing_disclosure_block]
+    anonymous_visitor_patterns:
+      - multi_model_compare_sessions
+      - deep_scroll_on_specs
+      - return_visits_before_configure
+    engine_hints:
+      suggested_vertical: ecommerce
+      playbook_tuning: [generic_product_interest_no_cart, high_engagement_no_cta]
+      fixture_priority: high
+
+  - id: samsung_high_sku_consumer_electronics
+    label: High-SKU consumer electronics commerce
+    representative_sites: [Samsung.com]
+    site_type: high_sku_dtc_retail
+    business_model: hardware_promos_financing_retailer_handoff_optional
+    primary_objective: sku_selection_and_purchase
+    secondary_objective: promo_and_financing_sensitivity
+    typical_page_roles: [product_detail, category, compare, offers, support]
+    common_conversion_paths:
+      - promo_landing → pdp → finance → cart
+      - compare_models → pdp
+    common_personalization_needs:
+      - compatibility_guidance
+      - offer_and_financing_surfacing
+      - comparison_de_noise
+    key_concepts:
+      - Price sensitivity
+      - Comparison shopping
+      - Urgency / availability
+    typical_ctas:
+      hard: [Buy now, Where to buy, Pre-order, Add to cart]
+      soft: [Discover, Learn more, See offers]
+    typical_activation_surfaces: [offer_banner, compare_tool, pdp_bundle_block]
+    anonymous_visitor_patterns:
+      - high_compare_hops
+      - promo_code_search_behavior_proxy
+    engine_hints:
+      suggested_vertical: ecommerce
+      playbook_tuning: [generic_product_interest_no_cart]
+      fixture_priority: high
+
+  - id: nike_lifestyle_dtc_commerce
+    label: Lifestyle + DTC commerce
+    representative_sites: [Nike.com]
+    site_type: lifestyle_dtc_app_loyalty
+    business_model: dtc_plus_membership_app_push
+    primary_objective: category_and_collection_purchase
+    secondary_objective: membership_and_app_adoption
+    typical_page_roles: [collection, product_detail, membership, editorial_story, cart]
+    common_conversion_paths:
+      - story_drop → collection → pdp → checkout
+      - member_exclusive_path
+    common_personalization_needs:
+      - collection_and_drop_alignment
+      - loyalty_status_messaging_for_anonymous_use_discount_eligibility_copy_only
+      - size_fit_guidance
+    key_concepts:
+      - Premium / quality seeking
+      - Urgency / availability
+      - Local intent
+    typical_ctas:
+      hard: [Shop now, Join / Sign up, Checkout]
+      soft: [Explore, Read story, Notify me]
+    typical_activation_surfaces: [collection_header, pdp_size_helper, membership_inline]
+    anonymous_visitor_patterns:
+      - category_affinity_repeat_views
+      - launch_window_return_visits
+    engine_hints:
+      suggested_vertical: ecommerce
+      playbook_tuning: [generic_high_engagement_no_cta]
+      fixture_priority: medium
+
+  - id: sephora_beauty_commerce_loyalty
+    label: Beauty commerce + loyalty
+    representative_sites: [Sephora.com]
+    site_type: beauty_dtc_loyalty_reviews
+    business_model: retail_plus_loyalty_program_subscription_boxes_optional
+    primary_objective: shade_and_sku_confidence_purchase
+    secondary_objective: loyalty_earn_and_redeem_education
+    typical_page_roles: [product_detail, reviews, shade_finder, rewards, basket]
+    common_conversion_paths:
+      - quiz_shade_finder → pdp → basket
+      - reviews_deep_dive → complementary_cross_sell
+    common_personalization_needs:
+      - quiz_and_recommendation_surfaces
+      - review_social_proof_modules
+      - complementary_product_logic
+    key_concepts:
+      - Trust / proof seeking
+      - Comparison shopping
+      - Convenience / ease
+    typical_ctas:
+      hard: [Add to basket, Buy, Checkout]
+      soft: [Find your shade, Write a review, Join Beauty Insider]
+    typical_activation_surfaces: [quiz_modal, reviews_tab, cart_threshold_prompt]
+    anonymous_visitor_patterns:
+      - long_reviews_scroll
+      - shade_compare_sessions
+    engine_hints:
+      suggested_vertical: ecommerce
+      playbook_tuning: [generic_product_interest_no_cart]
+      fixture_priority: medium
+
+  - id: amazon_marketplace_high_intent_commerce
+    label: Marketplace / high-intent commerce
+    representative_sites: [Amazon.com]
+    site_type: marketplace_search_driven_retail
+    business_model: marketplace_take_rate_ads_prime_optional
+    primary_objective: search_to_purchase_or_subscribe_prime
+    secondary_objective: cross_sell_attachments
+    typical_page_roles: [search_results, product_detail, compare_reviews, subscribe_save, checkout]
+    common_conversion_paths:
+      - search → srp → pdp → cart
+      - urgency_buy_box_competition
+    common_personalization_needs:
+      - cross_sell_and_substitute_recommendations
+      - urgency_without_deceptive_pressure
+      - price_and_delivery_clarity
+    key_concepts:
+      - Price sensitivity
+      - Comparison shopping
+      - Urgency / availability
+    typical_ctas:
+      hard: [Add to cart, Buy now, Subscribe & Save]
+      soft: [See options, Add to list, Learn more]
+    typical_activation_surfaces: [buy_box, srp_inline, post_add_cross_sell]
+    anonymous_visitor_patterns:
+      - rapid_srp_pogo
+      - filter_heavy_sessions
+    engine_hints:
+      suggested_vertical: ecommerce
+      playbook_tuning: [generic_product_interest_no_cart]
+      fixture_priority: high
+
+  - id: wayfair_high_consideration_home_commerce
+    label: High-consideration home commerce
+    representative_sites: [Wayfair.com]
+    site_type: high_consideration_home_dtc
+    business_model: large_cart_financing_delivery_sensitivity
+    primary_objective: room_and_style_confidence_purchase
+    secondary_objective: financing_and_delivery_expectation_setting
+    typical_page_roles: [room_ideas, category, product_detail, financing, delivery_policy]
+    common_conversion_paths:
+      - room_inspiration → narrowed_category → pdp → finance_checkout
+    common_personalization_needs:
+      - room_bundles_and_style_guidance
+      - financing_and_delivery_reassurance
+      - narrowing_assistance
+    key_concepts:
+      - Problem education
+      - Risk reduction
+      - Price sensitivity
+    typical_ctas:
+      hard: [Add to cart, Checkout, Apply financing]
+      soft: [See in room, Get design help, View dimensions]
+    typical_activation_surfaces: [room_planner, financing_callout, trust_badges_block]
+    anonymous_visitor_patterns:
+      - very_long_sessions_multi_pdp
+      - policy_and_returns_scroll
+    engine_hints:
+      suggested_vertical: ecommerce
+      playbook_tuning: [generic_product_interest_no_cart, generic_high_engagement_no_cta]
+      fixture_priority: medium
+
+  - id: cologuard_healthcare_education_to_lead
+    label: Healthcare education → lead / action
+    representative_sites: [Cologuard.com]
+    site_type: regulated_healthcare_education_lead
+    business_model: screening_awareness_provider_discussion_insurance_eligibility
+    primary_objective: qualified_next_step_provider_or_kit_path
+    secondary_objective: trust_eligibility_and_insurance_clarity
+    typical_page_roles: [condition_education, eligibility, find_provider, insurance, faq]
+    common_conversion_paths:
+      - education → eligibility_quiz → handoff
+    common_personalization_needs:
+      - provider_discussion_guides
+      - eligibility_prompts_without_coercion
+      - reminder_and_follow_up_for_qualified_sessions
+    key_concepts:
+      - Problem education
+      - Trust / proof seeking
+      - Risk reduction
+    typical_ctas:
+      hard: [Talk to your doctor, Get started, Request kit]
+      soft: [Learn how it works, See if you qualify, FAQs]
+    typical_activation_surfaces: [inline_education_cta, soft_modal_after_scroll, downloadable_guide]
+    anonymous_visitor_patterns:
+      - deep_faq_scroll
+      - return_visits_during_decision_window
+    engine_hints:
+      suggested_vertical: healthcare
+      playbook_tuning: [generic_lead_intent_no_form_submit, generic_deep_content_no_signup]
+      fixture_priority: high
+
+  - id: hims_healthcare_dtc_acquisition
+    label: Healthcare DTC acquisition
+    representative_sites: [Hims.com]
+    site_type: healthcare_dtc_subscription_telehealth
+    business_model: condition_quiz_subscription_privacy_first
+    primary_objective: assessment_to_treatment_plan_checkout
+    secondary_objective: trust_privacy_and_clinical_credibility
+    typical_page_roles: [condition_landing, quiz, plan_selection, checkout, hipaa_trust]
+    common_conversion_paths:
+      - quiz → plan → checkout → follow_up
+    common_personalization_needs:
+      - onboarding_quiz_assist
+      - reassurance_and_expectation_setting
+      - low_friction_first_step
+    key_concepts:
+      - Problem education
+      - Trust / proof seeking
+      - Convenience / ease
+    typical_ctas:
+      hard: [Start visit, Checkout, Get started]
+      soft: [Take the quiz, Learn more, See if you qualify]
+    typical_activation_surfaces: [quiz_inline, trust_rail, checkout_assist]
+    anonymous_visitor_patterns:
+      - quiz_start_no_finish
+      - high_scroll_on_safety_copy
+    engine_hints:
+      suggested_vertical: healthcare
+      playbook_tuning: [generic_lead_intent_no_form_submit]
+      fixture_priority: medium
+
+  - id: unitedhealthcare_benefits_navigation
+    label: Healthcare benefits navigation
+    representative_sites: [UnitedHealthcare.com]
+    site_type: payer_member_services_navigation
+    business_model: retention_cost_support_compliance_heavy
+    primary_objective: find_coverage_care_or_bill_answer
+    secondary_objective: reduce_call_center_load_via_self_serve
+    typical_page_roles: [plan_compare, provider_search, claims, pharmacy, member_login]
+    common_conversion_paths:
+      - anonymous_benefits_education → find_care → handoff_to_portal
+    common_personalization_needs:
+      - plan_and_benefit_guidance
+      - routing_to_correct_tool
+      - support_deflection_with_clarity
+    key_concepts:
+      - Problem education
+      - Risk reduction
+      - Trust / proof seeking
+    typical_ctas:
+      hard: [Find a doctor, Log in, Enroll]
+      soft: [Learn about plans, Coverage overview, Help me choose]
+    typical_activation_surfaces: [plan_wizard, provider_search_inline, contextual_help]
+    anonymous_visitor_patterns:
+      - repeated_search_refine
+      - shallow_sessions_on_wrong_landing_then_reentry
+    engine_hints:
+      suggested_vertical: healthcare
+      playbook_tuning: [generic_high_engagement_no_cta]
+      fixture_priority: medium
+
+  - id: citi_financial_services_multi_product
+    label: Financial services multi-product
+    representative_sites: [Citi.com]
+    site_type: multi_product_bank_cards_lending
+    business_model: cross_sell_prequal_application_servicing
+    primary_objective: product_match_and_apply_or_login
+    secondary_objective: rewards_and_benefits_education
+    typical_page_roles: [card_compare, product_detail, rates_fees, apply, login]
+    common_conversion_paths:
+      - compare_cards → apply → decision_pending
+    common_personalization_needs:
+      - product_matching_quizzes_lightweight
+      - prequal_paths_with_consent_discipline
+      - rewards_positioning
+    key_concepts:
+      - Comparison shopping
+      - Price sensitivity
+      - Trust / proof seeking
+    typical_ctas:
+      hard: [Apply now, Sign on, Open an account]
+      soft: [Compare cards, See rates, Learn more]
+    typical_activation_surfaces: [compare_table, apply_sidebar, disclosures_accordion]
+    anonymous_visitor_patterns:
+      - compare_table_hover_proxy_multi_tabs
+      - return_to_rates_page
+    engine_hints:
+      suggested_vertical: financial_services
+      playbook_tuning: [generic_lead_intent_no_form_submit]
+      fixture_priority: high
+
+  - id: usaa_financial_insurance_membership_ecosystem
+    label: Multi-line financial + insurance membership ecosystem
+    representative_sites: [USAA.com]
+    site_type: membership_gated_multi_line_financial
+    business_model: bundle_cross_sell_high_trust_regulated
+    primary_objective: deepen_relationship_quote_or_apply
+    secondary_objective: membership_education_and_eligibility_clarity
+    typical_page_roles: [eligibility, banking, insurance, claims, advice_content]
+    common_conversion_paths:
+      - eligibility_check → product_education → quote_apply
+    common_personalization_needs:
+      - bundle_pathways_without_presumptuous_cross_sell
+      - onboarding_journeys_for_new_members
+      - security_and_trust_reinforcement
+    key_concepts:
+      - Trust / proof seeking
+      - Risk reduction
+      - Comparison shopping
+    typical_ctas:
+      hard: [Get a quote, Log on, Open account]
+      soft: [See membership benefits, Learn more, Coverage explorer]
+    typical_activation_surfaces: [member_rail, quote_wizard, security_callout]
+    anonymous_visitor_patterns:
+      - eligibility_focused_sessions
+      - multi_product_tab_sequences
+    engine_hints:
+      suggested_vertical: financial_services
+      playbook_tuning: [generic_return_visit_no_conversion]
+      fixture_priority: medium
+
+  - id: rocket_mortgage_lead_gen_funnel
+    label: Lead-gen mortgage funnel
+    representative_sites: [RocketMortgage.com]
+    site_type: mortgage_lead_gen_rate_driven
+    business_model: application_handoff_to_loan_officer_tech_assist
+    primary_objective: rate_exploration_to_application_start
+    secondary_objective: refinance_vs_purchase_education
+    typical_page_roles: [rates, calculator, application_start, refinance_edu]
+    common_conversion_paths:
+      - calculator → soft_reg → application
+    common_personalization_needs:
+      - calculator_and_scenario_assist
+      - rate_alert_and_consult_prompts_compliant
+      - refinance_intent_detection
+    key_concepts:
+      - Price sensitivity
+      - Problem education
+      - Trust / proof seeking
+    typical_ctas:
+      hard: [Apply now, See rates, Start application]
+      soft: [Use calculator, Learn about refinance, Talk to an expert]
+    typical_activation_surfaces: [calculator_inline, rate_table_sticky, consult_soft_cta]
+    anonymous_visitor_patterns:
+      - calculator_repeat_use
+      - high_scroll_on_legal_disclosures
+    engine_hints:
+      suggested_vertical: financial_services
+      playbook_tuning: [generic_lead_intent_no_form_submit]
+      fixture_priority: high
+
+  - id: turbotax_seasonal_guided_conversion
+    label: Seasonal guided conversion
+    representative_sites: [TurboTax.com]
+    site_type: seasonal_guided_software_conversion
+    business_model: package_tier_upsell_support_attach
+    primary_objective: edition_selection_and_checkout
+    secondary_objective: confidence_reassurance_and_audit_defense_story
+    typical_page_roles: [product_picker, compare_editions, checkout, help]
+    common_conversion_paths:
+      - qualifier → edition → upsell → checkout
+    common_personalization_needs:
+      - guided_flows_and_reassurance
+      - transparent_upsell_with_escape_hatch
+      - help_deflection_contextual
+    key_concepts:
+      - Risk reduction
+      - Problem education
+      - Convenience / ease
+    typical_ctas:
+      hard: [Buy now, Start for free, File with an expert]
+      soft: [Compare products, See what’s included, Help me choose]
+    typical_activation_surfaces: [wizard_sidebar, edition_compare_modal, checkout_assist]
+    anonymous_visitor_patterns:
+      - wizard_abandon_mid_flow
+      - help_search_proxy
+    engine_hints:
+      suggested_vertical: financial_services
+      playbook_tuning: [generic_high_engagement_no_cta]
+      fixture_priority: medium
+
+  - id: jeep_lifestyle_auto_oem
+    label: Lifestyle-driven auto OEM
+    representative_sites: [Jeep.com]
+    site_type: auto_oem_brand_lifestyle_configure
+    business_model: brand_story_configure_dealer_handoff_incentives
+    primary_objective: model_exploration_configure_dealer_handoff
+    secondary_objective: incentive_and_accessory_attachment
+    typical_page_roles: [model_hub, trim_compare, build_price, dealer_locator, offers]
+    common_conversion_paths:
+      - story_trim → build → dealer → test_drive
+    common_personalization_needs:
+      - build_and_price_assist
+      - dealer_handoff_clarity
+      - incentive_surfacing_compliant
+    key_concepts:
+      - Comparison shopping
+      - Local intent
+      - Premium / quality seeking
+    typical_ctas:
+      hard: [Build & Price, Find a dealer, Request a quote]
+      soft: [Explore models, Watch, Compare]
+    typical_activation_surfaces: [build_widget, dealer_map, offer_strip]
+    anonymous_visitor_patterns:
+      - configure_sessions_without_dealer_click
+      - return_visits_near_month_end_incentive_windows
+    engine_hints:
+      suggested_vertical: auto_retail
+      playbook_tuning: []
+      fixture_priority: low
+      notes: >-
+        OEM sites mix lifestyle content with retail handoff; keep vehicle cues strict in classifier.
+        Use auto-specific playbooks when added — not generic B2B marketing ops.
+
+  - id: ford_mass_market_auto_oem
+    label: Mass-market auto OEM
+    representative_sites: [Ford.com]
+    site_type: auto_oem_inventory_finance_work_personal
+    business_model: dealer_network_inventory_financing
+    primary_objective: inventory_match_and_dealer_action
+    secondary_objective: financing_and_trade_education
+    typical_page_roles: [inventory, model, finance, commercial_fleet, dealer]
+    common_conversion_paths:
+      - inventory_search → vdp → finance → visit_scheduler
+    common_personalization_needs:
+      - inventory_forward_messaging
+      - financing_transparency
+      - use_case_segmentation_work_vs_personal
+    key_concepts:
+      - Price sensitivity
+      - Comparison shopping
+      - Local intent
+    typical_ctas:
+      hard: [Get trade-in value, View inventory, Request quote]
+      soft: [Explore, Build, Estimate payment]
+    typical_activation_surfaces: [inventory_card, payment_estimator, dealer_cta]
+    anonymous_visitor_patterns:
+      - inventory_filter_heavy_sessions
+      - payment_calculator_loops
+    engine_hints:
+      suggested_vertical: auto_retail
+      playbook_tuning: []
+      fixture_priority: medium
+
+  - id: tesla_direct_order_ev_commerce
+    label: Direct-order EV commerce
+    representative_sites: [Tesla.com]
+    site_type: direct_order_auto_low_friction_online
+    business_model: order_online_delivery_pickup_financing_insurance_addons
+    primary_objective: configure_order_deposit_or_checkout
+    secondary_objective: charging_ownership_ecosystem_education
+    typical_page_roles: [configurator, order, financing, charging, support]
+    common_conversion_paths:
+      - configurator → order → financing_insurance_addons
+    common_personalization_needs:
+      - ordering_assist_and_delivery_expectations
+      - incentive_and_regional_program_compliance
+      - ownership_ecosystem_next_steps
+    key_concepts:
+      - Convenience / ease
+      - Premium / quality seeking
+      - Problem education
+    typical_ctas:
+      hard: [Order now, Custom order, Get financing]
+      soft: [Learn more, Range estimator, Charging]
+    typical_activation_surfaces: [configurator_rail, financing_step, post_order_checklist]
+    anonymous_visitor_patterns:
+      - long_configurator_sessions
+      - financing_step_revisits
+    engine_hints:
+      suggested_vertical: auto_retail
+      playbook_tuning: [generic_product_interest_no_cart]
+      fixture_priority: low
+
+  - id: chevron_corporate_reputation_investor
+    label: Corporate reputation + investor + sustainability
+    representative_sites: [Chevron.com]
+    site_type: corporate_brand_investor_esg_careers
+    business_model: reputation_stakeholder_comms_not_transaction_first
+    primary_objective: trust_and_reporting_consumption_career_or_partner_path
+    secondary_objective: investor_relations_and_policy_positioning
+    typical_page_roles: [about, sustainability, investors, news, careers]
+    common_conversion_paths:
+      - issue_awareness → report_download → careers_apply
+    common_personalization_needs:
+      - report_and_story_surfacing
+      - careers_and_community_routing
+      - investor_content_discovery_assist
+    key_concepts:
+      - Trust / proof seeking
+      - Problem education
+      - Risk reduction
+    typical_ctas:
+      hard: [Apply now, Contact media, Investor login]
+      soft: [Read report, Our approach, View careers]
+    typical_activation_surfaces: [report_hub, careers_module, news_timeline]
+    anonymous_visitor_patterns:
+      - document_download_intent
+      - multi_section_corporate_scroll
+    engine_hints:
+      suggested_vertical: general_business
+      playbook_tuning: [generic_deep_content_no_signup]
+      fixture_priority: low
+
+  - id: coca_cola_global_cpg_brand_story
+    label: Global CPG brand storytelling
+    representative_sites: [Coca-Cola.com]
+    site_type: cpg_brand_campaign_engagement
+    business_model: brand_equity_promotions_partners_retailer_handoff
+    primary_objective: campaign_engagement_and_promo_participation
+    secondary_objective: retailer_or_product_finder_handoff
+    typical_page_roles: [campaign_story, product_family, promotions, where_to_buy]
+    common_conversion_paths:
+      - campaign → engagement → store_locator
+    common_personalization_needs:
+      - localized_promo_and_event_content
+      - retailer_handoff_without_tracking_children_unsafely
+      - contest_rules_clarity
+    key_concepts:
+      - Local intent
+      - Urgency / availability
+      - Trust / proof seeking
+    typical_ctas:
+      hard: [Enter now, Find near you, Buy now]
+      soft: [Explore flavors, Our story, Discover]
+    typical_activation_surfaces: [campaign_hero, locator_widget, rules_drawer]
+    anonymous_visitor_patterns:
+      - short_burst_campaign_sessions
+      - repeat_visits_during_promo_window
+    engine_hints:
+      suggested_vertical: ecommerce
+      playbook_tuning: [generic_high_engagement_no_cta]
+      fixture_priority: low
+
+  - id: procter_gamble_multi_brand_cpg_ecosystem
+    label: Multi-brand CPG ecosystem
+    representative_sites: [Procter & Gamble brand hubs]
+    site_type: multi_brand_cpg_coupon_retailer_handoff
+    business_model: household_problem_solution_coupons_retailers
+    primary_objective: brand_solution_education_to_retail_conversion
+    secondary_objective: coupon_and_rewards_capture
+    typical_page_roles: [brand_hub, product_benefit, coupons, where_to_buy, safety]
+    common_conversion_paths:
+      - problem_edu → sku_story → coupon → retailer
+    common_personalization_needs:
+      - coupon_and_value_surfacing
+      - cross_brand_complementarity_where_safe
+      - retailer_handoff_clarity
+    key_concepts:
+      - Price sensitivity
+      - Problem education
+      - Trust / proof seeking
+    typical_ctas:
+      hard: [Get coupon, Buy now, Find retailer]
+      soft: [Learn more, See ingredients, Tips]
+    typical_activation_surfaces: [coupon_banner, retailer_grid, safety_accordion]
+    anonymous_visitor_patterns:
+      - ingredient_and_safety_scroll
+      - coupon_click_without_retail_follow_through
+    engine_hints:
+      suggested_vertical: ecommerce
+      playbook_tuning: [generic_product_interest_no_cart]
+      fixture_priority: low
+
+  - id: marriott_hospitality_booking_loyalty
+    label: Hospitality booking + loyalty
+    representative_sites: [Marriott.com]
+    site_type: hospitality_booking_loyalty
+    business_model: adr_booking_fees_loyalty_program
+    primary_objective: search_book_modify_stay
+    secondary_objective: loyalty_points_upsell_packages
+    typical_page_roles: [destination, property, room_packages, checkout, loyalty]
+    common_conversion_paths:
+      - search → property → package_addon → checkout
+    common_personalization_needs:
+      - offer_and_package_recommendations
+      - points_messaging_for_anonymous_only_when_account_snippets_exist_else_soft
+      - urgency_with_rate_parity_ethics
+    key_concepts:
+      - Comparison shopping
+      - Price sensitivity
+      - Urgency / availability
+    typical_ctas:
+      hard: [Book now, Select room, Complete reservation]
+      soft: [View rates, Join member rate, Add package]
+    typical_activation_surfaces: [rate_calendar, package_upsell_inline, member_strip]
+    anonymous_visitor_patterns:
+      - date_change_loops
+      - multi_property_compare
+    engine_hints:
+      suggested_vertical: travel_hospitality
+      playbook_tuning: [generic_high_engagement_no_cta]
+      fixture_priority: medium
+
+  - id: expedia_travel_marketplace
+    label: Travel marketplace
+    representative_sites: [Expedia.com]
+    site_type: travel_ot_marketplace_packages
+    business_model: marketplace_commission_insurance_attach_optional
+    primary_objective: search_compare_book_itinerary
+    secondary_objective: bundle_insurance_car_upsell
+    typical_page_roles: [search, results, package_detail, checkout, manage_trip]
+    common_conversion_paths:
+      - flight_hotel_bundle → upsell → checkout
+    common_personalization_needs:
+      - price_alerts_and_fairness_copy
+      - bundle_recommendations
+      - urgency_ethical_scarcity
+    key_concepts:
+      - Comparison shopping
+      - Price sensitivity
+      - Risk reduction
+    typical_ctas:
+      hard: [Book, Checkout, Continue]
+      soft: [See details, Add protection, Flexible dates]
+    typical_activation_surfaces: [results_compare_strip, bundle_callout, checkout_upsell]
+    anonymous_visitor_patterns:
+      - multi_tab_compare_proxy
+      - itinerary_edit_sessions
+    engine_hints:
+      suggested_vertical: travel_hospitality
+      playbook_tuning: [generic_product_interest_no_cart]
+      fixture_priority: medium
+
+  - id: spotify_subscription_entertainment_funnel
+    label: Subscription entertainment funnel
+    representative_sites: [Spotify.com]
+    site_type: freemium_to_paid_subscription
+    business_model: subscription_ads_family_student_plans
+    primary_objective: trial_or_plan_upgrade
+    secondary_objective: feature_education_and_plan_fit
+    typical_page_roles: [pricing, plan_compare, feature_story, signup]
+    common_conversion_paths:
+      - free_usage_proxy_on_marketing_site → pricing → signup
+    common_personalization_needs:
+      - plan_fit_messaging_family_student
+      - trial_prompts_with_clear_cancel_story
+      - feature_education_not_dark_patterns
+    key_concepts:
+      - Price sensitivity
+      - Convenience / ease
+      - Premium / quality seeking
+    typical_ctas:
+      hard: [Get Premium, Sign up, Start trial]
+      soft: [Compare plans, What’s included, Listen free]
+    typical_activation_surfaces: [pricing_hero, plan_table, sticky_listen_cta]
+    anonymous_visitor_patterns:
+      - pricing_page_return_visits
+      - plan_compare_scroll_depth
+    engine_hints:
+      suggested_vertical: publisher_content
+      playbook_tuning: [generic_deep_content_no_signup]
+      fixture_priority: medium
+
+  - id: salesforce_enterprise_b2b_platform
+    label: Enterprise B2B platform
+    representative_sites: [Salesforce.com]
+    site_type: enterprise_b2b_platform_demo_buy
+    business_model: enterprise_sales_assisted_plus_self_serve_pqls
+    primary_objective: demo_contact_or_trial_with_role_fit
+    secondary_objective: industry_solution_education_and_roi_proof
+    typical_page_roles: [industry_hub, product, pricing, demo, resource_library]
+    common_conversion_paths:
+      - industry_content → product → demo_request
+    common_personalization_needs:
+      - industry_and_role_journeys
+      - roi_proof_modules
+      - demo_request_friction_tuning
+    key_concepts:
+      - Implementation / how-to
+      - Trust / proof seeking
+      - Comparison shopping
+    typical_ctas:
+      hard: [Book a demo, Contact sales, Try for free]
+      soft: [Watch demo, Read report, See pricing]
+    typical_activation_surfaces: [demo_sticky, resource_gates_ethical, industry_banner]
+    anonymous_visitor_patterns:
+      - multi_asset_downloads
+      - pricing_plus_demo_sequence
+    engine_hints:
+      suggested_vertical: b2b_saas
+      playbook_tuning: [b2b_marketing_ops_implementation_evaluator, generic_lead_intent_no_form_submit]
+      fixture_priority: high
+
+  - id: hubspot_inbound_saas_content_engine
+    label: Inbound SaaS + content engine
+    representative_sites: [HubSpot.com]
+    site_type: inbound_content_tool_gated_lead
+    business_model: freemium_plus_sales_led_expansion
+    primary_objective: template_tool_signup_and_mql_nurture
+    secondary_objective: academy_depth_to_demo
+    typical_page_roles: [blog, template, product, academy, pricing, demo]
+    common_conversion_paths:
+      - article → template → signup → nurture → demo
+    common_personalization_needs:
+      - tool_and_template_promotion
+      - academy_progression_assist
+      - demo_cta_timing_on_depth
+    key_concepts:
+      - Problem education
+      - Implementation / how-to
+      - Trust / proof seeking
+    typical_ctas:
+      hard: [Get a demo, Get started free, Contact sales]
+      soft: [Download template, Read guide, Subscribe]
+    typical_activation_surfaces: [inline_template_cta, article_end_cap, soft_sidebar]
+    anonymous_visitor_patterns:
+      - template_download_without_follow_on
+      - deep_article_no_demo_click
+    engine_hints:
+      suggested_vertical: b2b_saas
+      playbook_tuning: [b2b_marketing_ops_implementation_evaluator, generic_deep_content_no_signup]
+      fixture_priority: high
+
+  - id: angi_local_services_marketplace
+    label: Local services marketplace
+    representative_sites: [Angi.com]
+    site_type: local_services_matchmaking_quotes
+    business_model: lead_gen_subscription_pros_optional_ads
+    primary_objective: provider_match_and_quote_request
+    secondary_objective: trust_reviews_and_booking_assurance
+    typical_page_roles: [service_category, pro_profile, reviews, quote_form, trust_badges]
+    common_conversion_paths:
+      - category → shortlist_pros → quote_request
+    common_personalization_needs:
+      - quote_prompts_with_scope_clarity
+      - provider_recommendations_explained
+      - trust_signal_modules
+    key_concepts:
+      - Local intent
+      - Trust / proof seeking
+      - Price sensitivity
+    typical_ctas:
+      hard: [Get a quote, Book now, Request pros]
+      soft: [See reviews, Compare pros, Cost guide]
+    typical_activation_surfaces: [quote_modal, pro_cards, review_drawer]
+    anonymous_visitor_patterns:
+      - multi_pro_profile_views
+      - quote_start_abandon
+    engine_hints:
+      suggested_vertical: local_services
+      playbook_tuning: [generic_lead_intent_no_form_submit, generic_return_visit_no_conversion]
+      fixture_priority: high
