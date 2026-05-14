@@ -74,3 +74,9 @@ window.SessionIntel.pushPersonalizationSignalAll();
 
 - [ ] Demo site loads (with `pnpm deploy:demo`, inspector opens, signals update).
 - [ ] External site (e.g. Rhythm90) loads CDN snippet, inspector opens, same console checks pass.
+
+## External beta gate
+
+Before inviting **external** pilots (not just internal demos), work through **[EXTERNAL_BETA_CHECKLIST.md](./EXTERNAL_BETA_CHECKLIST.md)** (Access, CORS, signup → admin → D1, CDN DNS, dashboard API URL).
+
+Cloudflare project ↔ hostname reference: **[CLOUDFLARE_INVENTORY.md](./CLOUDFLARE_INVENTORY.md)**.
