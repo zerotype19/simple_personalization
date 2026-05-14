@@ -10,11 +10,21 @@ Not: identity resolution, full personalization platform replacement, passive ana
 
 **Stack position:** a thin decision layer that **feeds** CMS and personalization systems you already use — not a CDP, not identity resolution, not a full Adobe-class orchestration suite.
 
+## Pipeline (single path)
+
 ```txt
 signals → existing inference → activation opportunity → recipe match → experience decision → CMS activation
 ```
 
 Recipes **match** on top of today’s concepts / playbooks / behavior / readiness — they do **not** replace or re-implement that stack. No nested boolean DSL; simple thresholds and required concepts only.
+
+## Positioning (GTM)
+
+**Sell (one sentence):** Optiview helps websites decide the **next best experience** before a visitor identifies themselves.
+
+**Operational contrast:** Many personalization stacks are **identity-dependent**, **rules-heavy**, **slow to implement**, and **interruptive** for anonymous traffic. Optiview targets the gap: **session-scoped decisions** that existing CMS, GTM, Adobe, and Optimizely can consume **without** owning the full orchestration product.
+
+**Do not sell as:** “we identify visitors,” “AI behavioral intelligence,” “personalization platform replacement,” or analytics / pseudo-CDP.
 
 ## MVP cut line
 
@@ -29,6 +39,19 @@ Recipes **match** on top of today’s concepts / playbooks / behavior / readines
 
 First win: **emit useful decisions** and **wire them to CMS / GTM / Adobe / Optimizely** — not more databases.
 
+## What the product is (vs the inspector)
+
+The **inspector** is a **sales, demo, and debug** surface — not the product customers buy.
+
+What must be **excellent** for product–market fit:
+
+1. **Decision quality** — nuanced, situational, commercially plausible (not generic “show a guide”).
+2. **Decision timing** — correct *when*, not only *what* (see [Decision timing](#decision-timing); do not expand the taxonomy beyond the locked set).
+3. **Integration simplicity** — trivial hooks: GTM listener, Adobe Target input, AEM / CMS slot mapping, Optimizely event, `CustomEvent`, small `subscribe` API.
+4. **Trust** — suppression-first, null-primary when weak, explainable evidence — so teams are not afraid to ship it on anonymous traffic.
+
+If those four are weak, no amount of “visitor intelligence” UI saves the category story.
+
 ## Runtime philosophy
 
 The runtime is:
@@ -41,7 +64,11 @@ The runtime is:
 
 It may intentionally emit **no primary decision**, softer conversion paths, or **educational** recommendations instead of aggressive lead capture.
 
-**No-decision is often better than a weak decision.**
+**No-decision is often better than a weak decision.** That restraint is strategically load-bearing: it builds **trust**, reduces **brand risk**, and avoids the over-trigger / over-fit failure mode common in personalization vendors.
+
+### What the market needs (vs what it does not)
+
+The wedge is **better anonymous decisions** — when to interrupt, when **not** to interrupt, appropriate **ask intensity**, which **surface** to activate vs leave quiet, when to **escalate** vs **suppress** — not more dashboards, raw visitor telemetry, or identity-adjacent enrichment for v1.
 
 ## Decision cardinality
 
@@ -139,6 +166,18 @@ Illustrative ladder (exact labels live in recipe packs; this is strategic intent
 
 Recipes choose the **appropriate rung** for current readiness and posture — not “popup everywhere.” Escalation across the session should be **earned** by behavior, not assumed.
 
+## Confidence earns interruption (invariant)
+
+**Decision confidence must earn interruption level.** This is an explicit system rule — not only implied by recipes.
+
+| Confidence band (illustrative) | Allowed interruption / surfaces |
+|-------------------------------|----------------------------------|
+| **Low** | **Inline / educational only** — no popup, no hard CTA, no aggressive modal |
+| **Medium** | **Soft CTA** — guides, comparisons, secondary surfaces, checklist-style asks |
+| **High** | **Stronger asks** — demo, lead form, pricing / quote — only when evidence + readiness support it |
+
+Violating this (e.g. low confidence + exit popup) undermines **brand safety**, **explainability**, and the answer to: *“Why should we trust your runtime on anonymous visitors?”*
+
 ## Recipes (lightweight)
 
 Declarative only — **no** nested `all`/`or` trees, no custom expression language.
@@ -203,6 +242,10 @@ When **any** of these hold, non-exhaustively, prefer **null primary** globally a
 
 **Intent momentum** (below) becomes the natural home for **rate-of-change** once the core decision path ships — **do not block MVP** on it, but plan the schema so momentum can plug in without a breaking redesign.
 
+## Vertical realism (execution)
+
+Vertical breadth supports **credible demos** — but if every vertical “feels the same,” trust collapses. For v1: **go deeper on decision realism per vertical** (archetypes, surfaces, ladders, interruption profiles, timing) rather than adding many new verticals. Quality of emitted decisions matters more than count of labels.
+
 ## New signal (follow-on — not MVP-blocking)
 
 **Intent momentum** — how fast intent compounds (rapid multi-page exploration, comparison acceleration, CTA proximity, narrowing focus). First-class score **after** core decision path ships; **do not block MVP** on it.
@@ -211,7 +254,11 @@ When **any** of these hold, non-exhaustively, prefer **null primary** globally a
 
 **Borrow:** Plausible-style lightweight + privacy clarity; David Wells–style **destination plugins**; Infobip-style operational SDK (events, subscribe, push).
 
-**Do not borrow in MVP:** MCP-as-product, LLM runtime decisioning, identity / enrichment graphs, agent orchestration stacks.
+**Do not build in v1 (anti-patterns):** LLM orchestration or agent frameworks; reverse-IP / lead identity / person-level enrichment; heavy analytics or large “insight” dashboards; customer-editable visual rule builders; server-side orchestration beyond today’s Worker; cross-session ML or audience management products; MCP-as-core-product. The architecture doc is the guardrail — scope creep here destroys the wedge.
+
+## Existential execution risks (posture, not features)
+
+Success still depends on shipping: **(1)** decision copy that sounds like a thoughtful operator, not a template; **(2)** integration paths so simple that a marketer can wire one surface in an afternoon; **(3)** timing + suppression correctness over taxonomy richness; **(4)** frequent **`primary_decision: null`** framed as mature restraint, not failure; **(5)** vertical-specific realism so demos do not collapse into one generic voice.
 
 ## Related docs
 
