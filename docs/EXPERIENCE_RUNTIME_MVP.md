@@ -2,6 +2,21 @@
 
 This document freezes product and engineering decisions **before** building the anonymous experience decision layer. Goal: avoid a **second platform** (second rule engine, orchestration product, or analytics DB) inside Session Intelligence.
 
+## Operational philosophy (constraints)
+
+The architecture is not only a diagram — it is an **operational philosophy**. The product becomes **believable** when these constraint classes stay aligned:
+
+| Constraint class | Examples of what it blocks |
+|------------------|----------------------------|
+| **Technical** | Second rule engines, giant DSLs, cross-session ML in v1 |
+| **Commercial** | “Identify everyone,” CDP replacement claims, orchestration sprawl |
+| **Interruption** | Over-trigger, aggressive popups when research posture is high |
+| **Behavioral** | Treating all anonymous traffic as lead-gen |
+| **Integration** | Replatforming, heavy implementation, owning customer DOM |
+| **Trust** | Weak emits, generic soup, unexplainable jumps in ask intensity |
+
+**Constraints are the product story** as much as the API surface.
+
 ## Thesis (external)
 
 **Optiview is a lightweight anonymous experience decision runtime that helps websites decide what to show visitors before identity exists.**
@@ -58,6 +73,18 @@ Universal anonymous decision engine
 ## Moat (what actually differentiates)
 
 Not raw AI, identity, LLMs, reverse IP, dashboards, or enrichment volume alone. The combination that is **actually rare** in market practice: **restraint + correct timing + commercial plausibility** — explicitly resisting over-trigger, over-fit, and “treat all anonymous traffic like lead-gen.”
+
+## Category (name the wedge)
+
+What the market needs is **better anonymous decisions** — not another “personalization platform,” identity graph, analytics product, or “AI journey orchestration” slogan. For internal alignment, call the wedge: **anonymous decision quality** (the quality of *what to do next*, *when*, and *whether to stay quiet*).
+
+## What we deliberately abandoned
+
+Positioning used to risk sounding like: visitor intelligence platform, anonymous behavioral AI, real-time personalization engine, identity-adjacent magic. That space is crowded with intent data, reverse IP, enrichment, “identify anonymous traffic,” and “predict buying intent” — offerings that often collapse on **implementation cost**, **low trust**, **generic outputs**, **bad interruption**, or **heavy operations**. **This architecture abandons those directions.**
+
+## The real product (moat, restated)
+
+The durable product is not the inspector, dashboard, or SDK in isolation — it is **tasteful commercial decisioning**: outputs a CRO or lifecycle lead would defend. Restraint + timing + plausibility stay the technical combo; **tastefulness** is how enterprises *feel* the difference. That is also the cleanest answer to: *“Why should we trust this on anonymous visitors?”*
 
 ## MVP cut line
 
@@ -173,6 +200,22 @@ A **valid** experience decision (one we emit to subscribers / destinations) shou
 
 If emitted decisions read like template inference (“visitor engaged,” “show guide,” “surface educational content” with no situational bite), the product fails regardless of SDK quality. Copy and structure should aim for **CRO / lifecycle / performance-marketer** maturity — specific, defensible, and **timed** — not a generic anonymous intelligence demo.
 
+## Commercial plausibility (operational rubric)
+
+“Commercial plausibility” must be **executable**, not only philosophical. Use this rubric for **QA**, **recipe review**, **demo grading**, and future scoring (manual or automated):
+
+| Dimension | Question |
+|-----------|----------|
+| **Ask appropriateness** | Is the CTA / offer too aggressive for this session posture and confidence? |
+| **Surface appropriateness** | Is this the right `surface_id` to interrupt, or should we use inline / secondary only? |
+| **Timing appropriateness** | Is this **too early** in the journey or scroll narrative for this ask? |
+| **Evidence sufficiency** | Do we have enough **grounded** signals to justify this decision vs emitting null? |
+| **Escalation correctness** | Did the session **earn** a stronger ask, or are we skipping rungs? |
+| **Session coherence** | Does this decision **follow** prior in-session behavior without whiplash? |
+| **Brand safety** | Would a sophisticated marketer **approve** this copy and placement on their brand? |
+
+Shipped code and recipes should be judged against this grid — otherwise “plausibility” drifts into vibes.
+
 ## Surfaces vs presentation
 
 Optiview recommends **what** to show on a **surface** the customer maps in their CMS — not “popup vs inline” as the core abstraction.
@@ -207,7 +250,7 @@ Recipes choose the **appropriate rung** for current readiness and posture — no
 
 ## Progression over immediate conversion (invariant)
 
-The runtime optimizes for **progression**, not **immediate conversion** on every tick.
+**Among the highest-leverage invariants in this document:** the runtime optimizes for **progression**, not **immediate conversion** on every tick.
 
 Sessions should be allowed — and often encouraged — to: **deepen**, **compare**, **educate**, **defer** a hard ask until a later navigation, or receive **only low-friction** activation. This blocks devolution into “always push demo,” “always push lead,” or “always maximize CTA clicks,” which reads as **spam optimization** rather than strategy.
 
@@ -304,6 +347,22 @@ Vertical breadth supports **credible demos** — but if every vertical “feels 
 ## Existential execution risks (posture, not features)
 
 Success still depends on shipping: **(1)** decision copy that sounds like a thoughtful operator, not a template; **(2)** integration paths so simple that a marketer can wire one surface in an afternoon; **(3)** timing + suppression correctness over taxonomy richness; **(4)** frequent **`primary_decision: null`** framed as mature restraint, not failure; **(5)** vertical-specific realism so demos do not collapse into one generic voice.
+
+## Primary risk after architecture: recipe mediocrity
+
+Once the runtime shape is stable, the dominant failure mode is **not** architecture drift — it is **mediocre recipes**: generic experiences, weak offers, shallow vertical realism, obvious timing, repetitive patterns, weak suppression, lazy escalation, simplistic “intent” reads. Most future PMF work lives in **pack quality**, not more engine features.
+
+## Where PMF is earned (post-architecture)
+
+Architecture returns diminish after this file. Invest next in:
+
+- **Vertical realism packs** — ladders, catalogs, tone, interruption profiles
+- **Decision QA** — rubric above + review cadence
+- **Recipe grading** — good vs bad decision fixtures, regression sets
+- **Timing and interruption realism** — when *not* to fire
+- **Surface catalogs** — enterprise-credible `surface_id` sets per vertical
+- **Commercial plausibility scoring** — manual first, automated later
+- **Suppression heuristics** and **escalation sequencing** — documented defaults per pack
 
 ### What to optimize aggressively (implementation order)
 
