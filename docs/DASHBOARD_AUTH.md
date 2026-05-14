@@ -30,6 +30,8 @@ Seed data ships in migration `0003_seed_demo_tenancy.sql` (dev/demo emails — *
 
 ## Cloudflare Access setup (production)
 
+**Use a *self-hosted* application, not a SaaS connector.** In **Zero Trust → Access → Applications → Add an application**, pick **Self-hosted** (your own hostname). The wizard that asks for an **Application** like “Google” and **SAML vs OIDC** is for connecting Cloudflare to a *third-party SaaS product* — that is the wrong path for protecting `dashboard.optiview.ai`.
+
 1. In **Zero Trust → Access → Applications**, create an application that protects:
    - **Self-hosted / Pages**: `dashboard.optiview.ai`
    - **API / Worker hostname**: `api.optiview.ai` (include this so `fetch(..., { credentials: "include" })` from the dashboard sends the Access cookie to the Worker).
