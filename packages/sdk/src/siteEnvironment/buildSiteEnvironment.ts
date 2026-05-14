@@ -40,4 +40,4 @@ export function buildSiteEnvironment(input: BuildSiteEnvironmentInput): SiteEnvi
   return { site, page, object, conversion, ladder };
 }
 
-export { humanGenericPageLabel } from "./genericPageClassifier";
+export { humanGenericPageLabel, timelineHumanPageLabel } from "./genericPageClassifier";

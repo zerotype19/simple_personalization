@@ -1,5 +1,5 @@
 import type { GenericPageKind, SessionProfile } from "@si/shared";
-import { humanGenericPageLabel } from "./siteEnvironment";
+import { timelineHumanPageLabel } from "./siteEnvironment";
 
 export const INTEL_TIMELINE_CAP = 15;
 
@@ -44,7 +44,7 @@ export function appendIntelMilestones(
   }
 
   if (opts.isNewPageContext) {
-    const label = humanGenericPageLabel(opts.genericKind);
+    const label = timelineHumanPageLabel(opts.genericKind, opts.pathname);
     pushIntelEvent(
       profile,
       `Viewed ${label} — ${opts.pathname || "/"}`,
@@ -53,11 +53,11 @@ export function appendIntelMilestones(
   }
 
   const path = opts.pathname || "/";
-  if (profile.signals.max_scroll_depth >= 68) {
+  if (!opts.isNewPageContext && profile.signals.max_scroll_depth >= 68) {
     const paths = meta.deep_scroll_paths ?? (meta.deep_scroll_paths = []);
     if (!paths.includes(path)) {
       paths.push(path);
-      pushIntelEvent(profile, "Strong scroll engagement on this page", `deep_scroll:${path}`);
+      pushIntelEvent(profile, "Sustained deep reading on this page", `deep_scroll:${path}`);
     }
   }
 

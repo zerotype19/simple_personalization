@@ -14,7 +14,7 @@ import {
   topicAffinitySectionTitle,
   verticalDisplayName,
 } from "./siteIntelligence/panelLabelMapper";
-import { humanGenericPageLabel } from "./siteEnvironment";
+import { humanGenericPageLabel, timelineHumanPageLabel } from "./siteEnvironment";
 import { formatTimelineClock } from "./sessionIntel";
 import {
   marketerArrivalSourceHeadline,
@@ -305,7 +305,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         : "Few funnel-specific DOM cues detected",
       sc.scan.primary_ctas.length
         ? `Sample CTAs: ${sc.scan.primary_ctas.slice(0, 5).join(" · ")}`
-        : pm.cta_layout_summary || "No hard conversion CTA engagement detected yet.",
+        : pm.cta_layout_summary || "No strong conversion-oriented CTA detected yet.",
       sc.scan.content_themes.length ? `Themes: ${sc.scan.content_themes.slice(0, 5).join(", ")}` : null,
     ]
       .filter((x): x is string => !!x)
@@ -355,8 +355,9 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       bs && bs.traffic.acquisition_evidence.length
         ? `<ul class="si-reason si-reason--tight">${bs.traffic.acquisition_evidence.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
         : `<div class="si-muted">—</div>`;
+    const entryPathFirst = p.page_journey?.[0]?.path ?? "/";
     const entryKindEsc = bs?.traffic.entry_page_kind
-      ? escHtml(bs.traffic.entry_page_kind.replace(/_/g, " "))
+      ? escHtml(timelineHumanPageLabel(bs.traffic.entry_page_kind, entryPathFirst))
       : "—";
     const landPatternEsc = bs?.traffic.landing_pattern_summary
       ? escHtml(bs.traffic.landing_pattern_summary)
@@ -426,6 +427,20 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         ? `<ul class="si-reason si-reason--tight">${rm.evidence.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
         : `<div class="si-muted">—</div>`;
 
+    const acqRowReferrer = bs?.referrer.host
+      ? `<div>Referrer host</div><div class="si-muted">${acqIntelRefHostEsc}</div>`
+      : "";
+    const acqRowPosture = rm?.acquisition_posture
+      ? `<div>Platform / source posture</div><div class="si-muted si-metric--break">${acqIntelPostureEsc}</div>`
+      : "";
+    const acqRowThemes =
+      rm && (rm.acquisition_themes.length > 0 || bs.campaign_intent.keyword_themes.length > 0)
+        ? `<div>Theme blend (URL + campaign)</div><div class="si-muted si-metric--break">${acqIntelThemesEsc}</div>`
+        : "";
+    const acqRowCreative = rm?.creative_interpretation
+      ? `<div>Creative interpretation</div><div class="si-muted si-metric--break">${acqIntelCreativeEsc}</div>`
+      : "";
+
     const acquisitionIntelHtml = bs
       ? `<div class="si-card">
         <h3>Acquisition intelligence</h3>
@@ -434,12 +449,12 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <div>Likely visitor mindset</div><div class="si-muted si-metric--break">${acqIntelMindsetEsc}</div>
           <div>Personalization implication</div><div class="si-muted si-metric--break">${acqIntelImplicationEsc}</div>
           <div class="si-muted si-muted--mb6" style="grid-column:1/-1;margin-top:8px">Supporting signals</div>
-          <div>Referrer host</div><div class="si-muted">${acqIntelRefHostEsc}</div>
-          <div>Platform / source posture</div><div class="si-muted si-metric--break">${acqIntelPostureEsc}</div>
+          ${acqRowReferrer}
+          ${acqRowPosture}
           <div>Acquisition stage</div><div class="si-metric">${acqIntelStageEsc}</div>
           <div>Campaign / strategy read</div><div class="si-muted si-metric--break">${acqIntelStrategyEsc}</div>
-          <div>Theme blend (URL + campaign)</div><div class="si-muted si-metric--break">${acqIntelThemesEsc}</div>
-          <div>Creative interpretation</div><div class="si-muted si-metric--break">${acqIntelCreativeEsc}</div>
+          ${acqRowThemes}
+          ${acqRowCreative}
           <div>Interpretation confidence</div><div class="si-metric">${escHtml(acqIntelConfPct)}</div>
           <div class="si-muted si-muted--mb6" style="grid-column:1/-1;margin-top:4px">Evidence</div>
           <div style="grid-column:1/-1">${acqIntelEvidenceUl}</div>

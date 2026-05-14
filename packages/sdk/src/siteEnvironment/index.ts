@@ -1,2 +1,2 @@
-export { buildSiteEnvironment, humanGenericPageLabel } from "./buildSiteEnvironment";
+export { buildSiteEnvironment, humanGenericPageLabel, timelineHumanPageLabel } from "./buildSiteEnvironment";
 export { emptySiteEnvironmentSnapshot } from "./emptySnapshot";

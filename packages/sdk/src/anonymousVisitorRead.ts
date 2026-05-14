@@ -1,5 +1,5 @@
 import type { SessionProfile } from "@si/shared";
-import { humanGenericPageLabel } from "./siteEnvironment";
+import { timelineHumanPageLabel } from "./siteEnvironment";
 import { verticalDisplayName } from "./siteIntelligence/panelLabelMapper";
 
 function channelClause(profile: SessionProfile): string {
@@ -28,7 +28,8 @@ export function buildAnonymousVisitorRead(profile: SessionProfile): {
 
   const siteLabel = sc.scan.site_name?.trim() || sc.domain || "this site";
   const vertical = verticalDisplayName(sc.vertical);
-  const pageKind = humanGenericPageLabel(env.page.generic_kind);
+  const pathRecent = profile.page_journey?.[profile.page_journey.length - 1]?.path ?? "/";
+  const surfaceLabel = timelineHumanPageLabel(env.page.generic_kind, pathRecent);
   const promise =
     profile.page_semantics.primary_promise?.trim() ||
     env.object.object_name?.trim() ||
@@ -56,7 +57,10 @@ export function buildAnonymousVisitorRead(profile: SessionProfile): {
         " ",
       )}”.`
     : "Engagement signals are still warming up.";
-  const p2 = `They are consuming ${pageKind} content; the strongest page read is “${promise.slice(0, 160)}${promise.length > 160 ? "…" : ""}”. ${engage}`;
+  const p2 =
+    env.page.generic_kind === "homepage" || surfaceLabel === "Homepage"
+      ? `They are on the homepage; the strongest page read is “${promise.slice(0, 160)}${promise.length > 160 ? "…" : ""}”. ${engage}`
+      : `They are viewing ${surfaceLabel}; the strongest page read is “${promise.slice(0, 160)}${promise.length > 160 ? "…" : ""}”. ${engage}`;
 
   let ctaLine = "";
   if (s.cta_clicks === 0 && s.cta_hover_events >= 3)

@@ -38,7 +38,7 @@ export function buildInferenceCertaintyBands(p: SessionProfile): InferenceCertai
   if (hardCtas >= 2) high.push("High-intent conversion CTAs detected (checkout, demo, quote, …)");
   else if (hardCtas === 1 || convSamples >= 2) medium.push("Conversion-oriented CTA text sampled in header/main");
   else if (convSamples === 1) medium.push("Limited CTA diversity on this page sample");
-  else low.push("No hard conversion CTA engagement detected yet in the sampled chrome");
+  else low.push("No strong conversion-oriented CTA detected yet in the sampled page chrome");
 
   if (env.ladder.level === 1) {
     low.push("Ladder level 1 — keep recommendations lightweight until site, page, and funnel reads strengthen.");

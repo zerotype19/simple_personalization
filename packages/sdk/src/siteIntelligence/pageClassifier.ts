@@ -21,13 +21,13 @@ export function classifyPageKind(
     return map[pageType] ?? pageType;
   }
   const p = pathname.toLowerCase();
-  if (/\/(blog|posts?|articles?|news|insights)\b/i.test(p)) return "Article / content";
+  if (/\/(blog|posts?|articles?|news|insights)\b/i.test(p)) return "Long-form editorial content";
   if (/\/(pricing|plans?)\b/i.test(p)) return "Pricing / plans";
   if (/\/(login|sign-?in|auth)\b/i.test(p)) return "Sign-in";
   if (p === "/" || p === "") return "Home / landing";
 
   const t = scan.page_title.toLowerCase();
-  if (/\b(blog|article|guide|insights)\b/.test(t)) return "Article / content";
+  if (/\b(blog|article|guide|insights)\b/.test(t)) return "Long-form editorial content";
   if (/\b(pricing|plan|trial)\b/.test(t)) return "Commercial intent page";
 
   return "Content / app page";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildSiteEnvironment } from "../siteEnvironment/buildSiteEnvironment";
-import { classifyGenericPage } from "../siteEnvironment/genericPageClassifier";
+import { classifyGenericPage, timelineHumanPageLabel } from "../siteEnvironment/genericPageClassifier";
 
 const emptyScan = {
   domain: "example.com",
@@ -21,6 +21,15 @@ describe("classifyGenericPage", () => {
   it("detects article from JSON-LD Article", () => {
     const r = classifyGenericPage("/foo", { ...emptyScan, page_title: "Post" }, "other", ["NewsArticle"]);
     expect(r.generic_kind).toBe("article_page");
+  });
+});
+
+describe("timelineHumanPageLabel", () => {
+  it("uses path hints for unknown kinds instead of unknown-page copy", () => {
+    expect(timelineHumanPageLabel("unknown", "/part-iii/chapter-6")).toBe("Chapter page");
+    expect(timelineHumanPageLabel("unknown", "/dive-into-rhythm90/manifesto")).toBe("Guide or manifesto page");
+    expect(timelineHumanPageLabel("unknown", "/dive-into-rhythm90/overview")).toBe("Learning or onboarding page");
+    expect(timelineHumanPageLabel("article_page", "/blog/x")).toBe("Long-form editorial content");
   });
 });
 

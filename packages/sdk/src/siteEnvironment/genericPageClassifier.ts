@@ -128,7 +128,7 @@ export function humanGenericPageLabel(kind: GenericPageKind): string {
     homepage: "Homepage",
     category_page: "Category / listing",
     product_detail_page: "Product detail",
-    article_page: "Article / content",
+    article_page: "Long-form editorial content",
     pricing_page: "Pricing / plans",
     lead_form_page: "Lead / contact",
     cart_page: "Cart",
@@ -139,4 +139,25 @@ export function humanGenericPageLabel(kind: GenericPageKind): string {
     unknown: "Content page",
   };
   return map[kind] ?? kind;
+}
+
+/**
+ * Inspector / timeline copy: never “Unknown page”; use path hints when the classifier is weak.
+ */
+export function timelineHumanPageLabel(kind: GenericPageKind, pathname: string): string {
+  const p = (pathname.split("?")[0] || "/").toLowerCase();
+
+  if (kind === "unknown") {
+    if (/\bchapter\b|\/chapter\d*\/|\/chapters?\//i.test(p)) return "Chapter page";
+    if (/\b(part|volume|book|series|framework)\b/i.test(p)) return "Framework or series page";
+    if (/\/(blog|posts?|articles?|news|insights|editorial)\b/i.test(p)) return "Editorial content page";
+    if (/\/(manifesto|guide|playbook|handbook)\b/i.test(p)) return "Guide or manifesto page";
+    if (/\/(pricing|plans|subscribe|membership)\b/i.test(p)) return "Plans or subscription page";
+    if (/\/(about|team|company|careers)\b/i.test(p)) return "About or company page";
+    if (/\/(dive|learn|explore|start)\b/i.test(p)) return "Learning or onboarding page";
+    if (p !== "/" && p.length > 1) return "Content page";
+    return "Content page";
+  }
+
+  return humanGenericPageLabel(kind);
 }

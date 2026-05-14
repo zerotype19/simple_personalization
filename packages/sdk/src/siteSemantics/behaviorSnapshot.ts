@@ -17,7 +17,20 @@ function inferCommercialPhase(p: SessionProfile, nav: NavigationPatternRead): Co
   const legacy = p.journey_stage;
   const steps = p.page_journey ?? [];
   if (steps.some((s) => s.generic_kind === "support_page")) return "support_service";
-  if (nav.high_intent_transition || legacy === "conversion") return "conversion_ready";
+  if (nav.high_intent_transition || legacy === "conversion") {
+    const vertical = p.site_context.vertical;
+    const editorialVertical =
+      vertical === "publisher_content" || vertical === "content_led_business" || vertical === "nonprofit";
+    const monetizationStep = steps.some(
+      (st) =>
+        st.generic_kind === "pricing_page" ||
+        st.generic_kind === "lead_form_page" ||
+        st.generic_kind === "cart_page" ||
+        st.generic_kind === "checkout_page",
+    );
+    if (editorialVertical && p.signals.cta_clicks === 0 && !monetizationStep) return "evaluation";
+    return "conversion_ready";
+  }
   if (steps.some((s) => s.generic_kind === "pricing_page" || s.generic_kind === "lead_form_page"))
     return "evaluation";
   if (nav.comparison_behavior || legacy === "comparison") return "comparison";
