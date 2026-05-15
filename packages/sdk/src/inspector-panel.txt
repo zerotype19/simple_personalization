@@ -471,3 +471,160 @@ button.si-btn.danger {
 .si-drawer-secondary-body {
   padding-top: 4px;
 }
+
+/* —— Buyer judgment panel (PROGRAM 1 / Slice 1A) —— */
+.si-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+button.si-mode-btn {
+  background: #1f2937;
+  color: #9ca3af;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+button.si-mode-btn.si-mode-active {
+  background: #1e3a8a;
+  border-color: #2563eb;
+  color: #e0e7ff;
+}
+.si-buyer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.si-buyer-section h3 {
+  color: #94a3b8;
+}
+.si-buyer-lead {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+.si-buyer-kv {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 8px 12px;
+  font-size: 12px;
+  margin-top: 6px;
+}
+.si-buyer-k {
+  color: #64748b;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.si-buyer-v {
+  color: #e2e8f0;
+  line-height: 1.45;
+}
+.si-buyer-chip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  font-size: 10px;
+  color: #cbd5e1;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+.si-buyer-families {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #1f2937;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+}
+.si-buyer-fam-label {
+  color: #64748b;
+  margin-right: 6px;
+}
+.si-buyer-fam-val {
+  color: #cbd5e1;
+}
+.si-buyer-list {
+  margin-top: 4px;
+}
+.si-buyer-withhold-card {
+  border-color: #422006;
+  background: linear-gradient(160deg, #1c1410 0%, #111827 100%);
+}
+.si-buyer-withhold-card h3 {
+  color: #fdba74;
+}
+.si-buyer-withheld li {
+  color: #fed7aa;
+}
+.si-ladder {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.si-ladder-step {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #1f2937;
+  color: #64748b;
+  background: #0f172a;
+}
+.si-ladder-step--past {
+  color: #94a3b8;
+  border-color: #334155;
+}
+.si-ladder-step--current {
+  color: #f1f5f9;
+  border-color: #3b82f6;
+  background: rgba(30, 58, 138, 0.35);
+  font-weight: 600;
+}
+.si-ladder-step--future {
+  opacity: 0.55;
+}
+.si-buyer-privacy h3 {
+  color: #86efac;
+}
+.si-operator-details {
+  margin-top: 12px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #0c1018;
+  padding: 8px 10px;
+}
+.si-operator-details-summary {
+  cursor: pointer;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  font-weight: 600;
+  list-style: none;
+}
+.si-operator-details-summary::-webkit-details-marker {
+  display: none;
+}
+.si-operator-details[open] .si-operator-details-summary {
+  margin-bottom: 10px;
+}
+.si-operator-details-body {
+  padding-top: 4px;
+}

@@ -1,6 +1,11 @@
 import type { ExperienceDecisionEnvelope, SessionProfile } from "@si/shared";
+import {
+  buildBuyerInspectorView,
+  type BuyerInspectorView,
+} from "./decisioning/buyerInspectorNarrative";
 import { buildExperienceOperatorNarrative, buildSessionProgressionNarrative } from "./decisioning/experienceInspectorNarrative";
 import { runDecisionReplay } from "./decisioning/replay/runDecisionReplay";
+import type { ReplayResult } from "./decisioning/replay/types";
 import { buildOperatorSessionStory } from "./decisioning/replay/sessionStory";
 import { conceptSignalLabel } from "@si/shared/contextBrain";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
@@ -54,6 +59,109 @@ function escHtml(s: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/"/g, "&quot;");
+}
+
+const INSPECTOR_MODE_STORAGE_KEY = "si:inspector_mode";
+
+type InspectorPanelMode = "buyer" | "operator";
+
+function getInspectorPanelMode(): InspectorPanelMode {
+  try {
+    const v = window.sessionStorage?.getItem(INSPECTOR_MODE_STORAGE_KEY);
+    if (v === "buyer" || v === "operator") return v;
+  } catch {
+    /* storage blocked */
+  }
+  return urlHasSiDebug() ? "operator" : "buyer";
+}
+
+function setInspectorPanelMode(mode: InspectorPanelMode): void {
+  try {
+    window.sessionStorage?.setItem(INSPECTOR_MODE_STORAGE_KEY, mode);
+  } catch {
+    /* storage blocked */
+  }
+}
+
+/** Buyer-facing judgment panel HTML (deterministic narrative layer). */
+function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
+  const { progression } = view;
+  const ladderRows = progression.steps
+    .map((label, i) => {
+      let cls = "si-ladder-step";
+      if (i < progression.currentIndex) cls += " si-ladder-step--past";
+      else if (i === progression.currentIndex) cls += " si-ladder-step--current";
+      else cls += " si-ladder-step--future";
+      return `<li class="${cls}">${escHtml(label)}</li>`;
+    })
+    .join("");
+
+  const why =
+    view.whyBullets.length > 0
+      ? `<ul class="si-reason si-buyer-list">${view.whyBullets.map((b) => `<li>${escHtml(b)}</li>`).join("")}</ul>`
+      : `<p class="si-muted si-muted--block">Signals are still assembling a crisp rationale — keep browsing.</p>`;
+
+  const withheld =
+    view.withheld.length > 0
+      ? `<ul class="si-reason si-buyer-withheld">${view.withheld.map((w) => `<li>${escHtml(w)}</li>`).join("")}</ul>`
+      : `<p class="si-muted si-muted--block">No additional restraint notes on this tick — pacing looks appropriate.</p>`;
+
+  const famBlock =
+    view.families.primary || view.families.secondary
+      ? `<div class="si-buyer-families">
+          ${view.families.primary ? `<div><span class="si-buyer-fam-label">Primary guidance theme</span> <span class="si-buyer-fam-val">${escHtml(view.families.primary)}</span></div>` : ""}
+          ${view.families.secondary ? `<div><span class="si-buyer-fam-label">Secondary theme</span> <span class="si-buyer-fam-val">${escHtml(view.families.secondary)}</span></div>` : ""}
+        </div>`
+      : "";
+
+  const postureChip = view.recommended.confidenceChip
+    ? `<span class="si-buyer-chip">${escHtml(view.recommended.confidenceChip)}</span>`
+    : "";
+
+  const whatChangedBlock = view.whatChanged
+    ? `<div class="si-card si-buyer-section">
+        <h3>What changed</h3>
+        <p class="si-buyer-lead">${escHtml(view.whatChanged)}</p>
+      </div>`
+    : "";
+
+  return `<div class="si-buyer-stack">
+    <div class="si-card si-buyer-section si-card--hero">
+      <h3>Current commercial read</h3>
+      <p class="si-buyer-lead">${escHtml(view.commercialRead)}</p>
+    </div>
+    <div class="si-card si-buyer-section">
+      <h3>Recommended next experience</h3>
+      <div class="si-buyer-kv">
+        <div class="si-buyer-k">Show</div>
+        <div class="si-buyer-v">${escHtml(view.recommended.show)}</div>
+        <div class="si-buyer-k">Surface</div>
+        <div class="si-buyer-v">${escHtml(view.recommended.surface)}</div>
+        <div class="si-buyer-k">Timing</div>
+        <div class="si-buyer-v">${escHtml(view.recommended.timing)}</div>
+        <div class="si-buyer-k">Escalation posture</div>
+        <div class="si-buyer-v">${escHtml(view.recommended.escalationPosture)}${postureChip ? ` ${postureChip}` : ""}</div>
+      </div>
+      ${famBlock}
+    </div>
+    <div class="si-card si-buyer-section">
+      <h3>Why this recommendation</h3>
+      ${why}
+    </div>
+    <div class="si-card si-buyer-section si-buyer-withhold-card">
+      <h3>Why stronger escalation was withheld</h3>
+      ${withheld}
+    </div>
+    <div class="si-card si-buyer-section">
+      <h3>Progression</h3>
+      <ol class="si-ladder">${ladderRows}</ol>
+    </div>
+    ${whatChangedBlock}
+    <div class="si-card si-card--privacy si-buyer-privacy">
+      <h3>Privacy</h3>
+      <p class="si-muted si-muted--block">Anonymous, first-party, in-session only — no fingerprinting or identity stitching.</p>
+    </div>
+  </div>`;
 }
 
 /** Keeps inspector JSON readable (avoids float artifacts like 0.8921999999999999). */
@@ -122,8 +230,8 @@ function appendInspectorShell(root: HTMLElement): void {
   const launcher = document.createElement("button");
   launcher.type = "button";
   launcher.id = "si-inspector-launcher";
-  launcher.setAttribute("aria-label", "Toggle Session Intelligence panel");
-  launcher.title = "Session Intelligence";
+  launcher.setAttribute("aria-label", "Toggle Optiview judgment panel");
+  launcher.title = "Optiview";
   launcher.textContent = "SI";
 
   const panel = document.createElement("div");
@@ -135,26 +243,41 @@ function appendInspectorShell(root: HTMLElement): void {
 
   const headerMain = document.createElement("div");
   const h2 = document.createElement("h2");
-  h2.textContent = "Session Intelligence";
+  h2.textContent = "Optiview";
 
   const hint = document.createElement("div");
   hint.className = "si-muted";
-  hint.append("Click ");
+  hint.append("Session judgment · Click ");
   const bSi = document.createElement("b");
   bSi.textContent = "SI";
-  hint.append(bSi, " (corner) or ");
+  hint.append(bSi, " corner or ");
   const bWin = document.createElement("b");
   bWin.textContent = "Ctrl+Shift+`";
   hint.append(bWin, " / ");
   const bMac = document.createElement("b");
   bMac.textContent = "⌘+Shift+`";
-  hint.append(bMac, " (backtick key) to toggle. ");
-  const chromeHint = document.createElement("span");
-  chromeHint.className = "si-csp-chrome-hint";
-  chromeHint.textContent = "(Ctrl+Shift+D is reserved in Chrome for bookmarks.)";
-  hint.append(chromeHint);
+  hint.append(bMac, " to toggle.");
 
   headerMain.append(h2, hint);
+
+  const headerActions = document.createElement("div");
+  headerActions.className = "si-header-actions";
+
+  const modeBuyer = document.createElement("button");
+  modeBuyer.type = "button";
+  modeBuyer.id = "si-mode-buyer";
+  modeBuyer.className = "si-mode-btn";
+  modeBuyer.textContent = "Buyer view";
+  modeBuyer.setAttribute("aria-pressed", "true");
+
+  const modeOp = document.createElement("button");
+  modeOp.type = "button";
+  modeOp.id = "si-mode-operator";
+  modeOp.className = "si-mode-btn";
+  modeOp.textContent = "Operator view";
+  modeOp.setAttribute("aria-pressed", "false");
+
+  headerActions.append(modeBuyer, modeOp);
 
   const closeBtn = document.createElement("button");
   closeBtn.type = "button";
@@ -162,7 +285,7 @@ function appendInspectorShell(root: HTMLElement): void {
   closeBtn.id = "si-close";
   closeBtn.textContent = "Close";
 
-  header.append(headerMain, closeBtn);
+  header.append(headerMain, headerActions, closeBtn);
 
   const panelBody = document.createElement("div");
   panelBody.id = "si-inspector-body";
@@ -208,7 +331,17 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
   const body = root.querySelector("#si-inspector-body") as HTMLElement;
   const closeBtn = root.querySelector("#si-close") as HTMLButtonElement;
   const launcher = root.querySelector("#si-inspector-launcher") as HTMLButtonElement;
+  const modeBuyerBtn = root.querySelector("#si-mode-buyer") as HTMLButtonElement;
+  const modeOperatorBtn = root.querySelector("#si-mode-operator") as HTMLButtonElement;
   launcher.setAttribute("aria-expanded", "false");
+
+  function syncInspectorModeChrome() {
+    const m = getInspectorPanelMode();
+    modeBuyerBtn.classList.toggle("si-mode-active", m === "buyer");
+    modeOperatorBtn.classList.toggle("si-mode-active", m === "operator");
+    modeBuyerBtn.setAttribute("aria-pressed", m === "buyer" ? "true" : "false");
+    modeOperatorBtn.setAttribute("aria-pressed", m === "operator" ? "true" : "false");
+  }
 
   let open = false;
   const toggle = () => {
@@ -250,9 +383,15 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
   });
 
   function render() {
+    const panelMode = getInspectorPanelMode();
     const p = opts.getState();
     const expEnv = opts.getExperienceDecisionEnvelope?.() ?? null;
     const primaryDecision = expEnv?.primary_decision;
+    const replayFrames = opts.getReplayFrames?.() ?? [];
+    const replayResult: ReplayResult | null =
+      replayFrames.length >= 2 ? runDecisionReplay(replayFrames) : null;
+    const buyerView = buildBuyerInspectorView(p, expEnv, replayResult);
+    const buyerPanelHtml = formatBuyerInspectorHtml(buyerView);
     const sessionProgressionEsc =
       expEnv != null ? escHtml(buildSessionProgressionNarrative(p, expEnv)) : "";
     const nba = p.next_best_action;
@@ -583,10 +722,9 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       buildExperienceOperatorNarrative(p, primaryDecision ?? null, expEnv?.suppression_summary),
     );
 
-    const replayFrames = opts.getReplayFrames?.() ?? [];
     let decisionProgressionHtml = "";
-    if (replayFrames.length >= 2) {
-      const replay = runDecisionReplay(replayFrames);
+    if (replayResult) {
+      const replay = replayResult;
       const storyEsc = escHtml(buildOperatorSessionStory(replay));
       const steps =
         replay.transitions
@@ -994,7 +1132,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         </details>
       </div>`;
 
-    const html = `
+    const technicalStackHtml = `
       ${experienceDecisionHtml}
       ${decisionProgressionHtml}
       ${behaviorWarmupHtml}
@@ -1005,8 +1143,14 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       ${secondaryDrawerHtml}
       ${liveSignalsHtml}
     `;
+
+    const html =
+      panelMode === "buyer"
+        ? buyerPanelHtml
+        : `${buyerPanelHtml}<details class="si-operator-details"><summary class="si-operator-details-summary">Operator view — full diagnostics</summary><div class="si-operator-details-body">${technicalStackHtml}</div></details>`;
     try {
       replaceChildrenFromHtml(body, html);
+      syncInspectorModeChrome();
     } catch (e) {
       console.error(
         "[Session Intelligence] inspector panel render blocked (SES lockdown, Trusted Types, or DOMParser).",
@@ -1060,6 +1204,19 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     clear.addEventListener("click", () => opts.onForcePersona(null));
     personaRow.appendChild(clear);
   }
+
+  modeBuyerBtn.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    setInspectorPanelMode("buyer");
+    if (open) render();
+  });
+  modeOperatorBtn.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    setInspectorPanelMode("operator");
+    if (open) render();
+  });
+
+  syncInspectorModeChrome();
 
   /** Debug / SPA: open drawer when `?si_debug=1` or `sessionStorage['si:debug'] === '1'`. */
   if (urlHasSiDebug()) {
