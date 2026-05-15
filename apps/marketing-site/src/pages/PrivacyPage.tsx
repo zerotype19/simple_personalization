@@ -20,7 +20,7 @@ export function PrivacyPage() {
           <li>No browser fingerprinting for identity stitching.</li>
           <li>No cross-site identity graph inside Optiview.</li>
           <li>No keystroke logging.</li>
-          <li>No raw form field values as part of the Session Intelligence signal path described for customers.</li>
+          <li>No raw form field values as part of the Optiview runtime path described for customers.</li>
           <li>Where query context appears, the product is oriented toward themes or classifications rather than storing raw search strings for profiling.</li>
         </ul>
       </section>
@@ -46,17 +46,17 @@ export function PrivacyPage() {
       <section className="mb-10">
         <h2 className="mb-3 text-xl font-semibold text-slate-900">Customer data ownership</h2>
         <p className="text-slate-700">
-          You own your site, your tags, and your relationship with visitors. Optiview provides the signal layer; you
-          decide which tools receive which fields.
+          You own your site, your tags, and your relationship with visitors. Optiview provides the decision and signal
+          layer; you decide which tools receive which fields.
         </p>
       </section>
 
       <section>
         <h2 className="mb-3 text-xl font-semibold text-slate-900">No identity resolution</h2>
         <p className="text-slate-700">
-          Session Intelligence is not an identity product. It is not designed to resolve anonymous traffic to known
-          individuals inside Optiview. Integrations you build on top of your own identity systems are your
-          responsibility.
+          Optiview is not an identity product. It is an <strong>anonymous experience decision runtime</strong>—not designed
+          to resolve anonymous traffic to known individuals inside Optiview. Integrations you build on top of your own
+          identity systems are your responsibility.
         </p>
       </section>
     </article>

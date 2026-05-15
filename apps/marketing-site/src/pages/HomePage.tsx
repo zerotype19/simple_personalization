@@ -27,13 +27,16 @@ export function HomePage() {
   return (
     <div>
       <div className="mb-16 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:p-12">
-        <p className="mb-2 text-sm font-medium uppercase tracking-wide text-accent-muted">Session Intelligence</p>
+        <p className="mb-2 text-sm font-medium uppercase tracking-wide text-accent-muted">
+          Anonymous experience decision runtime
+        </p>
         <h1 className="mb-4 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
-          Understand anonymous visitors before they identify themselves.
+          Decide what to show on each surface—before visitors identify themselves.
         </h1>
         <p className="mb-6 max-w-2xl text-lg text-slate-600">
-          Optiview turns acquisition context, page semantics, and in-session behavior into real-time personalization
-          signals for Adobe, Optimizely, GTM, Epsilon, and your CMS.
+          Optiview turns acquisition context, page semantics, and in-session behavior into <strong>experience decisions</strong>{" "}
+          (per <strong>surface</strong>) that your CMS, Adobe, Optimizely, GTM, Epsilon, and custom code can activate—still
+          anonymous, session-scoped by design.
         </p>
         <div className="flex flex-wrap gap-3">
           <a
@@ -58,14 +61,14 @@ export function HomePage() {
       <Section id="how-it-works" title="How it works">
         <ol className="list-decimal space-y-3 pl-5 text-slate-700">
           <li>Install one script</li>
-          <li>Optiview reads the session</li>
-          <li>It generates a personalization signal</li>
-          <li>Your tools use the signal to show better content, offers, forms, or CTAs</li>
+          <li>Optiview reads the session in the browser</li>
+          <li>You receive an experience decision envelope (primary + per-surface slots)</li>
+          <li>Your tags or CMS code render, replace, or suppress the mapped surface</li>
         </ol>
         <CodeBlock label="Install snippet" code={scriptSnippet} />
       </Section>
 
-      <Section title="What the signal can power">
+      <Section title="What experience decisions can power">
         <ul className="grid gap-3 sm:grid-cols-2">
           {[
             "Soft popup",
@@ -77,7 +80,7 @@ export function HomePage() {
             "Adobe Target or AEM component",
             "Optimizely experiment",
             "GTM trigger",
-            "Epsilon or event stream signal",
+            "Epsilon or event stream payload",
           ].map((item) => (
             <li key={item} className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm">
               {item}
@@ -94,23 +97,24 @@ export function HomePage() {
         </Card>
       </Section>
 
-      <Section title="Built for pre-identity personalization">
+      <Section title="Built for anonymous-first activation">
         <p>
-          Most personalization tools improve after a user logs in, submits a form, or enters PII. Optiview helps
-          before that moment by interpreting anonymous behavior in a session-scoped way, so you can still trigger
-          better popups, offers, forms, guides, and experiences on the first visits.
+          Most personalization improves after login or a form fill. Optiview is an{" "}
+          <strong>anonymous experience decision runtime</strong>: it recommends which surfaces to show or hold back on the
+          first visits, using session-scoped context—so inline modules, offers, forms, guides, and experiments can follow
+          the same contract your recipes define.
         </p>
       </Section>
 
       <Section title="Integrations">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Card title="GTM / dataLayer">Push signals into the tag manager layer your teams already use.</Card>
+          <Card title="GTM / dataLayer">Push decision payloads into the tag manager layer your teams already use.</Card>
           <Card title="Adobe AEP / Web SDK">Send structured events aligned with your Adobe stack.</Card>
           <Card title="Adobe Client Data Layer / AEM">Feed component-level decisions from a shared data layer.</Card>
-          <Card title="Adobe Target">Use the signal as input to Target activities and offers.</Card>
+          <Card title="Adobe Target">Use decisions as input to Target activities and offers.</Card>
           <Card title="Optimizely">Wire the payload into experimentation and activation.</Card>
           <Card title="Epsilon / generic collectors">Emit compatible events for your event pipeline.</Card>
-          <Card title="Custom CMS slots">Drive slot logic from the same signal object in the browser.</Card>
+          <Card title="Custom CMS slots">Map surface IDs to regions in your headless or traditional CMS.</Card>
         </div>
         <p className="pt-2">
           <Link to="/integrations" className="text-sm font-medium text-accent hover:underline">
@@ -121,7 +125,7 @@ export function HomePage() {
 
       <Section title="Privacy posture">
         <ul className="list-disc space-y-2 pl-5">
-          <li>Anonymous sessionStorage scope for the signal surface we expose in-browser</li>
+          <li>Anonymous sessionStorage scope for the decision envelope / personalization surface we expose in-browser</li>
           <li>No fingerprinting</li>
           <li>No cross-site identity graph</li>
           <li>No keystroke logging</li>

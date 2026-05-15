@@ -10,7 +10,10 @@ export function InstallPage() {
     <div className="space-y-10">
       <div>
         <h1 className="mb-3 text-3xl font-semibold tracking-tight text-slate-900">Install</h1>
-        <p className="text-slate-600">Add one script tag, verify in the console, then push the signal to your tools.</p>
+        <p className="text-slate-600">
+          Add one script tag, verify in the console, then push experience decisions (or the personalization signal) to your
+          tools.
+        </p>
       </div>
 
       <ol className="space-y-8">
