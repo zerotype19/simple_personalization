@@ -137,6 +137,15 @@ export function runFixtureCase(
     }
   }
 
+  if (expected.hard_surfaces_must_not_show?.length) {
+    for (const sid of expected.hard_surfaces_must_not_show) {
+      const slot = slotDecisions[sid];
+      if (slot?.action === "show") {
+        errors.push(`Surface ${sid} must not be show (hard escalation blocked under this session); got show.`);
+      }
+    }
+  }
+
   const queried = sessionInput.expected_surfaces_to_query ?? [];
   for (const sid of queried) {
     const slot = slotDecisions[sid];

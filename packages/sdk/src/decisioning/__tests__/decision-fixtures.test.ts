@@ -5,7 +5,7 @@ import { formatFixtureReport, runAllFixtures } from "../fixtures/runAllFixtures"
 describe("decision fixtures QA", () => {
   it("all decision fixtures pass", () => {
     const summary = runAllFixtures(decisionFixturesRootFromSdkTests());
-    expect(summary.total).toBeGreaterThanOrEqual(21);
+    expect(summary.total).toBeGreaterThanOrEqual(22);
     if (summary.failed > 0) {
       // eslint-disable-next-line no-console
       console.log(formatFixtureReport(summary));

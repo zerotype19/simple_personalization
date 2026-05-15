@@ -1,0 +1,8 @@
+[
+  { "forbidden_substring": "book a demo" },
+  { "forbidden_substring": "talk to sales" },
+  { "forbidden_substring": "request a quote" },
+  { "forbidden_substring": "exit intent" },
+  { "forbidden_substring": "download the ebook" },
+  { "forbidden_substring": "schedule your demo" }
+]

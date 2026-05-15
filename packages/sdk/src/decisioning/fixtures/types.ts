@@ -51,6 +51,8 @@ export interface FixtureExpectedPrimary {
   expected_surface_id?: string;
   /** Per-surface slot expectations (`show` | `suppress` | `none` | `any`). */
   surface_slots?: Record<string, "show" | "suppress" | "none" | "any">;
+  /** Slot `show` is forbidden for these surfaces (e.g. modals under `soft_cta_ready`). */
+  hard_surfaces_must_not_show?: string[];
 }
 
 export interface FixtureBadPattern {

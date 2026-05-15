@@ -93,7 +93,7 @@ Environment:
 
 ## Acceptance bar
 
-- **≥ 21** fixture cases across the seven verticals.
+- **≥ 22** fixture cases across the seven verticals.
 - `pnpm test`, `pnpm typecheck`, and `pnpm decision-fixtures` all succeed in CI and locally.
 
 This layer is the quality gate for **what** the runtime chooses; pack and recipe edits should be justified by fixture deltas or new cases.
