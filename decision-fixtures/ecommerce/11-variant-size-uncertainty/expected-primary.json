@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "size_or_variant_guidance",
+  "expected_offer_type": "size_and_variant_guide",
+  "expected_message_angle": "reduce_variant_anxiety",
+  "expected_timing": "after_scroll",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:ecom_variant_size_guidance"],
+  "forbidden_terms": ["act now", "last chance"]
+}

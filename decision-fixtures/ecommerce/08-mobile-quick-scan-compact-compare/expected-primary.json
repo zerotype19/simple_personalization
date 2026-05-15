@@ -1,0 +1,10 @@
+{
+  "expected_surface_id": "mobile_quick_compare",
+  "expected_offer_type": "mobile_shortlist_compare",
+  "expected_message_angle": "compact_compare",
+  "expected_timing": "after_scroll",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:ecom_mobile_quick_compare"],
+  "hard_surfaces_must_not_show": ["ecom_exit_offer_popup"],
+  "forbidden_terms": ["act now", "last chance", "don't miss out"]
+}

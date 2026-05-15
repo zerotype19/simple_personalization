@@ -1,0 +1,53 @@
+{
+  "name": "Inventory reassurance strip",
+  "vertical": "ecommerce",
+  "engagement_score": 46,
+  "commercial_journey_phase": "comparison",
+  "journey_stage": "comparison",
+  "page_type": "other",
+  "site_environment": {
+    "page": {
+      "generic_kind": "product_page",
+      "confidence": 0.76,
+      "signals_used": ["pdp", "inventory", "ships"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 44,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "comparison"
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.7,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "concept_affinity": {
+    "Inventory & availability": 0.52
+  },
+  "concept_evidence": {
+    "Inventory & availability": ["in stock", "ships", "availability"]
+  },
+  "signals": {
+    "cta_clicks": 0,
+    "pages_viewed": 3,
+    "max_scroll_depth": 60
+  },
+  "expected_surfaces_to_query": ["inventory_reassurance_strip", "pdp_comparison_module"]
+}

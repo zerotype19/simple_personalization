@@ -1,0 +1,60 @@
+{
+  "name": "Cart hesitation — shipping reassurance before discount",
+  "vertical": "ecommerce",
+  "engagement_score": 54,
+  "commercial_journey_phase": "evaluation",
+  "journey_stage": "comparison",
+  "page_type": "other",
+  "site_environment": {
+    "page": {
+      "generic_kind": "cart_page",
+      "confidence": 0.82,
+      "signals_used": ["cart", "shipping"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 50,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": ["Cart dwell without checkout progression"]
+    },
+    "commercial_journey_phase": "evaluation",
+    "navigation": {
+      "journey_pattern": "cart_stall",
+      "journey_velocity": "deliberate",
+      "comparison_behavior": false,
+      "high_intent_transition": false,
+      "path_summary": "/pdp → /cart"
+    }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.74,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "concept_affinity": {
+    "Cart & checkout intent": 0.55
+  },
+  "concept_evidence": {
+    "Cart & checkout intent": ["cart", "shipping", "returns"]
+  },
+  "signals": {
+    "cta_clicks": 1,
+    "pages_viewed": 3,
+    "max_scroll_depth": 70
+  },
+  "expected_surfaces_to_query": ["shipping_returns_reassurance", "cart_assist_inline", "coupon_offer_secondary"]
+}

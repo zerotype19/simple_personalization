@@ -1,0 +1,10 @@
+{
+  "expected_surface_id": "high_aov_confidence_module",
+  "expected_offer_type": "high_aov_confidence_pack",
+  "expected_message_angle": "premium_confidence",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:ecom_high_aov_confidence"],
+  "hard_surfaces_must_not_show": ["coupon_offer_secondary"],
+  "forbidden_terms": ["flash sale", "unlock savings", "act now", "cheap", "clearance"]
+}

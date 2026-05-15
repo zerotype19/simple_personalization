@@ -1,17 +1,55 @@
 {
   "surfaces": [
     {
+      "surface_id": "category_help_me_choose",
+      "surface_type": "inline_module",
+      "label": "Category help-me-choose",
+      "min_confidence": 0.44,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
       "surface_id": "pdp_comparison_module",
       "surface_type": "inline_module",
+      "label": "PDP comparison module",
       "min_confidence": 0.46,
       "max_friction": "medium",
       "allowed_timing": ["after_scroll", "next_navigation"],
       "safe_for_zero_config": true
     },
     {
-      "surface_id": "category_help_me_choose",
+      "surface_id": "mobile_quick_compare",
+      "surface_type": "compact_module",
+      "label": "Mobile quick compare strip",
+      "min_confidence": 0.42,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "product_fit_assistant",
       "surface_type": "inline_module",
+      "label": "Product fit assistant",
+      "min_confidence": 0.45,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "size_or_variant_guidance",
+      "surface_type": "inline_module",
+      "label": "Size / variant guidance",
       "min_confidence": 0.44,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "bundle_or_accessory_module",
+      "surface_type": "inline_module",
+      "label": "Bundle / accessory module",
+      "min_confidence": 0.48,
       "max_friction": "medium",
       "allowed_timing": ["after_scroll", "next_navigation"],
       "safe_for_zero_config": true
@@ -19,26 +57,83 @@
     {
       "surface_id": "cart_assist_inline",
       "surface_type": "inline_cta",
+      "label": "Cart assist inline",
       "min_confidence": 0.5,
       "max_friction": "medium",
       "allowed_timing": ["immediate", "after_scroll"],
       "safe_for_zero_config": true
     },
     {
+      "surface_id": "shipping_returns_reassurance",
+      "surface_type": "inline_module",
+      "label": "Shipping & returns reassurance",
+      "min_confidence": 0.48,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "immediate"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "review_summary_module",
+      "surface_type": "inline_module",
+      "label": "Review summary module",
+      "min_confidence": 0.46,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "high_aov_confidence_module",
+      "surface_type": "inline_module",
+      "label": "High-AOV confidence module",
+      "min_confidence": 0.5,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "inventory_reassurance_strip",
+      "surface_type": "inline_strip",
+      "label": "Inventory reassurance strip",
+      "min_confidence": 0.44,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "immediate"],
+      "safe_for_zero_config": true
+    },
+    {
       "surface_id": "coupon_offer_secondary",
       "surface_type": "inline",
-      "min_confidence": 0.55,
+      "label": "Coupon / promo secondary",
+      "min_confidence": 0.58,
       "max_friction": "low",
       "allowed_timing": ["after_scroll", "idle"],
       "safe_for_zero_config": true
     },
     {
+      "surface_id": "loyalty_or_email_soft_capture",
+      "surface_type": "inline",
+      "label": "Loyalty / email soft capture",
+      "min_confidence": 0.52,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
       "surface_id": "product_recommendation_slot",
       "surface_type": "inline",
+      "label": "Light product recommendation slot",
       "min_confidence": 0.42,
       "max_friction": "low",
       "allowed_timing": ["after_scroll", "next_navigation"],
       "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "ecom_exit_offer_popup",
+      "surface_type": "soft_popup",
+      "label": "Exit / interrupt offer (gated)",
+      "min_confidence": 0.72,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "idle"],
+      "safe_for_zero_config": false
     }
   ]
 }

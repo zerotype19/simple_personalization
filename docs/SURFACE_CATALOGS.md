@@ -30,6 +30,26 @@ Loaded via `getSurfaceCatalogForVertical()` in `@si/shared/experiencePacks`.
 |-----------|-------------------------------|
 | `b2b-saas` | `b2b_saas`, `content_led_business`, `lead_generation`, … |
 | `ecommerce` | `ecommerce`, `travel_hospitality` |
+
+### Ecommerce surface roles (bundled catalog)
+
+| `surface_id` | Role |
+|--------------|------|
+| `category_help_me_choose` | Category-grid shortlist / criteria |
+| `pdp_comparison_module` | PDP-side-by-side compare |
+| `mobile_quick_compare` | Compact thumb-friendly compare strip |
+| `product_fit_assistant` | Repeat-view fit confirmation |
+| `size_or_variant_guidance` | Size / colorway uncertainty |
+| `bundle_or_accessory_module` | Cart-complete pairing |
+| `cart_assist_inline` | Inline cart assist |
+| `shipping_returns_reassurance` | Cart hesitation — policy clarity first |
+| `review_summary_module` | Social proof summary |
+| `high_aov_confidence_module` | Premium consideration pack |
+| `inventory_reassurance_strip` | Stock / ship window strip |
+| `coupon_offer_secondary` | Earned inline coupon (high confidence floor) |
+| `loyalty_or_email_soft_capture` | Soft loyalty / save-for-later |
+| `product_recommendation_slot` | Light browse suggestions only |
+| `ecom_exit_offer_popup` | Gated interrupt (high `min_confidence`; fixtures expect suppress) |
 | `healthcare` | `healthcare` |
 | `financial-services` | `financial_services` |
 | `auto-oem` | `auto_oem` |

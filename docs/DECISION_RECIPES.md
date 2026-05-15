@@ -49,6 +49,8 @@ Multiple recipes may match. The engine **dedupes by `recipe.id`**, keeps the str
 
 When **match confidence ties** (common today because the base score is profile-wide), the **first viable recipe in JSON file order** wins the primary after stable sorting—so **recipe order is part of the product contract** and must be updated together with fixtures when you rebalance.
 
+**Ecommerce pack order (intentional):** comparison / fit / trust recipes (`ecom_mobile_quick_compare`, `ecom_help_me_choose_compare`, fit, variant, high-AOV, inventory, cart shipping) are listed **before** `ecom_coupon_secondary_soft` and loyalty capture so merchandising guidance wins ties unless promo concepts and thresholds are met.
+
 ## Editing workflow
 
 1. Add or edit JSON in `experience-recipes/`.

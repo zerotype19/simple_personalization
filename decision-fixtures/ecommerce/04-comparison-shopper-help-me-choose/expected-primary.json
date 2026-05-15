@@ -1,10 +1,10 @@
 {
-  "expected_surface_id": "category_help_me_choose",
+  "expected_surface_id": "pdp_comparison_module",
   "expected_offer_type": "guided_shortlist",
   "expected_message_angle": "narrow_the_field",
   "expected_timing": "next_navigation",
   "min_confidence": 0.45,
-  "required_reason_terms": ["recipe:ecom_category_help_me_choose"],
+  "required_reason_terms": ["recipe:ecom_pdp_comparison_shop"],
   "hard_surfaces_must_not_show": ["coupon_offer_secondary", "ecom_exit_offer_popup"],
-  "forbidden_terms": ["act now", "last chance", "unlock savings", "don't miss out"]
+  "forbidden_terms": ["act now", "unlock savings", "don't miss out"]
 }

@@ -78,7 +78,15 @@ When authoring `bad-decisions.json` and `forbidden_terms`:
 
 - **Healthcare** — forbid diagnosis, risk, “you have”, treatment guarantees, countdown urgency tied to health outcomes.
 - **Financial services** — forbid predatory urgency, implied approval, creditworthiness claims, distress exploitation.
-- **Ecommerce** — forbid “act now” style pressure when the scenario calls for secondary loyalty treatment; match coupon recipes to engagement thresholds so comparison flows are not hijacked.
+- **Ecommerce** — merchandising doctrine, not coupon spam:
+  - **Discounts are earned** — `price_promo_sensitivity` (or equivalent signals) must be present before `coupon_offer_secondary` / loyalty capture; comparison-led sessions without promo concepts stay on help-me-choose / PDP compare surfaces.
+  - **Comparison before coupon** — fit/product uncertainty → `category_help_me_choose`, `pdp_comparison_module`, or `mobile_quick_compare`; never default coupon on weak confidence.
+  - **Cart hesitation** — `shipping_returns_reassurance` / `cart_assist_inline` before discount unless promo sensitivity exists (`06-cart-hesitation-shipping-reassurance`).
+  - **High-AOV** — `high_aov_confidence_module` + trust/review copy; forbid cheap urgency (`07-high-aov-confidence-module`).
+  - **Mobile quick scan** — compact compare (`08-mobile-quick-scan-compact-compare`); exit/popup surfaces stay off for rapid scanners.
+  - **Low-intent category** — often **null primary** (`09-low-intent-category-null`); no exit popup on shallow browse.
+  - Forbidden patterns: “act now”, “last chance”, “limited time” (unless explicit promo fixture), “don’t miss out”, generic “unlock savings”, coupon popup on comparison-only sessions.
+  - Fixture matrix **`decision-fixtures/ecommerce/04-*` through `13-*`** plus `01–03` locks comparison, coupon-secondary, cart reassurance, AOV trust, mobile compare, null browse, fit/variant, inventory, and anti-discount-spam outcomes against `surface-catalogs/ecommerce.json` + `experience-recipes/ecommerce.json`.
 - **B2B SaaS** — forbid hard demo before evaluation signals; prefer inline implementation aids for late-stage technical visitors. The **`decision-fixtures/b2b-saas/05-*` through `16-*`** matrix locks integration, AI arrival, stakeholder alignment, comparison, ROI research pacing, progressive rollout study, earned walkthrough, workspace readiness, and thin-session restraint against `packages/shared/src/context-packs/surface-catalogs/b2b-saas.json` + `experience-recipes/b2b-saas.json`.
 
 ## Regulated verticals (restraint-first)
@@ -107,7 +115,7 @@ Environment:
 
 ## Acceptance bar
 
-- **≥ 36** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, healthcare/finance restraint cases, and other verticals).
+- **≥ 49** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, **13 ecommerce** merchandising cases, healthcare/finance restraint cases, and other verticals).
 - `pnpm test`, `pnpm typecheck`, and `pnpm decision-fixtures` all succeed in CI and locally.
 
 This layer is the quality gate for **what** the runtime chooses; pack and recipe edits should be justified by fixture deltas or new cases.

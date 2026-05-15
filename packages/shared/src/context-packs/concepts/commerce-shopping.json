@@ -21,6 +21,16 @@
       "id": "trust_reviews",
       "label": "Trust & reviews",
       "terms": ["review", "reviews", "rating", "ratings", "trust", "verified", "authentic", "guarantee", "secure"]
+    },
+    {
+      "id": "product_fit_sizing",
+      "label": "Product fit & sizing",
+      "terms": ["size", "sizing", "fit", "fits", "measurement", "width", "length", "inseam", "shoe size", "variant", "colorway"]
+    },
+    {
+      "id": "inventory_availability",
+      "label": "Inventory & availability",
+      "terms": ["in stock", "inventory", "availability", "backorder", "ships", "warehouse", "low stock", "restock", "pickup"]
     }
   ]
 }

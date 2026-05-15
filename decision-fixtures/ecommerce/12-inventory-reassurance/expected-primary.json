@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "inventory_reassurance_strip",
+  "expected_offer_type": "inventory_and_ship_window",
+  "expected_message_angle": "fulfillment_clarity",
+  "expected_timing": "after_scroll",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:ecom_inventory_reassurance"],
+  "forbidden_terms": ["act now", "limited time"]
+}

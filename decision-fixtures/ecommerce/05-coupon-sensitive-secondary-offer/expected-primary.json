@@ -5,5 +5,5 @@
   "expected_timing": "after_scroll",
   "min_confidence": 0.45,
   "required_reason_terms": ["recipe:ecom_coupon_secondary_soft"],
-  "forbidden_terms": ["act now", "last chance", "limited time", "don't miss out", "unlock savings"]
+  "forbidden_terms": ["act now", "last chance", "limited time", "don't miss out"]
 }

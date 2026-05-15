@@ -1,0 +1,10 @@
+{
+  "expected_surface_id": "shipping_returns_reassurance",
+  "expected_offer_type": "shipping_returns_reassurance",
+  "expected_message_angle": "reduce_cart_risk",
+  "expected_timing": "after_scroll",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:ecom_cart_shipping_reassurance"],
+  "hard_surfaces_must_not_show": ["coupon_offer_secondary"],
+  "forbidden_terms": ["act now", "unlock savings", "last chance"]
+}

@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "product_fit_assistant",
+  "expected_offer_type": "product_fit_assistant",
+  "expected_message_angle": "confirm_fit_before_cart",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:ecom_repeat_product_fit_guidance"],
+  "forbidden_terms": ["act now", "unlock savings"]
+}

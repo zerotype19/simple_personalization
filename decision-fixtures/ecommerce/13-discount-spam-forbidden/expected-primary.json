@@ -2,9 +2,15 @@
   "expected_surface_id": "category_help_me_choose",
   "expected_offer_type": "guided_shortlist",
   "expected_message_angle": "narrow_the_field",
-  "expected_timing": "next_navigation",
   "min_confidence": 0.45,
   "required_reason_terms": ["recipe:ecom_category_help_me_choose"],
   "hard_surfaces_must_not_show": ["coupon_offer_secondary", "ecom_exit_offer_popup"],
-  "forbidden_terms": ["act now", "last chance", "unlock savings", "don't miss out"]
+  "forbidden_terms": [
+    "act now",
+    "last chance",
+    "limited time",
+    "don't miss out",
+    "unlock savings",
+    "unlock"
+  ]
 }

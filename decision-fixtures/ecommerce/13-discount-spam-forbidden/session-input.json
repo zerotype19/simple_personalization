@@ -1,15 +1,15 @@
 {
-  "name": "Comparison-heavy shopper",
+  "name": "Discount spam forbidden — comparison without promo",
   "vertical": "ecommerce",
-  "engagement_score": 52,
+  "engagement_score": 55,
   "commercial_journey_phase": "comparison",
+  "journey_stage": "comparison",
+  "page_type": "other",
   "site_environment": {
     "page": {
       "generic_kind": "category_page",
-      "confidence": 0.78,
-      "signals_used": [
-        "grid"
-      ]
+      "confidence": 0.75,
+      "signals_used": ["grid", "compare"]
     }
   },
   "behavior_snapshot": {
@@ -24,18 +24,12 @@
       "journey_velocity": "deliberate",
       "comparison_behavior": true,
       "high_intent_transition": false,
-      "path_summary": "/compare"
+      "path_summary": "/compare/laptops"
     }
-  },
-  "concept_affinity": {
-    "Comparison shopping": 0.52
-  },
-  "concept_evidence": {
-    "Comparison shopping": ["compare", "versus", "side by side"]
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.75,
+    "confidence": 0.76,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -47,20 +41,20 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
     "playbook": null
   },
-  "signals": {
-    "cta_clicks": 1,
-    "compare_interactions": 2
+  "concept_affinity": {
+    "Comparison shopping": 0.56
   },
-  "expected_surfaces_to_query": [
-    "category_help_me_choose"
-  ]
+  "concept_evidence": {
+    "Comparison shopping": ["compare", "which is better", "specs"]
+  },
+  "signals": {
+    "cta_clicks": 0,
+    "compare_interactions": 2,
+    "pages_viewed": 4
+  },
+  "expected_surfaces_to_query": ["category_help_me_choose", "coupon_offer_secondary", "ecom_exit_offer_popup"]
 }

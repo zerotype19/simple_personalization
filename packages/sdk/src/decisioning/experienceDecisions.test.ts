@@ -206,6 +206,7 @@ describe("experience decisioning", () => {
     const p = minimalProfile({
       site_context: siteCtx("ecommerce"),
       engagement_score: 50,
+      concept_affinity: { "Comparison shopping": 0.52 },
       behavior_snapshot: (() => {
         const b = behaviorBase();
         return {

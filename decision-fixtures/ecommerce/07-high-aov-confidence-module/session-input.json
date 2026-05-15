@@ -1,0 +1,66 @@
+{
+  "name": "High-AOV consideration — confidence module",
+  "vertical": "ecommerce",
+  "engagement_score": 68,
+  "commercial_journey_phase": "evaluation",
+  "journey_stage": "comparison",
+  "page_type": "other",
+  "site_environment": {
+    "page": {
+      "generic_kind": "product_page",
+      "confidence": 0.85,
+      "signals_used": ["pdp", "premium", "warranty"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 56,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "evaluation",
+    "engagement_quality": {
+      "label": "deep_reader",
+      "rationale": ["Long dwell on premium PDP"]
+    },
+    "navigation": {
+      "journey_pattern": "evaluation_led",
+      "journey_velocity": "deliberate",
+      "comparison_behavior": true,
+      "high_intent_transition": false,
+      "path_summary": "/pdp/premium-desk → /reviews"
+    }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.8,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "concept_affinity": {
+    "Premium quality seeking": 0.56,
+    "Trust & reviews": 0.48
+  },
+  "concept_evidence": {
+    "Premium quality seeking": ["premium", "luxury", "craftsmanship"],
+    "Trust & reviews": ["reviews", "warranty", "verified"]
+  },
+  "signals": {
+    "cta_clicks": 0,
+    "pages_viewed": 5,
+    "max_scroll_depth": 88
+  },
+  "expected_surfaces_to_query": ["high_aov_confidence_module", "review_summary_module", "coupon_offer_secondary"]
+}

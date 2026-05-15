@@ -1,0 +1,4 @@
+{
+  "primary_must_be_null": true,
+  "hard_surfaces_must_not_show": ["ecom_exit_offer_popup", "coupon_offer_secondary"]
+}
