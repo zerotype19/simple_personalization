@@ -173,3 +173,7 @@ export {
   type DecisionSuppressedEventDetail,
   type DecisionReplayedEventDetail,
 } from "./destinations/decisionRuntimeEvents";
+export { buildFixtureProfile } from "./decisioning/fixtures/buildFixtureProfile";
+export type { FixtureSessionInput } from "./decisioning/fixtures/types";
+export { buildBuyerInspectorView } from "./decisioning/buyerInspectorNarrative";
+export type { BuyerInspectorView } from "./decisioning/buyerInspectorNarrative";

@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import SessionPersonalizationStrip from "./SessionPersonalizationStrip";
+import ScenarioPresetsPanel from "./ScenarioPresetsPanel";
 import WebmasterIntegrationSection from "./WebmasterIntegrationSection";
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -44,6 +45,7 @@ export default function Layout() {
           </nav>
         </div>
       </header>
+      <ScenarioPresetsPanel />
       <SessionPersonalizationStrip />
       <main className="mx-auto max-w-6xl px-4 py-8">
         <Outlet />
