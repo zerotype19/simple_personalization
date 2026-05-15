@@ -34,9 +34,14 @@ import { runSiteSemantics } from "./siteSemantics/semanticScanner";
 import { buildSiteEnvironment, humanGenericPageLabel } from "./siteEnvironment";
 import { pushExperienceDecisionToAdobeDataLayer as pushExpDecisionAdobe } from "./destinations/adobeDataLayerDestination";
 import { dispatchExperienceDecisionCustomEvent } from "./destinations/customEventDestination";
+import {
+  dispatchSiDecisionSuppressed,
+  dispatchSiDecisionTransition,
+} from "./destinations/decisionRuntimeEvents";
 import { pushExperienceDecisionToDataLayer as pushExpDecisionDataLayer } from "./destinations/dataLayerDestination";
 import { pushExperienceDecisionToOptimizely as pushExpDecisionOptimizely } from "./destinations/optimizelyDestination";
 import { buildExperienceDecisionEnvelope } from "./decisioning/buildExperienceDecisionEnvelope";
+import { inferDecisionTransitionReasons } from "./decisioning/replay/inferTransitionReasons";
 import {
   bumpNavigationTickIfPathChanged,
   emptyExperienceProgressionMemory,
@@ -89,6 +94,10 @@ export class SessionIntelRuntime {
   private slotDecisions: Record<string, ExperienceDecision> = {};
   private experienceProgression: ExperienceProgressionMemory = emptyExperienceProgressionMemory();
   private lastProgressionPersistAt = 0;
+  /** Profile snapshot before the latest decision tick (for transition events). */
+  private profileBeforeDecisionTick: SessionProfile | null = null;
+  /** Rolling anonymous frames for inspector replay (no persistence). */
+  private decisionReplayBuffer: SessionProfile[] = [];
 
   constructor(private opts: BootOptions = {}) {}
 
@@ -147,6 +156,8 @@ export class SessionIntelRuntime {
     this.decisionBus.reset();
     this.lastExperienceEnvelope = null;
     this.slotDecisions = {};
+    this.profileBeforeDecisionTick = null;
+    this.decisionReplayBuffer = [];
   }
 
   getState(): SessionProfile {
@@ -244,6 +255,11 @@ export class SessionIntelRuntime {
     return structuredClone(this.lastExperienceEnvelope);
   }
 
+  /** Last ~16 profile snapshots when the experience envelope meaningfully changed (inspector replay). */
+  getDecisionReplayFrames(): SessionProfile[] {
+    return this.decisionReplayBuffer.map((p) => structuredClone(p));
+  }
+
   getExperienceDecision(surfaceId: string): ExperienceDecision {
     const hit = this.slotDecisions[surfaceId];
     if (hit) return structuredClone(hit);
@@ -318,6 +334,9 @@ export class SessionIntelRuntime {
   }
 
   private syncExperienceDecisions(): void {
+    const prevProfile = this.profileBeforeDecisionTick;
+    const prevEnv = this.lastExperienceEnvelope ? structuredClone(this.lastExperienceEnvelope) : null;
+
     if (typeof window !== "undefined") {
       bumpNavigationTickIfPathChanged(this.experienceProgression, window.location.pathname);
     }
@@ -330,10 +349,47 @@ export class SessionIntelRuntime {
     });
     this.lastExperienceEnvelope = envelope;
     this.slotDecisions = slotDecisions;
+
+    const progressionSnap = mergeExperienceProgressionMemory(emptyExperienceProgressionMemory(), this.experienceProgression);
+
     const changed = this.decisionBus.notifyIfChanged(envelope);
     if (changed) {
       dispatchExperienceDecisionCustomEvent(envelope);
+
+      if (typeof window !== "undefined") {
+        const reasons = inferDecisionTransitionReasons({
+          prevProfile,
+          nextProfile: this.profile,
+          prevPrimary: prevEnv?.primary_decision ?? null,
+          nextPrimary: envelope.primary_decision,
+          prevProgression: prevProfile?.experience_progression ?? null,
+          nextProgression: progressionSnap,
+          holdbackReasonsNext: envelope.primary_decision ? [] : [envelope.suppression_summary ?? "no_primary"],
+        });
+        dispatchSiDecisionTransition({
+          previous_envelope: prevEnv,
+          next_envelope: envelope,
+          transition_reasons: reasons,
+          progression_stage: progressionSnap.escalation_stage,
+          primary_timing_from: prevEnv?.primary_decision?.timing ?? null,
+          primary_timing_to: envelope.primary_decision?.timing ?? null,
+          primary_confidence_from: prevEnv?.primary_decision?.confidence ?? null,
+          primary_confidence_to: envelope.primary_decision?.confidence ?? null,
+        });
+        if (!envelope.primary_decision && prevEnv?.primary_decision) {
+          dispatchSiDecisionSuppressed({
+            envelope,
+            had_primary_before: true,
+            suppression_summary: envelope.suppression_summary,
+          });
+        }
+      }
+
+      if (this.decisionReplayBuffer.length >= 16) this.decisionReplayBuffer.shift();
+      this.decisionReplayBuffer.push(structuredClone(this.profile));
     }
+
+    this.profileBeforeDecisionTick = structuredClone(this.profile);
     this.persistExperienceProgressionThrottled();
   }
 
@@ -371,6 +427,8 @@ export class SessionIntelRuntime {
     this.decisionBus.reset();
     this.lastExperienceEnvelope = null;
     this.slotDecisions = {};
+    this.profileBeforeDecisionTick = null;
+    this.decisionReplayBuffer = [];
     this.tick();
   }
 
@@ -390,6 +448,7 @@ export class SessionIntelRuntime {
     this.stopInspector = mountInspector({
       getState: () => this.getState(),
       getExperienceDecisionEnvelope: () => this.getExperienceDecisionEnvelope(),
+      getReplayFrames: () => this.getDecisionReplayFrames(),
       subscribe: (cb) => this.subscribe(cb),
       onSoftReset: () => {
         this.softResetSession();

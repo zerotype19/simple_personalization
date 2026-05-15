@@ -115,13 +115,19 @@ Fixture coverage:
 
 Runner logic for these cases lives in `packages/sdk/src/decisioning/fixtures/regulatedFixtureSafety.ts` (shared phrase lists) alongside `hard_surfaces_must_not_show` in `runFixture.ts`.
 
+## Decision replay (observability)
+
+- **`packages/sdk/src/decisioning/replay/`** — deterministic replay (`runDecisionReplay`), transition reason codes, operator narrative templates (`buildOperatorSessionStory`), and observability predicates (flicker / escalation heuristics).
+- **`docs/DECISION_REPLAY.md`** — philosophy, `si:*` event shapes, debugging workflow, explicit non-goals (no remote engine, no DB).
+- **Vitest** — `packages/sdk/src/decisioning/__tests__/decision-replay.test.ts` (determinism + B2B deepen scenario + diff helper).
+
 ## Commands
 
 | Command | Purpose |
 |---------|---------|
 | `pnpm decision-fixtures` | CLI report: totals, pass/fail, expected vs actual, grouped mismatches / forbidden violations. Exits non-zero on failure. |
 | `pnpm test:decisions` | Alias for the same script. |
-| `pnpm test` | Full Vitest suite including `decision-fixtures.test.ts`. |
+| `pnpm test` | Full Vitest suite including `decision-fixtures.test.ts` and `decision-replay.test.ts`. |
 | `pnpm typecheck` | Workspace TypeScript check. |
 
 Environment:

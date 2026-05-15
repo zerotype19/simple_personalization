@@ -1,5 +1,7 @@
 import type { ExperienceDecisionEnvelope, SessionProfile } from "@si/shared";
 import { buildExperienceOperatorNarrative, buildSessionProgressionNarrative } from "./decisioning/experienceInspectorNarrative";
+import { runDecisionReplay } from "./decisioning/replay/runDecisionReplay";
+import { buildOperatorSessionStory } from "./decisioning/replay/sessionStory";
 import { conceptSignalLabel } from "@si/shared/contextBrain";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import { isAutoSiteVertical } from "@si/shared";
@@ -36,6 +38,8 @@ export interface InspectorOptions {
   getState: () => SessionProfile;
   /** Experience decision runtime envelope (browser-local). */
   getExperienceDecisionEnvelope?: () => ExperienceDecisionEnvelope;
+  /** Rolling snapshots when the envelope meaningfully changed (replay / inspector). */
+  getReplayFrames?: () => SessionProfile[];
   subscribe: (cb: (p: SessionProfile) => void) => () => void;
   /** Clear `si:session` storage, new session id, re-roll A/B, re-apply — no reload. */
   onSoftReset: () => void;
@@ -579,6 +583,44 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       buildExperienceOperatorNarrative(p, primaryDecision ?? null, expEnv?.suppression_summary),
     );
 
+    const replayFrames = opts.getReplayFrames?.() ?? [];
+    let decisionProgressionHtml = "";
+    if (replayFrames.length >= 2) {
+      const replay = runDecisionReplay(replayFrames);
+      const storyEsc = escHtml(buildOperatorSessionStory(replay));
+      const steps =
+        replay.transitions
+          .map(
+            (t) =>
+              `<li><span class="si-muted">Δ${t.from_index}→${t.to_index}</span> — ${escHtml(t.reasons.join(", "))} · surfaces <code class="si-code">${escHtml(t.primary_surface_from ?? "—")}</code> → <code class="si-code">${escHtml(t.primary_surface_to ?? "—")}</code> · suppression <code class="si-code">${escHtml(t.suppression_delta)}</code></li>`,
+          )
+          .join("") || "<li>—</li>";
+      const frameStrip = replay.frames
+        .map(
+          (f) =>
+            `<li>Tick ${f.index}: primary <code class="si-code">${escHtml(f.envelope.primary_decision?.surface_id ?? "null")}</code> · readiness ${escHtml(String(f.diagnostics.readiness_score))} · nav ${escHtml(f.path_replay_tick)}</li>`,
+        )
+        .join("");
+      decisionProgressionHtml = `<div class="si-panel-section">
+        <div class="si-card">
+          <h3>Decision progression</h3>
+          <p class="si-muted si-muted--block">${storyEsc}</p>
+          <h4 class="si-subh">Why it moved (transition codes)</h4>
+          <ul class="si-reason">${steps}</ul>
+          <h4 class="si-subh">Recent engine ticks</h4>
+          <ul class="si-reason si-reason--tight">${frameStrip}</ul>
+          <p class="si-muted si-muted--block">Runtime emits <code class="si-code">si:decision-transition</code> and <code class="si-code">si:decision-suppressed</code> when the envelope meaningfully changes—local CustomEvents only.</p>
+        </div>
+      </div>`;
+    } else {
+      decisionProgressionHtml = `<div class="si-panel-section">
+        <div class="si-card">
+          <h3>Decision progression</h3>
+          <p class="si-muted si-muted--block">Replay needs at least two captured ticks after meaningful experience changes. Browse or revisit pricing—the inspector buffers the last several decision snapshots in-memory for this session.</p>
+        </div>
+      </div>`;
+    }
+
     const experienceDecisionHtml = expEnv
       ? `<div class="si-panel-section">
         <div class="si-card si-card--hero si-card--experience">
@@ -954,6 +996,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
 
     const html = `
       ${experienceDecisionHtml}
+      ${decisionProgressionHtml}
       ${behaviorWarmupHtml}
       ${visitorHeroHtml}
       ${sessionJourneyHtml}

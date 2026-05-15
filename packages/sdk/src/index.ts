@@ -142,3 +142,34 @@ export { DEFAULT_CONFIG } from "./defaults";
 export { resetProfile, SI_SESSION_STORAGE_KEY } from "./session";
 export { clearTreatments } from "./personalization";
 export { computeClampedScores, mergeAffinityFromHits, recomputeScores } from "./scorer";
+export {
+  runDecisionReplay,
+  buildOperatorSessionStory,
+  inferDecisionTransitionReasons,
+  replayHasSurfaceFlicker,
+  replayHasRepeatedSurfaceSpam,
+  replayEscalationJumpsLimited,
+  replaySuppressionsHaveHoldbacks,
+  replayTransitionsHaveReasons,
+} from "./decisioning/replay";
+export type {
+  ReplayResult,
+  ReplayOptions,
+  ReplayFrameResult,
+  DecisionTransition,
+  DecisionTransitionReason,
+} from "./decisioning/replay";
+export { diffExperienceDecision, experienceDecisionMeaningfullyChanged } from "./decisioning/decisionDiff";
+export type { ExperienceDecisionDiff } from "./decisioning/decisionDiff";
+export {
+  buildExperienceDecisionEnvelopeWithDiagnostics,
+  type ExperienceDecisionFrameDiagnostics,
+} from "./decisioning/buildExperienceDecisionEnvelope";
+export {
+  dispatchSiDecisionTransition,
+  dispatchSiDecisionSuppressed,
+  dispatchSiDecisionReplayed,
+  type DecisionTransitionEventDetail,
+  type DecisionSuppressedEventDetail,
+  type DecisionReplayedEventDetail,
+} from "./destinations/decisionRuntimeEvents";

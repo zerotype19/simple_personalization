@@ -126,6 +126,10 @@ It may intentionally emit **no primary decision**, softer conversion paths, or *
 
 **No-decision is often better than a weak decision.** That restraint is strategically load-bearing: it builds **trust**, reduces **brand risk**, and avoids the over-trigger / over-fit failure mode common in personalization vendors.
 
+### Replay & operator observability (Phase C)
+
+Operators and CMS teams need to **see why** the runtime changed its mind without reading implementation details. **`runDecisionReplay`** feeds `SessionProfile[]` snapshots through the **same** decision pipeline as the tag; the inspector **Decision progression** section summarizes recent meaningful ticks from an in-memory buffer; **`si:decision-transition`** and **`si:decision-suppressed`** expose structured transition reasons for optional tag-manager wiring. Details: [DECISION_REPLAY.md](DECISION_REPLAY.md).
+
 ### Healthcare realism (pack-level)
 
 For **healthcare** experience packs, anonymous decisions should **reduce uncertainty, not create urgency**: favor **education** and **eligibility / coverage** guidance before **provider** escalation; **appointment**-style surfaces only after **strong readiness**; avoid fear- or diagnosis-adjacent copy and guaranteed-coverage claims. Pack recipes and `decision-fixtures/healthcare/*` encode this without changing collector APIs or architecture.

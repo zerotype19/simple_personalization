@@ -22,6 +22,9 @@ declare global {
       getExperienceDecisionEnvelope: typeof api.getExperienceDecisionEnvelope;
       getExperienceDecision: typeof api.getExperienceDecision;
       getAllExperienceDecisions: typeof api.getAllExperienceDecisions;
+      getDecisionReplayFrames: () => import("@si/shared").SessionProfile[];
+      runDecisionReplay: typeof api.runDecisionReplay;
+      buildOperatorSessionStory: typeof api.buildOperatorSessionStory;
       subscribeToDecision: typeof api.subscribeToDecision;
       subscribeToAllDecisions: typeof api.subscribeToAllDecisions;
       pushToDataLayer: typeof api.pushToDataLayer;
@@ -79,6 +82,9 @@ export function boot(): void {
           getExperienceDecisionEnvelope: () => rt.getExperienceDecisionEnvelope(),
           getExperienceDecision: (surfaceId: string) => rt.getExperienceDecision(surfaceId),
           getAllExperienceDecisions: () => rt.getAllExperienceDecisions(),
+          getDecisionReplayFrames: () => rt.getDecisionReplayFrames(),
+          runDecisionReplay: api.runDecisionReplay,
+          buildOperatorSessionStory: api.buildOperatorSessionStory,
           subscribeToDecision: (surfaceId, cb) => rt.subscribeToDecision(surfaceId, cb),
           subscribeToAllDecisions: (cb) => rt.subscribeToAllDecisions(cb),
           pushToDataLayer: () => rt.pushToDataLayer(),
