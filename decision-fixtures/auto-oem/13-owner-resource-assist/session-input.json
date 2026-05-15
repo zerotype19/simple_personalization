@@ -1,31 +1,29 @@
 {
-  "name": "Trim and build exploration",
+  "name": "Owner resource assist",
   "vertical": "auto_oem",
-  "engagement_score": 39,
-  "commercial_journey_phase": "comparison",
+  "engagement_score": 38,
+  "commercial_journey_phase": "support_service",
   "site_environment": {
     "page": {
-      "generic_kind": "category_page",
-      "confidence": 0.78,
-      "signals_used": [
-        "trims"
-      ]
+      "generic_kind": "support_page",
+      "confidence": 0.74,
+      "signals_used": ["support"]
     }
   },
   "behavior_snapshot": {
     "activation_readiness": {
-      "score_0_100": 50,
+      "score_0_100": 40,
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "comparison"
+    "commercial_journey_phase": "support_service"
   },
   "concept_affinity": {
-    "Trim packages compared side by side": 0.74
+    "Warranty booklet and maintenance schedule lookup": 0.72
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.76,
+    "confidence": 0.74,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,20 +35,14 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
     "playbook": null
   },
   "signals": {
-    "cta_clicks": 0,
-    "compare_interactions": 1
+    "cta_clicks": 0
   },
   "expected_surfaces_to_query": [
-    "trim_comparison_module"
+    "owner_resource_assist"
   ]
 }

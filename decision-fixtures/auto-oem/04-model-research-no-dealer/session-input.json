@@ -1,31 +1,29 @@
 {
-  "name": "Trim and build exploration",
+  "name": "Model research — no dealer locator",
   "vertical": "auto_oem",
-  "engagement_score": 39,
-  "commercial_journey_phase": "comparison",
+  "engagement_score": 40,
+  "commercial_journey_phase": "research",
   "site_environment": {
     "page": {
-      "generic_kind": "category_page",
-      "confidence": 0.78,
-      "signals_used": [
-        "trims"
-      ]
+      "generic_kind": "article_page",
+      "confidence": 0.72,
+      "signals_used": ["article"]
     }
   },
   "behavior_snapshot": {
     "activation_readiness": {
-      "score_0_100": 50,
+      "score_0_100": 40,
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "comparison"
+    "commercial_journey_phase": "research"
   },
   "concept_affinity": {
-    "Trim packages compared side by side": 0.74
+    "Model segment body style first-time education": 0.7
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.76,
+    "confidence": 0.72,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,20 +35,12 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
     "playbook": null
   },
   "signals": {
-    "cta_clicks": 0,
-    "compare_interactions": 1
+    "cta_clicks": 0
   },
-  "expected_surfaces_to_query": [
-    "trim_comparison_module"
-  ]
+  "expected_surfaces_to_query": ["model_discovery_assist", "dealer_locator_soft_prompt"]
 }

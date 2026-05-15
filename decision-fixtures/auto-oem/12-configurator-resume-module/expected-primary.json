@@ -1,0 +1,6 @@
+{
+  "expected_surface_id": "configurator_resume_module",
+  "expected_offer_type": "config_resume_soft",
+  "hard_surfaces_must_not_show": ["dealer_locator_soft_prompt"],
+  "forbidden_terms": ["contact dealer now", "schedule test drive"]
+}

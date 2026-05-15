@@ -1,0 +1,11 @@
+{
+  "expected_surface_id": "model_discovery_assist",
+  "expected_offer_type": "model_family_overview",
+  "hard_surfaces_must_not_show": ["dealer_locator_soft_prompt"],
+  "forbidden_terms": [
+    "buy now",
+    "contact dealer now",
+    "schedule test drive",
+    "Contact dealer now"
+  ]
+}

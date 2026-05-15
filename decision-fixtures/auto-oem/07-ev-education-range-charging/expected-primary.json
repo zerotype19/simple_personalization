@@ -1,0 +1,6 @@
+{
+  "expected_surface_id": "ev_education_module",
+  "expected_offer_type": "ev_range_charging_overview",
+  "hard_surfaces_must_not_show": ["dealer_locator_soft_prompt"],
+  "forbidden_terms": ["limited time", "only 2 left", "buy now"]
+}

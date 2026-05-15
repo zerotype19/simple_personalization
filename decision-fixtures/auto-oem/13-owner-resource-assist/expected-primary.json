@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "owner_resource_assist",
+  "expected_offer_type": "owner_resource_links",
+  "forbidden_terms": ["buy now", "contact dealer now"]
+}

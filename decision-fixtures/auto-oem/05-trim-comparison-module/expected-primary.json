@@ -1,0 +1,6 @@
+{
+  "expected_surface_id": "trim_comparison_module",
+  "expected_offer_type": "build_and_price_walkthrough",
+  "hard_surfaces_must_not_show": ["dealer_locator_soft_prompt"],
+  "forbidden_terms": ["buy now", "contact dealer now", "schedule test drive"]
+}

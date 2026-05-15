@@ -88,6 +88,7 @@ When authoring `bad-decisions.json` and `forbidden_terms`:
   - Forbidden patterns: “act now”, “last chance”, “limited time” (unless explicit promo fixture), “don’t miss out”, generic “unlock savings”, coupon popup on comparison-only sessions.
   - Fixture matrix **`decision-fixtures/ecommerce/04-*` through `13-*`** plus `01–03` locks comparison, coupon-secondary, cart reassurance, AOV trust, mobile compare, null browse, fit/variant, inventory, and anti-discount-spam outcomes against `surface-catalogs/ecommerce.json` + `experience-recipes/ecommerce.json`.
 - **B2B SaaS** — forbid hard demo before evaluation signals; prefer inline implementation aids for late-stage technical visitors. The **`decision-fixtures/b2b-saas/05-*` through `16-*`** matrix locks integration, AI arrival, stakeholder alignment, comparison, ROI research pacing, progressive rollout study, earned walkthrough, workspace readiness, and thin-session restraint against `packages/shared/src/context-packs/surface-catalogs/b2b-saas.json` + `experience-recipes/b2b-saas.json`.
+- **Auto OEM** — progress **model → trim → build/configure** before **dealer locator** or inventory handoff; forbid **“buy now”**, **“contact dealer now”**, and **“schedule test drive”** on early education sessions unless fixtures explicitly allow; avoid fake scarcity without inventory signals. **`decision-fixtures/auto-oem/04-*` through `15-*`** lock the realism matrix against `surface-catalogs/auto-oem.json` + `experience-recipes/auto-oem.json`.
 
 ## Regulated verticals (restraint-first)
 
@@ -97,12 +98,16 @@ Healthcare and financial services are **restraint-first** verticals: anonymous o
 
 **Financial services doctrine (fixtures + packs):** anonymous decisions should **build comparison confidence and trust**, not imply **approval**, **distress**, **urgency**, or **personal financial status**—comparison and rate/fee clarity **before** application pressure; **`application_soft_resume`** only when recipes gate **high readiness** and **`conversion_ready`** phase; eligibility copy stays **educational** (no “you qualify” / underwriting outcomes).
 
+**Auto OEM doctrine (fixtures + packs):** anonymous decisions should help visitors move from **model education** toward **configuration confidence**—**not** jump to **dealer handoff** until **build, inventory, incentive, or dealer-intent** signals are earned; **`dealer_locator_soft_prompt`** stays recipe-gated to **high readiness** and dealer/test-drive concepts; copy avoids showroom-pressure phrases on pure research sessions.
+
 Fixture coverage:
 
 - **`healthcare/04-education-eligibility-soft-only`** — Education/eligibility-adjacent reading with **moderate readiness below** the eligibility-module recipe floor; expects **`education_inline_next_step`** / **`next_clinical_step_guide`**, `regulated_vertical_safety: "healthcare"`, and **`hard_surfaces_must_not_show`** for aggressive provider CTAs (e.g. `provider_discussion_cta`).
 - **`healthcare/05-symptom-education-inline-reader` → `16-insurance-payment-coverage-helper`** — Realism matrix for the expanded healthcare surface catalog (`education_inline_next_step`, `eligibility_guidance_module`, `coverage_reassurance_inline`, `next_clinical_step_guide`, `doctor_conversation_guide`, `care_pathway_explainer`, `screening_education_module`, `insurance_coverage_helper`, `provider_discussion_cta`, `appointment_soft_prompt`) with **regulated_vertical_safety**, **`hard_surfaces_must_not_show`** where escalation must not earn `show`, and copy **`forbidden_terms`** aligned to the vertical lists above.
 - **`financial-services/04-rate-fee-research-soft-only`** — Rate/fee comparison posture with engagement **below** the card-shopping primary recipe; expects **`finance_trust_compare_inline`** outcomes (`card_comparison_module`, **`rate_and_fee_explainer`**), `regulated_vertical_safety: "financial_services"`, and **`hard_surfaces_must_not_show`** for **`application_soft_resume`**.
 - **`financial-services/05-card-comparison-confidence` → `16-distress-inference-forbidden`** — Expanded finance surface catalog with **`regulated_vertical_safety`**, **`hard_surfaces_must_not_show`** where application escalation is inappropriate, and copy **`forbidden_terms`** for approval/urgency/distress patterns.
+
+- **`auto-oem/04-model-research-no-dealer` → `15-hard-dealer-handoff-forbidden`** — OEM realism matrix (discovery, trim, build, EV, family, payment, inventory transition, configurator resume, owner resources) with **`hard_surfaces_must_not_show`** on **`dealer_locator_soft_prompt`** where handoff is not earned, and copy **`forbidden_terms`** for dealer/test-drive pressure.
 
 Runner logic for these cases lives in `packages/sdk/src/decisioning/fixtures/regulatedFixtureSafety.ts` (shared phrase lists) alongside `hard_surfaces_must_not_show` in `runFixture.ts`.
 
@@ -121,7 +126,7 @@ Environment:
 
 ## Acceptance bar
 
-- **≥ 73** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, **13 ecommerce** merchandising cases, **16 healthcare** realism + restraint cases, **16 financial-services** cases including the finance realism matrix, and other verticals).
+- **≥ 85** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, **13 ecommerce** merchandising cases, **16 healthcare** realism + restraint cases, **16 financial-services** cases, **15 auto OEM** cases including the OEM realism matrix, **3 auto retail** cases, and other verticals).
 - `pnpm test`, `pnpm typecheck`, and `pnpm decision-fixtures` all succeed in CI and locally.
 
 This layer is the quality gate for **what** the runtime chooses; pack and recipe edits should be justified by fixture deltas or new cases.

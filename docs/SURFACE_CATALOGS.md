@@ -55,7 +55,7 @@ Loaded via `getSurfaceCatalogForVertical()` in `@si/shared/experiencePacks`.
 |-----------|-----------------------------------------------|
 | `healthcare` | `healthcare` |
 | `financial-services` | `financial_services` — see [Financial services surfaces](#financial-services-surfaces) |
-| `auto-oem` | `auto_oem` |
+| `auto-oem` | `auto_oem` — see [Auto OEM surfaces](#auto-oem-surfaces) |
 | `auto-retail` | `auto_retail` |
 | `publisher` | `publisher_content` |
 | `generic` | fallback verticals |
@@ -76,6 +76,23 @@ Loaded via `getSurfaceCatalogForVertical()` in `@si/shared/experiencePacks`.
 | `refinance_scenario_explainer` | Refinance scenario education |
 | `document_prep_checklist` | Application paperwork checklist (earned intent) |
 | `application_soft_resume` | Soft resume path (pack-gated to high readiness / `conversion_ready`) |
+
+### Auto OEM surfaces
+
+| `surface_id` | Role |
+|--------------|------|
+| `model_discovery_assist` | Model line / body-style orientation |
+| `capability_feature_explainer` | Towing, clearance, traction education |
+| `trim_comparison_module` | Trim / package comparison |
+| `build_price_assist` | Configurator / build guidance |
+| `configurator_resume_module` | Resume saved build |
+| `ev_education_module` | Range, charging, EV foundations |
+| `family_use_case_module` | Cargo / seating / family fit |
+| `incentive_inline_offer` | Incentive stack summary inline |
+| `payment_estimate_helper` | Lease / payment estimate framing (OEM context) |
+| `inventory_transition_assist` | Earned availability / inventory next step |
+| `dealer_locator_soft_prompt` | Dealer search (`soft_modal`; high readiness in recipes) |
+| `owner_resource_assist` | Warranty, manual, service resources |
 
 ## Why this matters
 

@@ -1,15 +1,13 @@
 {
-  "name": "Trim and build exploration",
+  "name": "Configurator resume module",
   "vertical": "auto_oem",
-  "engagement_score": 39,
-  "commercial_journey_phase": "comparison",
+  "engagement_score": 48,
+  "commercial_journey_phase": "evaluation",
   "site_environment": {
     "page": {
-      "generic_kind": "category_page",
+      "generic_kind": "product_detail_page",
       "confidence": 0.78,
-      "signals_used": [
-        "trims"
-      ]
+      "signals_used": ["build"]
     }
   },
   "behavior_snapshot": {
@@ -18,14 +16,14 @@
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "comparison"
+    "commercial_journey_phase": "evaluation"
   },
   "concept_affinity": {
-    "Trim packages compared side by side": 0.74
+    "Draft configuration resume token": 0.76
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.76,
+    "confidence": 0.78,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,20 +35,15 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
     "playbook": null
   },
   "signals": {
-    "cta_clicks": 0,
-    "compare_interactions": 1
+    "cta_clicks": 1
   },
   "expected_surfaces_to_query": [
-    "trim_comparison_module"
+    "configurator_resume_module",
+    "dealer_locator_soft_prompt"
   ]
 }

@@ -1,0 +1,6 @@
+{
+  "expected_surface_id": "inventory_transition_assist",
+  "expected_offer_type": "inventory_handoff_soft",
+  "hard_surfaces_must_not_show": ["dealer_locator_soft_prompt"],
+  "forbidden_terms": ["only 2 left on the lot", "buy now"]
+}

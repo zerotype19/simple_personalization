@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "family_use_case_module",
+  "expected_offer_type": "passenger_cargo_story",
+  "forbidden_terms": ["contact dealer now", "schedule test drive"]
+}

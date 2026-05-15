@@ -134,6 +134,10 @@ For **healthcare** experience packs, anonymous decisions should **reduce uncerta
 
 For **financial_services** packs, anonymous decisions should **build comparison confidence and trust**, not imply **approval**, **distress**, **urgency**, or **personal financial status**: comparison, rate/fee clarity, calculators, and trust surfaces **before** **`application_soft_resume`**; **`application_soft_resume`** only with **`conversion_ready`**-phase intent and high activation readiness in recipes; pack copy and `decision-fixtures/financial-services/*` align with `regulatedFixtureSafety` + `decisionSuppression` finance guards.
 
+### Auto OEM realism (pack-level)
+
+For **`auto_oem`**, help visitors progress from **model education** to **configuration confidence**—trim comparison and build/price assist **before** **`dealer_locator_soft_prompt`**; dealer and inventory handoffs stay **recipe-gated** to inventory/dealer concepts and readiness; pack copy avoids showroom CTAs on thin research. **`decision-fixtures/auto-oem/*`** encodes this without collector or architecture changes.
+
 ### What the market needs (vs what it does not)
 
 The wedge is **better anonymous decisions** — when to interrupt, when **not** to interrupt, appropriate **ask intensity**, which **surface** to activate vs leave quiet, when to **escalate** vs **suppress** — not more dashboards, raw visitor telemetry, or identity-adjacent enrichment for v1.

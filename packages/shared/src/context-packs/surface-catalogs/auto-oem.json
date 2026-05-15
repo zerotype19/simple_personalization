@@ -9,6 +9,14 @@
       "safe_for_zero_config": true
     },
     {
+      "surface_id": "capability_feature_explainer",
+      "surface_type": "inline",
+      "min_confidence": 0.45,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
       "surface_id": "trim_comparison_module",
       "surface_type": "inline_module",
       "min_confidence": 0.46,
@@ -25,6 +33,54 @@
       "safe_for_zero_config": true
     },
     {
+      "surface_id": "configurator_resume_module",
+      "surface_type": "inline_module",
+      "min_confidence": 0.51,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "ev_education_module",
+      "surface_type": "inline_module",
+      "min_confidence": 0.47,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "family_use_case_module",
+      "surface_type": "inline_module",
+      "min_confidence": 0.47,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "incentive_inline_offer",
+      "surface_type": "inline",
+      "min_confidence": 0.5,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "payment_estimate_helper",
+      "surface_type": "inline",
+      "min_confidence": 0.46,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "inventory_transition_assist",
+      "surface_type": "inline_module",
+      "min_confidence": 0.52,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
       "surface_id": "dealer_locator_soft_prompt",
       "surface_type": "soft_modal",
       "min_confidence": 0.62,
@@ -33,11 +89,11 @@
       "safe_for_zero_config": false
     },
     {
-      "surface_id": "incentive_inline_offer",
+      "surface_id": "owner_resource_assist",
       "surface_type": "inline",
-      "min_confidence": 0.5,
-      "max_friction": "medium",
-      "allowed_timing": ["after_scroll"],
+      "min_confidence": 0.44,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
       "safe_for_zero_config": true
     }
   ]

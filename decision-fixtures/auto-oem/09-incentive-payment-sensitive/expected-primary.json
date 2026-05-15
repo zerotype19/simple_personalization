@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "payment_estimate_helper",
+  "expected_offer_type": "oem_payment_estimate_explainer",
+  "forbidden_terms": ["buy now", "guaranteed approval"]
+}

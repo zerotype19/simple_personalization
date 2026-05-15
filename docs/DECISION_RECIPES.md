@@ -53,6 +53,8 @@ When **match confidence ties** (common today because the base score is profile-w
 
 **Financial services pack order (intentional):** trust/security and document-prep recipes are listed early for trust-sensitive and high-intent paperwork sessions; **rewards**, **refinance**, **calculator**, **payment estimate**, then **`finance_rate_fee_explainer_standalone`** (APR/fee/APY concepts) **before** **`finance_fee_transparency_module`** (Schumer-box / fee-schedule concepts) so APR-only readers land on the **inline rate/fee explainer**; **eligibility** and **card comparison** precede the broad **`finance_trust_compare_inline`** bundle; **`finance_application_soft_resume_high`** stays late with **`conversion_ready`** + high readiness gates; predatory **`finance_guaranteed_approval_bad`** remains last for suppression tests. Anonymous finance doctrine: **build comparison confidence and trust**, not implied approval, distress, urgency, or personal financial status—see `decision-fixtures/financial-services/05-*`–`16-*`.
 
+**Auto OEM pack order (intentional):** **`auto_oem_incentive_inline`** first for stackable-offer sessions; **`auto_oem_model_discovery_soft`** for **discovery/research** only; **`auto_oem_capability_explainer`**, **`auto_oem_trim_compare`** (requires trim-grade concepts), **`auto_oem_configurator_resume_soft`** before **`auto_oem_build_price_focus`** so resume tokens beat generic configurator lanes; **EV**, **family**, **payment estimate**, **owner**, **inventory transition**, then **`auto_oem_dealer_locator_earned`** last among positives (high readiness + dealer/test-drive concepts). See `decision-fixtures/auto-oem/04-*`–`15-*`.
+
 ## Editing workflow
 
 1. Add or edit JSON in `experience-recipes/`.

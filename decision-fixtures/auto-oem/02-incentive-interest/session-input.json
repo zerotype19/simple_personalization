@@ -20,6 +20,9 @@
     },
     "commercial_journey_phase": "evaluation"
   },
+  "concept_affinity": {
+    "Stackable APR and lease incentives on this model": 0.78
+  },
   "activation_opportunity": {
     "status": "ready",
     "confidence": 0.77,
