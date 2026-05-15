@@ -69,10 +69,10 @@ export function IntegrationsPage() {
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-3 font-semibold text-slate-900">Push destination helpers (experience layer)</h2>
+        <h2 className="mb-3 font-semibold text-slate-900">Destinations</h2>
         <p className="mb-4 text-sm text-slate-600">
-          Normalized payloads for common sinks (event name <code className="rounded bg-slate-100 px-1">si_experience_decision</code>{" "}
-          on the data layer where applicable).
+          Call these after the envelope updates (e.g. from <code className="rounded bg-slate-100 px-1">subscribeToAllDecisions</code>
+          ). Data layer events use <code className="rounded bg-slate-100 px-1">si_experience_decision</code> where applicable.
         </p>
         <div className="space-y-3">
           <CopyLine code="window.SessionIntel.pushExperienceDecisionToDataLayer()" />
@@ -82,17 +82,34 @@ export function IntegrationsPage() {
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-3 font-semibold text-slate-900">Google Tag Manager / dataLayer</h2>
-        <p className="mb-4 text-sm text-slate-600">
-          Prefer the experience decision push so GTM variables map to <code className="rounded bg-slate-100 px-1">si_decision_*</code>{" "}
-          fields. Pair with a Custom Event trigger on <code className="rounded bg-slate-100 px-1">si_experience_decision</code>.
-        </p>
-        <CopyLine code="window.SessionIntel.pushExperienceDecisionToDataLayer()" />
-      </section>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-3 font-semibold text-slate-900">Adobe Client Data Layer</h2>
-        <CopyLine code="window.SessionIntel.pushExperienceDecisionToAdobeDataLayer()" />
+        <h2 className="mb-4 font-semibold text-slate-900">Platform notes</h2>
+        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
+          <div className="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+            <h3 className="mb-2 text-sm font-semibold text-slate-900">Google Tag Manager</h3>
+            <p className="text-sm text-slate-600">
+              Listen for <code className="rounded bg-white px-1">si_experience_decision</code> in <code className="rounded bg-white px-1">dataLayer</code>; map Data Layer
+              Variables for <code className="rounded bg-white px-1">surface_id</code>, <code className="rounded bg-white px-1">action</code>,{" "}
+              <code className="rounded bg-white px-1">offer_type</code>, <code className="rounded bg-white px-1">message_angle</code>,{" "}
+              <code className="rounded bg-white px-1">timing</code>, and <code className="rounded bg-white px-1">confidence</code>{" "}
+              (<code className="rounded bg-white px-1">si_decision_*</code> keys).
+            </p>
+          </div>
+          <div className="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+            <h3 className="mb-2 text-sm font-semibold text-slate-900">Adobe</h3>
+            <p className="text-sm text-slate-600">
+              Pass the <strong>experience decision envelope</strong> (or primary slot) into Target, AEP / Web SDK, or the
+              Client Data Layer as <strong>decision context</strong>—pair with your mbox / XDM field groups.
+            </p>
+          </div>
+          <div className="rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+            <h3 className="mb-2 text-sm font-semibold text-slate-900">Optimizely</h3>
+            <p className="text-sm text-slate-600">
+              Use <code className="rounded bg-white px-1">surface_id</code>, <code className="rounded bg-white px-1">offer_type</code>,{" "}
+              <code className="rounded bg-white px-1">message_angle</code>, and <code className="rounded bg-white px-1">confidence</code>{" "}
+              as event attributes, tags, or experiment / audience context.
+            </p>
+          </div>
+        </div>
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -120,11 +137,6 @@ alloy("sendEvent", {
   },
 });`}
         />
-      </section>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-3 font-semibold text-slate-900">Optimizely</h2>
-        <CopyLine code="window.SessionIntel.pushExperienceDecisionToOptimizely()" />
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
