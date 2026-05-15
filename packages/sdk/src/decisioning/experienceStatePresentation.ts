@@ -36,13 +36,13 @@ const LABEL_TO_STATE: Record<string, ExperienceLadderState> = {
 const TRANSITION_HINT: Partial<Record<DecisionTransitionReason, string>> = {
   commercial_phase_advanced: "the commercial journey phase matured",
   comparison_behavior_detected: "comparison-style navigation became clearer",
-  readiness_crossed_threshold: "activation readiness crossed a calmer threshold for guidance",
+  readiness_crossed_threshold: "interest crossed a point where softer guidance fits better",
   engagement_increased: "engagement deepened on recent pages",
   cta_engagement_increased: "CTA engagement increased",
   pricing_signal_added: "pricing-oriented pages showed up in the path",
   escalation_stage_increased: "pacing memory recorded room for a stronger next step",
   suppression_due_to_low_confidence: "confidence was still building for a harder surface",
-  progression_gate_blocked: "progression gates held back a heavier escalation",
+  progression_gate_blocked: "pacing intentionally held back a heavier step",
   progression_cooldown_active: "cooldown pacing avoided repeating the same interruption",
   decision_family_rotated: "the active guidance family rotated to match the new moment",
   no_decision_maintained: "the runtime maintained deliberate restraint",
@@ -242,7 +242,7 @@ export function buildEscalationUnlockCondition(profile: SessionProfile, envelope
 
   if (posture === "suppression preferred" || !primary) {
     return tidy(
-      "readiness firms up, engagement steadies, pacing gates and cooldowns allow it, and the moment supports a clearer primary surface",
+      "interest firms up, engagement steadies, pacing allows a natural next step, and the visitor takes a clearer action on a well-matched surface",
     );
   }
 

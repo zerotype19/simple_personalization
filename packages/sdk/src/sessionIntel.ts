@@ -94,3 +94,31 @@ export function formatTimelineClock(startedAt: number, t: number): string {
   const s = sec % 60;
   return `${hours}:${String(minutes).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
+
+const TEN_MIN_MS = 10 * 60 * 1000;
+const THIRTY_FIVE_MIN_MS = 35 * 60 * 1000;
+const FORTY_FIVE_MIN_MS = 45 * 60 * 1000;
+
+/**
+ * Buyer-mode timeline labels: avoid hour-long `H:MM:SS` clocks that read like raw artifacts.
+ * Operator timelines should keep {@link formatTimelineClock}.
+ */
+export function formatTimelineLabelForBuyer(startedAt: number, t: number, previousEventAt: number | null): string {
+  const elapsedSec = Math.max(0, Math.floor((t - startedAt) / 1000));
+  const gapSincePrev = previousEventAt != null ? t - previousEventAt : t - startedAt;
+  if (previousEventAt === null) {
+    return "Initial visit";
+  }
+  if (elapsedSec >= 3600) {
+    if (gapSincePrev >= FORTY_FIVE_MIN_MS) return "After returning to content";
+    if (gapSincePrev >= TEN_MIN_MS) return "After extended reading";
+    return "Later";
+  }
+  if (gapSincePrev >= THIRTY_FIVE_MIN_MS) {
+    return "After extended reading";
+  }
+  if (gapSincePrev >= TEN_MIN_MS) {
+    return "Later";
+  }
+  return formatTimelineClock(startedAt, t);
+}

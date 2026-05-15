@@ -175,7 +175,11 @@ export {
 } from "./destinations/decisionRuntimeEvents";
 export { buildFixtureProfile } from "./decisioning/fixtures/buildFixtureProfile";
 export type { FixtureSessionInput } from "./decisioning/fixtures/types";
-export { buildBuyerInspectorView } from "./decisioning/buyerInspectorNarrative";
+export {
+  buildBuyerInspectorView,
+  buyerInspectorNarrativeCredibilityIssue,
+  joinBuyerInspectorNarrativeForTests,
+} from "./decisioning/buyerInspectorNarrative";
 export type { BuyerInspectorView } from "./decisioning/buyerInspectorNarrative";
 export {
   buildEscalationUnlockCondition,
@@ -192,3 +196,34 @@ export {
   EXPERIENCE_LADDER_LABELS,
 } from "./decisioning/experienceStatePresentation";
 export type { ExperienceLadderState } from "./decisioning/experienceStatePresentation";
+
+export {
+  addMapping,
+  attachDecisionsToRegions,
+  buildCssSelector,
+  buildSurfaceDecisionPreview,
+  buildSurfaceMapState,
+  clearMappingsForPage,
+  destroySurfaceMapperOverlay,
+  dispatchSurfaceMapUpdated,
+  discoverSurfaceRegions,
+  FALLBACK_SURFACE_IDS,
+  getKnownSurfaceIdsForVertical,
+  getPageMappingKey,
+  isOverlayEnabled,
+  loadMappingsForPage,
+  saveMappingsForPage,
+  setOverlayEnabled,
+  SURFACE_MAPPINGS_STORAGE_KEY,
+  updateSurfaceMapperOverlay,
+  type DiscoverOptions,
+  type SurfaceDiscoverLayoutStub,
+} from "./surfaceMapper";
+export type {
+  SurfaceDecisionPreview,
+  SurfaceMapState,
+  SurfaceMapping,
+  SurfaceRegion,
+  SurfaceRegionBounds,
+  SurfaceRegionSource,
+} from "./surfaceMapper";

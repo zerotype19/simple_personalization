@@ -1,8 +1,33 @@
-import type { ExperienceDecisionEnvelope, SessionProfile } from "@si/shared";
+import type { ExperienceDecisionEnvelope, ExperienceProgressionMemory, SessionProfile } from "@si/shared";
 import { describe, expect, it } from "vitest";
-import { buildBuyerInspectorView } from "./buyerInspectorNarrative";
+import { buildSessionProgressionNarrative } from "./experienceInspectorNarrative";
+import {
+  buildBuyerInspectorView,
+  buyerInspectorNarrativeCredibilityIssue,
+  joinBuyerInspectorNarrativeForTests,
+} from "./buyerInspectorNarrative";
 import type { ReplayResult } from "./replay/types";
 import { minimalProfile } from "../test/fixtures";
+
+const BUYER_FORBIDDEN = [
+  /route\s+ticks/i,
+  /\bcandidates?\b/i,
+  /\bcleared\s+gates\b/i,
+  /\bprogression\s+gates\b/i,
+  /primary\s+slot/i,
+  /engagement\s+score/i,
+  /activation\s+readiness\s+score/i,
+  /activation\s+readiness\s+\(/i,
+  /\b\d{2,3}\s+engagement\b/i,
+  /\broughly\s+\d+\s+activation\b/i,
+  /conversion\s+ready\b/i,
+  /\bladder\s+level/i,
+  /model\s+confidence/i,
+  /\bon\s+this\s+tick\b/i,
+  /\bevaluation\s+tick\b/i,
+  /\bticks?\s+counted\b/i,
+  /\bfired\b/i,
+];
 
 function behaviorSnapshot(
   overrides: Partial<NonNullable<SessionProfile["behavior_snapshot"]>> = {},
@@ -87,7 +112,7 @@ function envWithPrimary(
     primary_decision: primary,
     secondary_decisions: [],
     suppression_summary: undefined,
-    progression_notes: ["Cooldown avoided repeating the same modal."],
+    progression_notes: ["Pacing kept repetition in check for this session."],
   };
 }
 
@@ -105,11 +130,19 @@ function envSuppressed(summary: string): ExperienceDecisionEnvelope {
 describe("buyerInspectorNarrative", () => {
   it("surfaces withheld escalation when there is no primary", () => {
     const p = minimalProfile({
-      behavior_snapshot: behaviorSnapshot(),
+      behavior_snapshot: behaviorSnapshot({
+        activation_readiness: {
+          score_0_100: 80,
+          interruption_posture: "avoid_interrupt",
+          rationale: ["Visitor is exploring, not racing to a form."],
+        },
+      }),
     });
     const v = buildBuyerInspectorView(p, envSuppressed("Readiness still building for a demo ask."), null);
     expect(v.withheld.length).toBeGreaterThan(0);
-    expect(v.withheld.some((w) => /withheld/i.test(w))).toBe(true);
+    expect(v.withheld.some((w) => /background|exploratory|pacing|restraint|prompts/i.test(w))).toBe(true);
+    expect(v.recommended.show).toBe("Restraint recommended");
+    expect(v.recommended.restraintBody).toContain("Engagement is high");
     expect(v.recommended.escalationPosture).toBe("Suppression preferred");
   });
 
@@ -120,11 +153,13 @@ describe("buyerInspectorNarrative", () => {
     const v = buildBuyerInspectorView(p, envSuppressed("No numeric leaks here."), null);
     const blob = [
       v.commercialRead,
-      ...v.whyBullets,
-      ...v.withheld,
       v.recommended.show,
       v.recommended.surface,
       v.recommended.timing,
+      v.recommended.escalationPosture,
+      v.recommended.restraintBody ?? "",
+      ...v.whyBullets,
+      ...v.withheld,
       v.statePresentation.whyThisState,
       v.statePresentation.whatWouldMoveForward,
       v.statePresentation.currentStateLabel,
@@ -199,5 +234,65 @@ describe("buyerInspectorNarrative", () => {
     const v = buildBuyerInspectorView(p, envSuppressed("x"), replay);
     expect(v.whatChanged).toBeTruthy();
     expect(v.whatChanged!.toLowerCase()).toContain("shift detected");
+  });
+
+  it("buyer join text avoids forbidden operator vocabulary", () => {
+    const p = minimalProfile({
+      behavior_snapshot: behaviorSnapshot({
+        activation_readiness: {
+          score_0_100: 82,
+          interruption_posture: "avoid_interrupt",
+          rationale: [],
+        },
+      }),
+    });
+    const v = buildBuyerInspectorView(p, envSuppressed("Thin signals for now."), null);
+    const blob = joinBuyerInspectorNarrativeForTests(v);
+    for (const r of BUYER_FORBIDDEN) {
+      expect(blob, `matched ${r}`).not.toMatch(r);
+    }
+    expect(buyerInspectorNarrativeCredibilityIssue(v)).toBeNull();
+  });
+
+  it("high engagement with null primary explains restraint without contradictions", () => {
+    const p = minimalProfile({
+      engagement_score: 88,
+      behavior_snapshot: behaviorSnapshot({
+        activation_readiness: {
+          score_0_100: 87,
+          interruption_posture: "avoid_interrupt",
+          rationale: [],
+        },
+      }),
+    });
+    const v = buildBuyerInspectorView(
+      p,
+      envSuppressed("No strong experience decision for this session state (restraint)."),
+      null,
+    );
+    expect(v.commercialRead.toLowerCase()).toMatch(/withheld|research-heavy|decisive commercial/i);
+    expect(v.recommended.restraintBody?.toLowerCase()).toContain("engagement");
+    const blob = joinBuyerInspectorNarrativeForTests(v);
+    expect((blob.match(/No strong experience decision yet/gi) ?? []).length).toBe(0);
+  });
+
+  it("operator session progression narrative keeps diagnostic routing language", () => {
+    const mem: ExperienceProgressionMemory = {
+      recent_surfaces_shown: ["rollout_complexity_estimator", "workspace_readiness_assessment"],
+      recent_recipe_ids: [],
+      recent_decision_families: ["comparison_support"],
+      suppression_history: [],
+      escalation_stage: 4,
+      last_decision_emit_at: null,
+      navigation_tick: 14,
+      last_path_seen: "/",
+      last_emit_navigation_tick: null,
+      last_modal_emit_at: null,
+      last_modal_emit_navigation_tick: null,
+    };
+    const p = minimalProfile({ experience_progression: mem });
+    const text = buildSessionProgressionNarrative(p, envSuppressed("x"));
+    expect(text).toMatch(/route ticks counted/i);
+    expect(text).toMatch(/Escalation warming is at stage/i);
   });
 });

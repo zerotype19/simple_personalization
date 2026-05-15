@@ -9,7 +9,10 @@ export default function HomePage() {
 
   return (
     <div className="space-y-10">
-      <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-8 shadow-2xl shadow-indigo-500/10">
+      <section
+        className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-8 shadow-2xl shadow-indigo-500/10"
+        data-si-surface="homepage_hero_secondary"
+      >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.35),_transparent_55%)]" />
         <div className="relative grid gap-8 md:grid-cols-2 md:items-center">
           <div>

@@ -49,7 +49,7 @@ export default function InventoryPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2" data-si-inventory>
+      <div className="grid gap-4 md:grid-cols-2" data-si-inventory data-si-surface="inventory_assist_module">
         {rows.map((v) => (
           <div key={v.id} className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
             <div className="flex items-start justify-between gap-3">

@@ -17,7 +17,7 @@ import type { ReplayResult } from "./replay/types";
 
 const BUYER_REASON_COPY: Partial<Record<string, string>> = {
   first_frame: "Baseline established for this session.",
-  readiness_crossed_threshold: "Activation readiness crossed a threshold where a guided next step fits better.",
+  readiness_crossed_threshold: "Interest crossed a level where a guided next step fits better.",
   commercial_phase_advanced: "Commercial journey phase moved forward.",
   engagement_increased: "Engagement depth increased on recent pages.",
   cta_engagement_increased: "The visitor engaged with calls-to-action more actively.",
@@ -30,9 +30,9 @@ const BUYER_REASON_COPY: Partial<Record<string, string>> = {
   offer_angle_changed: "The offer posture shifted to match visitor context.",
   escalation_stage_increased: "The session earned room for a stronger next step.",
   suppression_due_to_low_confidence: "A harder ask stayed back until confidence improves.",
-  progression_gate_blocked: "Pacing gates intentionally held back a heavier escalation.",
-  progression_cooldown_active: "Cooldown pacing avoided repeating the same interruption.",
-  cooldown_active: "A short cool-down window kept repetition in check.",
+  progression_gate_blocked: "A pacing boundary kept a heavier step from landing yet.",
+  progression_cooldown_active: "A short pause between prompts avoided repeating the same interruption.",
+  cooldown_active: "A short pause between prompts kept repetition in check.",
   no_decision_maintained: "The runtime kept restraint on purpose rather than forcing a new CTA.",
 };
 
@@ -45,7 +45,11 @@ export interface BuyerInspectorView {
     timing: string;
     escalationPosture: string;
     confidenceChip: string | null;
+    /** Buyer reassurance when there is no primary decision (null when a primary exists). */
+    restraintBody: string | null;
   };
+  /** False when the envelope has no primary experience decision. */
+  hasPrimaryExperience: boolean;
   whyBullets: string[];
   /** When restraint applies — highest-leverage buyer section. */
   withheld: string[];
@@ -63,12 +67,41 @@ export interface BuyerInspectorView {
   };
 }
 
+/** Buyer copy must not echo operator/engine diagnostics. */
+function hasOperatorJargon(s: string): boolean {
+  const t = s.trim();
+  if (!t) return false;
+  const patterns = [
+    /route\s+ticks/i,
+    /\bcandidates?\b/i,
+    /\bcleared\s+gates\b/i,
+    /\bprogression\s+gates\b/i,
+    /\bgates\s+or\b/i,
+    /\bor\s+the\s+primary\s+slot\b/i,
+    /primary\s+slot/i,
+    /engagement\s+score/i,
+    /activation\s+readiness\s+score/i,
+    /activation\s+readiness\s+\(/i,
+    /\b\d{2,3}\s+engagement\b/i,
+    /\broughly\s+\d+\s+activation\b/i,
+    /conversion\s+ready\b/i,
+    /ladder\s+level/i,
+    /model\s+confidence/i,
+    /\bon\s+this\s+tick\b/i,
+    /\bevaluation\s+tick\b/i,
+    /\bticks?\s+counted\b/i,
+    /\bfired\b/i,
+  ];
+  return patterns.some((r) => r.test(t));
+}
+
 function hasLeakage(s: string): boolean {
   if (/%/.test(s)) return true;
   if (/\b\d+\s*\/\s*100\b/.test(s)) return true;
   if (/\breadiness[_\s]?score\b/i.test(s)) return true;
   if (/\bmomentum\b/i.test(s)) return true;
   if (/\bthreshold\b.*\d/i.test(s)) return true;
+  if (hasOperatorJargon(s)) return true;
   return false;
 }
 
@@ -86,7 +119,7 @@ function humanPhase(phase: CommercialJourneyPhase | undefined): string {
     comparison: "active comparison shopping",
     evaluation: "structured evaluation of options",
     validation: "late validation before committing",
-    conversion_ready: "readiness to convert if the offer fits",
+    conversion_ready: "a decisive-moment posture when the offer fits",
     retention_interest: "ongoing relationship interest",
     support_service: "service or support-seeking context",
   };
@@ -155,7 +188,30 @@ function buildCommercialRead(
     core += " The next step favors practical guidance that matches that posture.";
   }
 
+  if (!primary) {
+    const posture = bs.activation_readiness.interruption_posture;
+    const deep = bs.engagement_quality.label === "deep_reader";
+    const eng = profile.engagement_score ?? 0;
+    if ((deep || eng >= 65) && (posture === "avoid_interrupt" || posture === "observe_only")) {
+      core +=
+        " Strong engagement is present, but interruption is withheld because the visit still reads as research-heavy without a decisive commercial action.";
+    }
+  }
+
   return tidySentence(core);
+}
+
+function buildRestraintBody(profile: SessionProfile, envelope: ExperienceDecisionEnvelope | null): string {
+  const bs = profile.behavior_snapshot;
+  const posture = bs?.activation_readiness.interruption_posture;
+  const deep = bs?.engagement_quality.label === "deep_reader";
+  const eng = profile.engagement_score ?? 0;
+  const ladderish =
+    (profile.personalization_signal?.activation_readiness_score ?? bs?.activation_readiness.score_0_100 ?? 0) >= 72;
+  if ((deep || eng >= 70 || ladderish) && (posture === "avoid_interrupt" || envelope?.suppression_summary?.trim())) {
+    return "Engagement is high, but a stronger interruption is not earned yet.";
+  }
+  return "The runtime is withholding interruption until the session shows a sharper commercial signal.";
 }
 
 function sanitizeBullet(raw: string): string | null {
@@ -211,15 +267,17 @@ function buildWithheld(
 ): string[] {
   const lines: string[] = [];
   if (!primary) {
-    const sum = envelope?.suppression_summary?.trim();
-    if (sum && !hasLeakage(sum)) {
-      lines.push(`Stronger surface withheld: ${sum}`);
-    } else {
-      lines.push(
-        "Stronger surface withheld: signals are still thin, mixed, or below the confidence needed for a hard ask.",
-      );
+    const notes = envelope?.progression_notes?.filter(Boolean) ?? [];
+    for (const n of notes) {
+      if (!/hold|cool|pacing|restraint|back|withheld|pause/i.test(n)) continue;
+      if (hasLeakage(n) || hasOperatorJargon(n)) continue;
+      lines.push(tidySentence(n.trim()));
     }
-    return lines;
+    const posture = profile.behavior_snapshot?.activation_readiness.interruption_posture;
+    if (lines.length === 0 && posture === "avoid_interrupt") {
+      lines.push("Heavier prompts stay back when the tab is often in the background or navigation stays exploratory.");
+    }
+    return lines.slice(0, 4);
   }
 
   if (primary.action === "suppress" && primary.suppression_reason?.trim()) {
@@ -231,7 +289,7 @@ function buildWithheld(
 
   const notes = envelope?.progression_notes?.filter(Boolean) ?? [];
   for (const n of notes) {
-    if (/hold|cool|pacing|restraint|back|withheld/i.test(n) && !hasLeakage(n)) {
+    if (/hold|cool|pacing|restraint|back|withheld/i.test(n) && !hasLeakage(n) && !hasOperatorJargon(n)) {
       lines.push(tidySentence(n));
     }
   }
@@ -242,7 +300,7 @@ function buildWithheld(
   }
 
   if (lines.length === 0 && primary.friction === "high") {
-    lines.push("Higher-friction treatment held back until pacing and confidence support it.");
+    lines.push("Higher-friction treatment held back until pacing supports it.");
   }
 
   return lines.slice(0, 4);
@@ -279,6 +337,7 @@ export function buildBuyerInspectorView(
   replay: ReplayResult | null,
 ): BuyerInspectorView {
   const primary = envelope?.primary_decision ?? null;
+  const hasPrimaryExperience = !!primary;
 
   const commercialRead = buildCommercialRead(profile, primary, envelope);
 
@@ -289,13 +348,15 @@ export function buildBuyerInspectorView(
         timing: humanTiming(primary.timing),
         escalationPosture: formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
         confidenceChip: null,
+        restraintBody: null,
       }
     : {
-        show: "Hold back until the visit clarifies",
-        surface: "None selected yet",
-        timing: "Waiting for clearer commercial signals",
+        show: "Restraint recommended",
+        surface: "None for this moment",
+        timing: "Until a decisive commercial action is visible",
         escalationPosture: formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
         confidenceChip: null,
+        restraintBody: buildRestraintBody(profile, envelope),
       };
 
   const whyBullets = buildWhyBullets(profile, primary);
@@ -305,21 +366,17 @@ export function buildBuyerInspectorView(
   const whatChanged = buildWhatChanged(replay);
   const families = buildFamilies(profile);
 
-  const withheldSummary =
-    !primary && withheld.length
-      ? withheld[0]!.replace(/^Stronger surface withheld:\s*/i, "").trim() || null
-      : null;
-
   const statePresentation = {
     currentStateLabel: ladderLabel(expState),
     ladder: progression,
     escalationPosture: formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
     whyThisState: buildRuntimeStayingSentence(profile, envelope, replay),
     whatWouldMoveForward: buildRuntimeEscalateIfSentence(profile, envelope),
-    strongerActionWithheld: withheldSummary,
+    strongerActionWithheld: null,
   };
 
   return {
+    hasPrimaryExperience,
     commercialRead,
     recommended,
     whyBullets,
@@ -329,4 +386,35 @@ export function buildBuyerInspectorView(
     families,
     statePresentation,
   };
+}
+
+/** Concatenate buyer-facing narrative fields for automated scans (tests). */
+export function joinBuyerInspectorNarrativeForTests(view: BuyerInspectorView): string {
+  const sp = view.statePresentation;
+  const rec = view.recommended;
+  return [
+    view.commercialRead,
+    rec.show,
+    rec.surface,
+    rec.timing,
+    rec.escalationPosture,
+    rec.restraintBody ?? "",
+    ...view.whyBullets,
+    ...view.withheld,
+    sp.currentStateLabel,
+    sp.whyThisState,
+    sp.whatWouldMoveForward,
+    sp.strongerActionWithheld ?? "",
+    view.whatChanged ?? "",
+    view.families.primary ?? "",
+    view.families.secondary ?? "",
+  ].join("\n");
+}
+
+/** Returns a short reason if any buyer string fails the credibility bar; otherwise null. */
+export function buyerInspectorNarrativeCredibilityIssue(view: BuyerInspectorView): string | null {
+  const blob = joinBuyerInspectorNarrativeForTests(view);
+  if (hasOperatorJargon(blob)) return "operator jargon";
+  if (/%/.test(blob)) return "percent sign";
+  return null;
 }

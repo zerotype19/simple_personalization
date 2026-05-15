@@ -512,6 +512,12 @@ button.si-mode-btn.si-mode-active {
   color: #f1f5f9;
   font-weight: 500;
 }
+.si-buyer-restraint-body {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #cbd5e1;
+}
 .si-buyer-kv {
   display: grid;
   grid-template-columns: 100px 1fr;
@@ -644,4 +650,89 @@ button.si-mode-btn.si-mode-active {
 }
 .si-operator-details-body {
   padding-top: 4px;
+}
+.si-buyer-surface-map h3 {
+  color: #93c5fd;
+}
+.si-sm-buyer-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+.si-sm-buyer-row {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px 12px;
+  font-size: 12px;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #0b1220;
+}
+.si-sm-buyer-k {
+  color: #94a3b8;
+  font-weight: 600;
+}
+.si-sm-buyer-v b {
+  color: #e2e8f0;
+}
+.si-sm-withheld {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #fdba74;
+}
+.si-sm-pick-hot {
+  color: #fde68a !important;
+  font-weight: 600;
+}
+.si-sm-op-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+.si-sm-check {
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.si-sm-save-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.si-select {
+  flex: 1;
+  min-width: 180px;
+  max-width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 12px;
+}
+.si-table.si-sm-preview {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 11px;
+}
+.si-table.si-sm-preview th,
+.si-table.si-sm-preview td {
+  border: 1px solid #1f2937;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.si-table.si-sm-preview th {
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
 }

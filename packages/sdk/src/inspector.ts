@@ -1,4 +1,4 @@
-import type { ExperienceDecisionEnvelope, SessionProfile } from "@si/shared";
+import type { ExperienceDecisionEnvelope, ExperienceDecision, SessionProfile } from "@si/shared";
 import {
   buildBuyerInspectorView,
   type BuyerInspectorView,
@@ -27,7 +27,7 @@ import {
   verticalDisplayName,
 } from "./siteIntelligence/panelLabelMapper";
 import { humanGenericPageLabel, timelineHumanPageLabel } from "./siteEnvironment";
-import { formatTimelineClock } from "./sessionIntel";
+import { formatTimelineClock, formatTimelineLabelForBuyer } from "./sessionIntel";
 import { distinctPagesExploredCount } from "./sessionMetrics";
 import {
   marketerArrivalSourceHeadline,
@@ -35,6 +35,21 @@ import {
   marketerPersonalizationImplication,
 } from "./siteSemantics/acquisitionPanelCopy";
 import { analyzeNavigationPattern } from "./siteSemantics/navigationPatternAnalyzer";
+import {
+  addMapping,
+  buildCssSelector,
+  buildSurfaceDecisionPreview,
+  buildSurfaceMapState,
+  clearMappingsForPage,
+  destroySurfaceMapperOverlay,
+  dispatchSurfaceMapUpdated,
+  getKnownSurfaceIdsForVertical,
+  getPageMappingKey,
+  isOverlayEnabled,
+  setOverlayEnabled,
+  updateSurfaceMapperOverlay,
+} from "./surfaceMapper";
+import type { SurfaceRegion } from "./surfaceMapper";
 
 /** Set only in the hosted IIFE build (`SI_PUBLIC_INSPECTOR_CSS_URL`); empty in ESM. */
 declare const __SI_EMBED_INSPECTOR_CSS_URL__: string;
@@ -43,6 +58,8 @@ export interface InspectorOptions {
   getState: () => SessionProfile;
   /** Experience decision runtime envelope (browser-local). */
   getExperienceDecisionEnvelope?: () => ExperienceDecisionEnvelope;
+  /** Experience slot decisions (same contract as `getExperienceDecision` on the runtime). */
+  getExperienceDecision?: (surfaceId: string) => ExperienceDecision;
   /** Rolling snapshots when the envelope meaningfully changed (replay / inspector). */
   getReplayFrames?: () => SessionProfile[];
   subscribe: (cb: (p: SessionProfile) => void) => () => void;
@@ -59,6 +76,35 @@ function escHtml(s: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/"/g, "&quot;");
+}
+
+function formatBuyerSurfaceMapperHtml(regions: SurfaceRegion[], hasSlotApi: boolean): string {
+  if (!hasSlotApi) {
+    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface mapper</h3><p class="si-muted si-muted--block">Slot preview needs a booted Session Intelligence runtime with <code class="si-code">getExperienceDecision</code>.</p></div>`;
+  }
+  if (!regions.length) {
+    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface mapper</h3><p class="si-muted si-muted--block">No regions yet. Add <code class="si-code">data-si-surface="surface_id"</code> on host DOM, or use operator mode to map a region for this path (sessionStorage only).</p></div>`;
+  }
+  const rows = regions
+    .map((r) => {
+      const d = r.current_decision;
+      const pr = d ? buildSurfaceDecisionPreview(d) : null;
+      const withheld =
+        pr && (d!.action === "suppress" || d!.action === "none")
+          ? `<div class="si-muted si-sm-withheld">${escHtml(pr.suppressionLine ?? pr.headline)}</div>`
+          : "";
+      const timing = pr ? escHtml(pr.timing) : "—";
+      const action = pr ? escHtml(pr.actionLine) : "—";
+      return `<div class="si-sm-buyer-row">
+        <div class="si-sm-buyer-k">${escHtml(r.surface_id.replace(/_/g, " "))}</div>
+        <div class="si-sm-buyer-v">
+          <div><b>${action}</b> · ${timing}</div>
+          ${withheld}
+        </div>
+      </div>`;
+    })
+    .join("");
+  return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface mapper</h3><p class="si-muted si-muted--block">Mapped surfaces on this page — preview only.</p><div class="si-sm-buyer-grid">${rows}</div></div>`;
 }
 
 const INSPECTOR_MODE_STORAGE_KEY = "si:inspector_mode";
@@ -84,8 +130,14 @@ function setInspectorPanelMode(mode: InspectorPanelMode): void {
 }
 
 /** Buyer-facing judgment panel HTML (deterministic narrative layer). */
-function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
+function formatBuyerInspectorHtml(
+  view: BuyerInspectorView,
+  buyerTimeline?: { t: number; displayMessage: string }[],
+  sessionStartedAt?: number,
+): string {
   const sp = view.statePresentation;
+  const showPrimary = view.hasPrimaryExperience;
+  const firstRecLabel = showPrimary ? "Show" : "Judgment";
   const ladderRows = sp.ladder.steps
     .map((label, i) => {
       let cls = "si-ladder-step";
@@ -96,21 +148,39 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
     })
     .join("");
 
-  const strongerWithheld =
-    sp.strongerActionWithheld != null && sp.strongerActionWithheld.trim() !== ""
-      ? `<div class="si-buyer-k">Why stronger action is withheld</div>
-         <div class="si-buyer-v">${escHtml(sp.strongerActionWithheld)}</div>`
-      : "";
-
   const why =
     view.whyBullets.length > 0
       ? `<ul class="si-reason si-buyer-list">${view.whyBullets.map((b) => `<li>${escHtml(b)}</li>`).join("")}</ul>`
       : `<p class="si-muted si-muted--block">Signals are still assembling a crisp rationale — keep browsing.</p>`;
 
-  const withheld =
+  const withheldBlock =
     view.withheld.length > 0
       ? `<ul class="si-reason si-buyer-withheld">${view.withheld.map((w) => `<li>${escHtml(w)}</li>`).join("")}</ul>`
-      : `<p class="si-muted si-muted--block">No additional restraint notes on this tick — pacing looks appropriate.</p>`;
+      : `<p class="si-muted si-muted--block">${
+          showPrimary
+            ? "No additional restraint notes on this tick — pacing looks appropriate."
+            : "No extra holdback detail beyond the judgment above — restraint is intentional for now."
+        }</p>`;
+
+  const restraintBodyHtml =
+    !showPrimary && view.recommended.restraintBody?.trim()
+      ? `<p class="si-buyer-restraint-body">${escHtml(view.recommended.restraintBody.trim())}</p>`
+      : "";
+
+  const timelineBlock =
+    buyerTimeline && buyerTimeline.length > 0 && sessionStartedAt != null
+      ? `<div class="si-card si-buyer-section">
+      <h3>Session highlights</h3>
+      <p class="si-muted si-muted--block">Key moments in plain language.</p>
+      <ul class="si-timeline si-timeline--buyer">${buyerTimeline
+        .map((ev, i) => {
+          const prev = i > 0 ? buyerTimeline[i - 1]!.t : null;
+          const lab = formatTimelineLabelForBuyer(sessionStartedAt, ev.t, prev);
+          return `<li><time>${escHtml(lab)}</time><span>${escHtml(ev.displayMessage)}</span></li>`;
+        })
+        .join("")}</ul>
+    </div>`
+      : "";
 
   const famBlock =
     view.families.primary || view.families.secondary
@@ -139,10 +209,9 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
         <div class="si-buyer-v">${escHtml(sp.whyThisState)}</div>
         <div class="si-buyer-k">What would move it forward</div>
         <div class="si-buyer-v">${escHtml(sp.whatWouldMoveForward)}</div>
-        ${strongerWithheld}
       </div>
       <div class="si-buyer-state-ladder-wrap">
-        <div class="si-muted si-muted--block si-buyer-ladder-caption">Progression ladder</div>
+        <div class="si-muted si-muted--block si-buyer-ladder-caption">Experience depth (qualitative)</div>
         <ol class="si-ladder">${ladderRows}</ol>
       </div>
     </div>
@@ -153,7 +222,7 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
     <div class="si-card si-buyer-section">
       <h3>Recommended next experience</h3>
       <div class="si-buyer-kv">
-        <div class="si-buyer-k">Show</div>
+        <div class="si-buyer-k">${escHtml(firstRecLabel)}</div>
         <div class="si-buyer-v">${escHtml(view.recommended.show)}</div>
         <div class="si-buyer-k">Surface</div>
         <div class="si-buyer-v">${escHtml(view.recommended.surface)}</div>
@@ -162,6 +231,7 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
         <div class="si-buyer-k">Escalation posture</div>
         <div class="si-buyer-v">${escHtml(view.recommended.escalationPosture)}</div>
       </div>
+      ${restraintBodyHtml}
       ${famBlock}
     </div>
     <div class="si-card si-buyer-section">
@@ -170,8 +240,9 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
     </div>
     <div class="si-card si-buyer-section si-buyer-withhold-card">
       <h3>Why stronger escalation was withheld</h3>
-      ${withheld}
+      ${withheldBlock}
     </div>
+    ${timelineBlock}
     ${whatChangedBlock}
     <div class="si-card si-card--privacy si-buyer-privacy">
       <h3>Privacy</h3>
@@ -360,6 +431,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
   }
 
   let open = false;
+  let mapperPickActive = false;
+  let pendingInspectorMapping: { selector: string } | null = null;
   const toggle = () => {
     open = !open;
     panel.classList.toggle("open", open);
@@ -407,13 +480,30 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const replayResult: ReplayResult | null =
       replayFrames.length >= 2 ? runDecisionReplay(replayFrames) : null;
     const buyerView = buildBuyerInspectorView(p, expEnv, replayResult);
-    const buyerPanelHtml = formatBuyerInspectorHtml(buyerView);
+    const buyerTimelineRows = curateIntelTimelineForInspector(p);
+    const buyerPanelHtml = formatBuyerInspectorHtml(buyerView, buyerTimelineRows, p.started_at);
     const sessionProgressionEsc =
       expEnv != null ? escHtml(buildSessionProgressionNarrative(p, expEnv)) : "";
     const nba = p.next_best_action;
     const exp = p.experiment_assignment;
     const persoOn = opts.getPersonalizationEnabled();
     const sc = p.site_context;
+    const surfaceSlotsAvailable = typeof document !== "undefined" && !!opts.getExperienceDecision;
+    const surfaceMapState =
+      surfaceSlotsAvailable && opts.getExperienceDecision
+        ? buildSurfaceMapState(document, sc.vertical, opts.getExperienceDecision)
+        : { regions: [] as SurfaceRegion[], mappings: [] };
+    const knownSurfaceIds = surfaceSlotsAvailable ? getKnownSurfaceIdsForVertical(sc.vertical) : [];
+    const surfaceOptionsHtml = knownSurfaceIds
+      .map((id) => `<option value="${escHtml(id)}">${escHtml(id.replace(/_/g, " "))}</option>`)
+      .join("");
+    const overlayOn = isOverlayEnabled() ? " checked" : "";
+    const pickBanner = mapperPickActive
+      ? `<p class="si-muted si-sm-pick-hot">Click a page region outside this panel to capture a CSS selector.</p>`
+      : "";
+    const pendingLine = pendingInspectorMapping
+      ? `<p class="si-muted">Pending region: <code class="si-code">${escHtml(pendingInspectorMapping.selector)}</code></p>`
+      : `<p class="si-muted">No pending region — choose “Select region on page”, click the host page, then pick a surface and save.</p>`;
     const liftPreview = demoLiftPreviewCopy(sc.vertical);
     const safePlanLines = buildSafePersonalizationPlan(p).slice(0, 2);
     const isAuto = isAutoSiteVertical(sc.vertical);
@@ -804,8 +894,10 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
                 <p class="si-muted si-muted--block">Harder asks wait for higher confidence, readiness, and surface fit. Null primaries are a deliberate product outcome.</p>
                 <h4 class="si-subh">Integration preview (<code class="si-code">si:experience-decision</code>)</h4>
                 <pre class="si-pre si-pre--activation-payload">${integrationSnippet}</pre>`
-              : `<p class="si-muted si-muted--block">No strong experience decision yet — <b>this is expected</b> when the session is thin, contradictory, or early. Restraint protects the brand.</p>
-                <p class="si-muted si-muted--block">${escHtml(expEnv.suppression_summary ?? "Suppression: session state did not cross decision thresholds.")}</p>`
+              : `<p class="si-muted si-muted--block">${escHtml(
+                  expEnv.suppression_summary?.trim() ||
+                    "Interruptions stay back for this session until signals firm up.",
+                )}</p>`
           }
         </div>
       </div>`
@@ -1148,7 +1240,54 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         </details>
       </div>`;
 
+    const surfaceMapperPreviewRows =
+      surfaceSlotsAvailable && surfaceMapState.regions.length > 0
+        ? surfaceMapState.regions
+            .map((r) => {
+              const d = r.current_decision!;
+              const pr = buildSurfaceDecisionPreview(d);
+              const why = d.reason?.slice(0, 2).map(escHtml).join(" · ") || "—";
+              return `<tr><td><code class="si-code">${escHtml(r.surface_id)}</code></td><td>${escHtml(r.source)}</td><td>${escHtml(pr.headline)}</td><td>${escHtml(pr.actionLine)}</td><td>${escHtml(pr.timing)}</td><td class="si-muted si-metric--break">${escHtml(pr.suppressionLine ?? why)}</td></tr>`;
+            })
+            .join("")
+        : `<tr><td colspan="6" class="si-muted">No regions — add <code class="si-code">data-si-surface</code> or map a selector below.</td></tr>`;
+
+    const surfaceMapperOperatorHtml =
+      typeof document !== "undefined"
+        ? `<div class="si-panel-section si-surface-mapper-op">
+      <div class="si-card">
+        <h3>Surface mapper</h3>
+        <p class="si-muted si-muted--block">
+          Map known <code class="si-code">surface_id</code> values to page regions for this host+path only (<code class="si-code">${escHtml(getPageMappingKey())}</code>).
+          Stored in <code class="si-code">sessionStorage</code> under <code class="si-code">si:surface_mappings</code>. Preview only — no DOM rewrites.
+        </p>
+        ${
+          surfaceSlotsAvailable
+            ? `${pickBanner}${pendingLine}
+        <div class="si-sm-op-controls">
+          <label class="si-sm-check"><input type="checkbox" id="si-sm-overlay"${overlayOn}/> Highlight regions on page</label>
+          <button type="button" class="si-btn" id="si-sm-pick">${mapperPickActive ? "Cancel region pick" : "Select region on page"}</button>
+          <button type="button" class="si-btn" id="si-sm-refresh">Refresh scan</button>
+          <button type="button" class="si-btn danger" id="si-sm-clear">Clear mappings (this path)</button>
+        </div>
+        <div class="si-muted si-muted--mb6" style="margin-top:12px">Assign surface to pending region</div>
+        <div class="si-sm-save-row">
+          <select class="si-select" id="si-sm-surface-select">${surfaceOptionsHtml}</select>
+          <button type="button" class="si-btn primary" id="si-sm-save">Save mapping</button>
+        </div>
+        <h4 class="si-subh">Live slot preview</h4>
+        <table class="si-table si-sm-preview">
+          <thead><tr><th>Surface</th><th>Source</th><th>Preview</th><th>Action</th><th>Timing</th><th>Why / holdback</th></tr></thead>
+          <tbody>${surfaceMapperPreviewRows}</tbody>
+        </table>`
+            : `<p class="si-muted si-muted--block">Slot preview needs a booted runtime exposing <code class="si-code">getExperienceDecision</code> to the inspector.</p>`
+        }
+      </div>
+    </div>`
+        : "";
+
     const technicalStackHtml = `
+      ${surfaceMapperOperatorHtml}
       ${experienceDecisionHtml}
       ${decisionProgressionHtml}
       ${behaviorWarmupHtml}
@@ -1160,13 +1299,16 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       ${liveSignalsHtml}
     `;
 
+    const buyerSurfaceHtml = formatBuyerSurfaceMapperHtml(surfaceMapState.regions, surfaceSlotsAvailable);
+
     const html =
       panelMode === "buyer"
-        ? buyerPanelHtml
-        : `${buyerPanelHtml}<details class="si-operator-details"><summary class="si-operator-details-summary">Operator view — full diagnostics</summary><div class="si-operator-details-body">${technicalStackHtml}</div></details>`;
+        ? `${buyerPanelHtml}${buyerSurfaceHtml}`
+        : `${buyerPanelHtml}${buyerSurfaceHtml}<details class="si-operator-details"><summary class="si-operator-details-summary">Operator view — full diagnostics</summary><div class="si-operator-details-body">${technicalStackHtml}</div></details>`;
     try {
       replaceChildrenFromHtml(body, html);
       syncInspectorModeChrome();
+      updateSurfaceMapperOverlay(surfaceMapState.regions);
     } catch (e) {
       console.error(
         "[Session Intelligence] inspector panel render blocked (SES lockdown, Trusted Types, or DOMParser).",
@@ -1181,8 +1323,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       return;
     }
 
-    const togglePerso = body.querySelector("#si-toggle-perso") as HTMLButtonElement;
-    togglePerso.addEventListener("click", () => {
+    const togglePerso = body.querySelector("#si-toggle-perso") as HTMLButtonElement | null;
+    togglePerso?.addEventListener("click", () => {
       opts.onTogglePersonalization(!opts.getPersonalizationEnabled());
       render();
     });
@@ -1206,20 +1348,77 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       opts.onReset();
     });
 
-    const personaRow = body.querySelector("#si-personas") as HTMLDivElement;
-    archetypePersonasForVertical(sc.vertical).forEach((persona) => {
-      const b = document.createElement("button");
-      b.className = "si-btn";
-      b.textContent = persona.replace(/_/g, " ");
-      b.addEventListener("click", () => opts.onForcePersona(persona));
-      personaRow.appendChild(b);
+    const personaRow = body.querySelector("#si-personas") as HTMLDivElement | null;
+    if (personaRow) {
+      archetypePersonasForVertical(sc.vertical).forEach((persona) => {
+        const b = document.createElement("button");
+        b.className = "si-btn";
+        b.textContent = persona.replace(/_/g, " ");
+        b.addEventListener("click", () => opts.onForcePersona(persona));
+        personaRow.appendChild(b);
+      });
+      const clear = document.createElement("button");
+      clear.className = "si-btn";
+      clear.textContent = "Clear archetype";
+      clear.addEventListener("click", () => opts.onForcePersona(null));
+      personaRow.appendChild(clear);
+    }
+
+    body.querySelector("#si-sm-refresh")?.addEventListener("click", () => {
+      render();
     });
-    const clear = document.createElement("button");
-    clear.className = "si-btn";
-    clear.textContent = "Clear archetype";
-    clear.addEventListener("click", () => opts.onForcePersona(null));
-    personaRow.appendChild(clear);
+    body.querySelector("#si-sm-clear")?.addEventListener("click", () => {
+      clearMappingsForPage();
+      pendingInspectorMapping = null;
+      mapperPickActive = false;
+      dispatchSurfaceMapUpdated();
+      render();
+    });
+    body.querySelector("#si-sm-overlay")?.addEventListener("change", (ev) => {
+      const on = (ev.target as HTMLInputElement).checked;
+      setOverlayEnabled(on);
+      dispatchSurfaceMapUpdated();
+      render();
+    });
+    body.querySelector("#si-sm-pick")?.addEventListener("click", () => {
+      mapperPickActive = !mapperPickActive;
+      if (!mapperPickActive) pendingInspectorMapping = null;
+      render();
+    });
+    body.querySelector("#si-sm-save")?.addEventListener("click", () => {
+      const sel = (body.querySelector("#si-sm-surface-select") as HTMLSelectElement | null)?.value;
+      if (!sel || !pendingInspectorMapping) return;
+      addMapping({
+        surface_id: sel,
+        selector: pendingInspectorMapping.selector,
+        label: sel.replace(/_/g, " "),
+        created_at: Date.now(),
+        source: "inspector",
+      });
+      pendingInspectorMapping = null;
+      mapperPickActive = false;
+      dispatchSurfaceMapUpdated();
+      render();
+    });
   }
+
+  const onMapperDocumentPointerDown = (ev: PointerEvent) => {
+    if (!mapperPickActive) return;
+    const t = ev.target;
+    if (!(t instanceof Element)) return;
+    if (t.closest("#si-inspector-root")) return;
+    const node: HTMLElement | null = t instanceof HTMLElement ? t : t.parentElement;
+    if (!node) return;
+    const anchor =
+      (node.closest("section,article,main,aside,header,footer,nav,[data-si-surface],[role='main']") as HTMLElement | null) ??
+      node;
+    pendingInspectorMapping = { selector: buildCssSelector(anchor) };
+    mapperPickActive = false;
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (open) render();
+  };
+  document.addEventListener("pointerdown", onMapperDocumentPointerDown, true);
 
   modeBuyerBtn.addEventListener("click", (ev) => {
     ev.preventDefault();
@@ -1246,6 +1445,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
   return () => {
     unsub();
     window.removeEventListener("keydown", keyHandler, true);
+    document.removeEventListener("pointerdown", onMapperDocumentPointerDown, true);
+    destroySurfaceMapperOverlay();
     if (pendingDomAttach) {
       document.removeEventListener("DOMContentLoaded", pendingDomAttach);
       pendingDomAttach = null;

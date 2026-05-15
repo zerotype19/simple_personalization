@@ -448,6 +448,7 @@ export class SessionIntelRuntime {
     this.stopInspector = mountInspector({
       getState: () => this.getState(),
       getExperienceDecisionEnvelope: () => this.getExperienceDecisionEnvelope(),
+      getExperienceDecision: (surfaceId: string) => this.getExperienceDecision(surfaceId),
       getReplayFrames: () => this.getDecisionReplayFrames(),
       subscribe: (cb) => this.subscribe(cb),
       onSoftReset: () => {
