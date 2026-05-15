@@ -1,0 +1,8 @@
+{
+  "expected_surface_id": "document_prep_checklist",
+  "expected_offer_type": "application_document_checklist",
+  "expected_message_angle": "calm_document_prep",
+  "regulated_vertical_safety": "financial_services",
+  "hard_surfaces_must_not_show": ["application_soft_resume"],
+  "forbidden_terms": ["urgent", "act now", "limited time", "apply now", "you qualify"]
+}

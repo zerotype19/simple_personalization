@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "card_comparison_module",
+  "expected_offer_type": "card_finder_assist",
+  "expected_message_angle": "compare_cards_fairly",
+  "regulated_vertical_safety": "financial_services",
+  "hard_surfaces_must_not_show": ["application_soft_resume"],
+  "min_confidence": 0.58,
+  "forbidden_terms": ["you qualify", "pre-approved", "pre approved", "guaranteed approval", "apply now"]
+}

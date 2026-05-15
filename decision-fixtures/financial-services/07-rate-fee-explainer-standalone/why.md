@@ -1,0 +1,1 @@
+APR/fee affinity should prefer the **standalone rate_fee_explainer** recipe (listed before the trust-forward bundle) so the primary lands on the **inline explainer surface**, not a comparison module or application resume.

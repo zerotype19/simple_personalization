@@ -1,0 +1,8 @@
+{
+  "expected_surface_id": "rate_fee_explainer",
+  "expected_offer_type": "rate_and_fee_explainer",
+  "expected_message_angle": "transparent_fees",
+  "regulated_vertical_safety": "financial_services",
+  "hard_surfaces_must_not_show": ["application_soft_resume"],
+  "forbidden_terms": ["act now", "urgent", "limited time", "apply now"]
+}

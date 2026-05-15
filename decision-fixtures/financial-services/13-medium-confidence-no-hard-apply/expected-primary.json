@@ -1,0 +1,8 @@
+{
+  "expected_surface_id": "rate_fee_explainer",
+  "expected_offer_type": "rate_and_fee_explainer",
+  "min_confidence": 0.55,
+  "max_confidence": 0.62,
+  "regulated_vertical_safety": "financial_services",
+  "hard_surfaces_must_not_show": ["application_soft_resume", "eligibility_assist"]
+}

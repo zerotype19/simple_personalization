@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "rate_fee_explainer",
+  "regulated_vertical_safety": "financial_services",
+  "forbidden_terms": ["act now", "urgent", "limited time", "don't miss out", "dont miss out", "apply now"]
+}

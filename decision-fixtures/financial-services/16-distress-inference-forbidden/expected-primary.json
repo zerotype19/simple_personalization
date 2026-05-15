@@ -1,0 +1,12 @@
+{
+  "expected_surface_id": "refinance_scenario_explainer",
+  "regulated_vertical_safety": "financial_services",
+  "forbidden_terms": [
+    "bad credit",
+    "debt trouble",
+    "financial distress",
+    "distressed borrower",
+    "creditworthiness",
+    "improve your credit"
+  ]
+}

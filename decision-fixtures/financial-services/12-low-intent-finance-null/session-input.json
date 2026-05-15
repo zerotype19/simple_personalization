@@ -1,0 +1,42 @@
+{
+  "name": "Low-intent finance — null primary",
+  "vertical": "financial_services",
+  "engagement_score": 22,
+  "commercial_journey_phase": "research",
+  "site_environment": {
+    "page": {
+      "generic_kind": "homepage",
+      "confidence": 0.52,
+      "signals_used": []
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 24,
+      "interruption_posture": "observe_only",
+      "rationale": []
+    },
+    "commercial_journey_phase": "research"
+  },
+  "activation_opportunity": {
+    "status": "weak",
+    "confidence": 0.36,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha"],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 0
+  }
+}

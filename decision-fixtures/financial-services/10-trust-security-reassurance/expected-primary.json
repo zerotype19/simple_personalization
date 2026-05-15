@@ -1,0 +1,8 @@
+{
+  "expected_surface_id": "security_trust_module",
+  "expected_offer_type": "security_overview_module",
+  "expected_message_angle": "trust_and_safety_first",
+  "regulated_vertical_safety": "financial_services",
+  "hard_surfaces_must_not_show": ["application_soft_resume"],
+  "forbidden_terms": ["you qualify", "guaranteed approval", "pre-approved"]
+}

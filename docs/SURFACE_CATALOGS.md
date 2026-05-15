@@ -50,12 +50,32 @@ Loaded via `getSurfaceCatalogForVertical()` in `@si/shared/experiencePacks`.
 | `loyalty_or_email_soft_capture` | Soft loyalty / save-for-later |
 | `product_recommendation_slot` | Light browse suggestions only |
 | `ecom_exit_offer_popup` | Gated interrupt (high `min_confidence`; fixtures expect suppress) |
+
+| File stem | Typical `SiteVertical` mapping (other packs) |
+|-----------|-----------------------------------------------|
 | `healthcare` | `healthcare` |
-| `financial-services` | `financial_services` |
+| `financial-services` | `financial_services` — see [Financial services surfaces](#financial-services-surfaces) |
 | `auto-oem` | `auto_oem` |
 | `auto-retail` | `auto_retail` |
 | `publisher` | `publisher_content` |
 | `generic` | fallback verticals |
+
+### Financial services surfaces
+
+| `surface_id` | Role |
+|--------------|------|
+| `card_comparison_module` | Side-by-side card comparison (trust-first) |
+| `rewards_comparison_module` | Rewards/points/cashback comparison without hard apply |
+| `rate_fee_explainer` | APR/fee/APY plain-language explainer inline |
+| `fee_transparency_module` | Fee schedule / disclosure walkthrough module |
+| `trust_reassurance_inline` | Lightweight trust copy inline |
+| `security_trust_module` | Security / fraud / encryption education module |
+| `eligibility_assist` | Neutral eligibility criteria overview (no implied approval) |
+| `calculator_next_step` | Post–calculator scenario guidance |
+| `payment_estimate_helper` | Payment estimate assumptions and next reads |
+| `refinance_scenario_explainer` | Refinance scenario education |
+| `document_prep_checklist` | Application paperwork checklist (earned intent) |
+| `application_soft_resume` | Soft resume path (pack-gated to high readiness / `conversion_ready`) |
 
 ## Why this matters
 

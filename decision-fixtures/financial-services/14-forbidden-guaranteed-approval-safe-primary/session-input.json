@@ -1,0 +1,46 @@
+{
+  "name": "Forbidden guaranteed approval language on safe primary",
+  "vertical": "financial_services",
+  "engagement_score": 52,
+  "commercial_journey_phase": "research",
+  "site_environment": {
+    "page": {
+      "generic_kind": "article_page",
+      "confidence": 0.76,
+      "signals_used": ["rates", "article"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 50,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "research"
+  },
+  "concept_affinity": {
+    "Intro APR and annual fee comparison study": 0.77
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.76,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 0
+  },
+  "expected_surfaces_to_query": ["rate_fee_explainer"]
+}

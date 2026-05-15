@@ -1,0 +1,14 @@
+{
+  "expected_surface_id": "rate_fee_explainer",
+  "expected_offer_type": "rate_and_fee_explainer",
+  "regulated_vertical_safety": "financial_services",
+  "forbidden_terms": [
+    "guaranteed approval",
+    "pre-approved",
+    "pre approved",
+    "you qualify",
+    "instant approval",
+    "no credit check",
+    "everyone qualifies"
+  ]
+}

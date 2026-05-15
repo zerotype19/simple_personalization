@@ -4,7 +4,8 @@ import type { ExperienceSurfaceCatalogFile } from "@si/shared";
 import { frictionWithinMax } from "./decisionTiming";
 
 const AGGRESSIVE_URGENCY = /(act now|disappearing|urgent|today only|immediately|slots disappearing)/i;
-const FINANCE_UNSAFE = /(guaranteed approval|no credit check|everyone qualifies)/i;
+const FINANCE_UNSAFE =
+  /(guaranteed approval|no credit check|everyone qualifies|pre-?approved|preapproved|\byou qualify\b|improve your credit|\bbad credit\b|debt trouble|financial distress|distressed borrower|creditworthiness|act now|\burgent\b|limited time|don'?t miss out|instant approval|\bapply now\b)/i;
 
 export interface SuppressionResult {
   ok: boolean;
@@ -79,7 +80,7 @@ export function shouldSuppressDecision(args: {
   }
 
   if (vertical === "financial_services") {
-    const blob = `${decision.headline} ${decision.body} ${decision.offer_type}`;
+    const blob = `${decision.message_angle} ${decision.headline} ${decision.body} ${decision.offer_type}`;
     if (FINANCE_UNSAFE.test(blob)) {
       return { ok: false, reason: "financial_unsafe_claim_suppressed" };
     }

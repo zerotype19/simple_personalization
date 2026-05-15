@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "rewards_comparison_module",
+  "expected_offer_type": "rewards_program_compare",
+  "regulated_vertical_safety": "financial_services",
+  "hard_surfaces_must_not_show": ["application_soft_resume"],
+  "forbidden_terms": ["apply now", "you qualify", "guaranteed approval"]
+}
