@@ -58,6 +58,10 @@ export default defineConfig({
         replacement: path.resolve(rootDir, "../../packages/shared/src/contextBrain/index.ts"),
       },
       { find: "@si/shared/demoMetrics", replacement: path.resolve(rootDir, "../../packages/shared/src/demoMetrics.ts") },
+      {
+        find: "@si/shared/experiencePacks",
+        replacement: path.resolve(rootDir, "../../packages/shared/src/experiencePacks.ts"),
+      },
       { find: "@si/sdk", replacement: sdkAlias },
       { find: "@si/shared", replacement: path.resolve(rootDir, "../../packages/shared/src/index.ts") },
     ],

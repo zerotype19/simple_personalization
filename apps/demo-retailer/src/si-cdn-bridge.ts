@@ -6,6 +6,10 @@
 import type { BootOptions, SessionIntelRuntime } from "../../../packages/sdk/src/runtime";
 
 export { buildRuleContext, evaluateExpression } from "../../../packages/sdk/src/rules";
+export { runDecisionReplay } from "../../../packages/sdk/src/decisioning/replay";
+export { buildFixtureProfile } from "../../../packages/sdk/src/decisioning/fixtures/buildFixtureProfile";
+export { buildBuyerInspectorView } from "../../../packages/sdk/src/decisioning/buyerInspectorNarrative";
+export type { FixtureSessionInput } from "../../../packages/sdk/src/decisioning/fixtures/types";
 
 const SNIPPET_ORIGIN = (import.meta.env.VITE_SI_SNIPPET_ORIGIN as string | undefined)
   ?.trim()
