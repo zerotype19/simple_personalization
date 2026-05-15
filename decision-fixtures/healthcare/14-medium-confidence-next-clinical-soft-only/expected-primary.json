@@ -1,0 +1,8 @@
+{
+  "expected_surface_id": "next_clinical_step_guide",
+  "expected_offer_type": "next_clinical_step_overview",
+  "min_confidence": 0.56,
+  "max_confidence": 0.64,
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["provider_discussion_cta", "appointment_soft_prompt"]
+}

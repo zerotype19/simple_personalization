@@ -126,6 +126,10 @@ It may intentionally emit **no primary decision**, softer conversion paths, or *
 
 **No-decision is often better than a weak decision.** That restraint is strategically load-bearing: it builds **trust**, reduces **brand risk**, and avoids the over-trigger / over-fit failure mode common in personalization vendors.
 
+### Healthcare realism (pack-level)
+
+For **healthcare** experience packs, anonymous decisions should **reduce uncertainty, not create urgency**: favor **education** and **eligibility / coverage** guidance before **provider** escalation; **appointment**-style surfaces only after **strong readiness**; avoid fear- or diagnosis-adjacent copy and guaranteed-coverage claims. Pack recipes and `decision-fixtures/healthcare/*` encode this without changing collector APIs or architecture.
+
 ### What the market needs (vs what it does not)
 
 The wedge is **better anonymous decisions** — when to interrupt, when **not** to interrupt, appropriate **ask intensity**, which **surface** to activate vs leave quiet, when to **escalate** vs **suppress** — not more dashboards, raw visitor telemetry, or identity-adjacent enrichment for v1.

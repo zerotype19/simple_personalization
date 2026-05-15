@@ -1,0 +1,1 @@
+Visitor signals **eligibility / benefits** uncertainty in **comparison** phase with sufficient readiness for **trust-first eligibility copy**, but **not** earned scheduling escalation. Locks **eligibility module** ahead of **provider** or **appointment** surfaces.

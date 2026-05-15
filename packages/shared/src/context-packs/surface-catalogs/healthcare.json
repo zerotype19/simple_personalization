@@ -9,6 +9,14 @@
       "safe_for_zero_config": true
     },
     {
+      "surface_id": "next_clinical_step_guide",
+      "surface_type": "inline",
+      "min_confidence": 0.49,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
       "surface_id": "eligibility_guidance_module",
       "surface_type": "inline_module",
       "min_confidence": 0.5,
@@ -25,11 +33,51 @@
       "safe_for_zero_config": true
     },
     {
+      "surface_id": "insurance_coverage_helper",
+      "surface_type": "inline",
+      "min_confidence": 0.47,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "care_pathway_explainer",
+      "surface_type": "inline_module",
+      "min_confidence": 0.5,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "screening_education_module",
+      "surface_type": "inline_module",
+      "min_confidence": 0.49,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "doctor_conversation_guide",
+      "surface_type": "inline_module",
+      "min_confidence": 0.52,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
       "surface_id": "provider_discussion_cta",
       "surface_type": "inline_cta",
       "min_confidence": 0.58,
       "max_friction": "medium",
       "allowed_timing": ["next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "appointment_soft_prompt",
+      "surface_type": "inline",
+      "min_confidence": 0.56,
+      "max_friction": "low",
+      "allowed_timing": ["next_navigation", "after_scroll"],
       "safe_for_zero_config": true
     },
     {

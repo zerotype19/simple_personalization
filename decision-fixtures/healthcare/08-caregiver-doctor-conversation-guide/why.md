@@ -1,0 +1,1 @@
+**Caregiver** signal with **multiple CTA clicks** should still route to **conversation framing** (module) instead of breadth **education inline** (gated by `max_cta_clicks`) or premature **appointment** prompts.

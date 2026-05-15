@@ -1,31 +1,29 @@
 {
-  "name": "Eligibility + education interest",
+  "name": "Appointment escalation only when earned",
   "vertical": "healthcare",
-  "engagement_score": 48,
-  "commercial_journey_phase": "evaluation",
+  "engagement_score": 58,
+  "commercial_journey_phase": "validation",
   "site_environment": {
     "page": {
       "generic_kind": "article_page",
-      "confidence": 0.78,
-      "signals_used": [
-        "article"
-      ]
+      "confidence": 0.82,
+      "signals_used": ["article"]
     }
   },
   "behavior_snapshot": {
     "activation_readiness": {
-      "score_0_100": 52,
+      "score_0_100": 68,
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "evaluation"
+    "commercial_journey_phase": "validation"
   },
   "concept_affinity": {
-    "Eligibility and covered benefits questions": 0.74
+    "Planning what to bring to an in-person visit": 0.7
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.78,
+    "confidence": 0.82,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,19 +35,12 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
     "playbook": null
   },
   "signals": {
-    "cta_clicks": 0
+    "cta_clicks": 2
   },
-  "expected_surfaces_to_query": [
-    "eligibility_guidance_module"
-  ]
+  "expected_surfaces_to_query": ["appointment_soft_prompt", "provider_discussion_cta"]
 }

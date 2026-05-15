@@ -1,0 +1,6 @@
+[
+  { "forbidden_substring": "you may have" },
+  { "forbidden_substring": "high risk" },
+  { "forbidden_substring": "don't wait" },
+  { "forbidden_substring": "urgent" }
+]

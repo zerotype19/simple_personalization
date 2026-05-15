@@ -1,0 +1,8 @@
+{
+  "expected_surface_id": "appointment_soft_prompt",
+  "expected_offer_type": "visit_planning_checklist",
+  "expected_message_angle": "readiness_first_scheduling",
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["provider_discussion_cta"],
+  "forbidden_terms": ["schedule now", "urgent", "don't wait", "dont wait"]
+}

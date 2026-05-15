@@ -1,0 +1,1 @@
+**Moderate readiness** with **structured next-step** concepts should prefer the **next clinical step guide** inline surface and keep **provider / appointment** escalation surfaces out of the slot map (`show`).

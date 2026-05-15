@@ -1,0 +1,1 @@
+**Returning** visitor with **continuity / pathway** affinity should see the **care pathway explainer** module before the breadth **education inline** recipe in the pack ordering—signals sustained learning, not a first-touch generic nudge.

@@ -1,0 +1,1 @@
+Deep reader with **preventive screening** concepts should get the **screening education module** ahead of generic **education inline** in pack order—still restrained from **appointment** or **provider** escalation.

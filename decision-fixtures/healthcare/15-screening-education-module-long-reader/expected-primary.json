@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "screening_education_module",
+  "expected_offer_type": "screening_information_module",
+  "expected_message_angle": "screening_education",
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["appointment_soft_prompt", "provider_discussion_cta"]
+}

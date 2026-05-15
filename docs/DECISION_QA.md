@@ -76,7 +76,7 @@ Use `surface_slots` when a specific surface must be `suppress` or `defer` for a 
 
 When authoring `bad-decisions.json` and `forbidden_terms`:
 
-- **Healthcare** — forbid diagnosis, risk, “you have”, treatment guarantees, countdown urgency tied to health outcomes.
+- **Healthcare** — forbid diagnosis-style claims, fear/panic framing, “you may have…”, “symptoms mean…”, risk/urgency countdowns, **guaranteed coverage**, and pushy scheduling (“schedule now”) on weak sessions; align copy with **`regulatedFixtureSafety`** + per-fixture `forbidden_terms`.
 - **Financial services** — forbid predatory urgency, implied approval, creditworthiness claims, distress exploitation.
 - **Ecommerce** — merchandising doctrine, not coupon spam:
   - **Discounts are earned** — `price_promo_sensitivity` (or equivalent signals) must be present before `coupon_offer_secondary` / loyalty capture; comparison-led sessions without promo concepts stay on help-me-choose / PDP compare surfaces.
@@ -93,9 +93,12 @@ When authoring `bad-decisions.json` and `forbidden_terms`:
 
 Healthcare and financial services are **restraint-first** verticals: anonymous or uncertain sessions should default to **education, comparison, and trust** surfaces—not fear, pseudo-diagnosis, guaranteed approval, or hard conversion chrome.
 
+**Healthcare doctrine (fixtures + packs):** anonymous decisions should **reduce uncertainty, not create urgency**—education and eligibility/coverage guidance **before** provider escalation; **appointment**-style prompts only after **earned readiness**; no fear, pseudo-diagnosis, or “urgent / don’t wait / at risk” posture in pack copy; medium-confidence sessions stay **inline / soft**, not hard-modal escapes.
+
 Fixture coverage:
 
 - **`healthcare/04-education-eligibility-soft-only`** — Education/eligibility-adjacent reading with **moderate readiness below** the eligibility-module recipe floor; expects **`education_inline_next_step`** / **`next_clinical_step_guide`**, `regulated_vertical_safety: "healthcare"`, and **`hard_surfaces_must_not_show`** for aggressive provider CTAs (e.g. `provider_discussion_cta`).
+- **`healthcare/05-symptom-education-inline-reader` → `16-insurance-payment-coverage-helper`** — Realism matrix for the expanded healthcare surface catalog (`education_inline_next_step`, `eligibility_guidance_module`, `coverage_reassurance_inline`, `next_clinical_step_guide`, `doctor_conversation_guide`, `care_pathway_explainer`, `screening_education_module`, `insurance_coverage_helper`, `provider_discussion_cta`, `appointment_soft_prompt`) with **regulated_vertical_safety**, **`hard_surfaces_must_not_show`** where escalation must not earn `show`, and copy **`forbidden_terms`** aligned to the vertical lists above.
 - **`financial-services/04-rate-fee-research-soft-only`** — Rate/fee comparison posture with engagement **below** the card-shopping primary recipe; expects **`finance_trust_compare_inline`** outcomes (`card_comparison_module`, **`rate_and_fee_explainer`**), `regulated_vertical_safety: "financial_services"`, and **`hard_surfaces_must_not_show`** for **`application_soft_resume`**.
 
 Runner logic for these cases lives in `packages/sdk/src/decisioning/fixtures/regulatedFixtureSafety.ts` (shared phrase lists) alongside `hard_surfaces_must_not_show` in `runFixture.ts`.
@@ -115,7 +118,7 @@ Environment:
 
 ## Acceptance bar
 
-- **≥ 49** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, **13 ecommerce** merchandising cases, healthcare/finance restraint cases, and other verticals).
+- **≥ 61** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, **13 ecommerce** merchandising cases, **16 healthcare** realism + restraint cases, finance restraint cases, and other verticals).
 - `pnpm test`, `pnpm typecheck`, and `pnpm decision-fixtures` all succeed in CI and locally.
 
 This layer is the quality gate for **what** the runtime chooses; pack and recipe edits should be justified by fixture deltas or new cases.

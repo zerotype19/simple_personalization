@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "education_inline_next_step",
+  "expected_message_angle": "education_first",
+  "regulated_vertical_safety": "healthcare",
+  "forbidden_terms": ["fear", "terrifying", "panic", "nightmare"],
+  "hard_surfaces_must_not_show": ["provider_discussion_cta"]
+}

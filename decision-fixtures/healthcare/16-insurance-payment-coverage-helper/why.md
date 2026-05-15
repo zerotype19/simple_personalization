@@ -1,0 +1,1 @@
+**Billing / prior auth** signals should route to the **insurance coverage helper** inline before **appointment** prompts. Eligibility may also match, but **payment-specific** pack ordering keeps the helper primary for this scenario.

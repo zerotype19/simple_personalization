@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "doctor_conversation_guide",
+  "expected_offer_type": "visit_question_framing",
+  "expected_message_angle": "clinician_conversation_prep",
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["appointment_soft_prompt"]
+}

@@ -1,0 +1,14 @@
+{
+  "primary_decision": {
+    "action": "show",
+    "friction": "medium"
+  },
+  "expected_surface_id": "provider_discussion_cta",
+  "expected_offer_type": "clinician_questions_prep",
+  "expected_message_angle": "compare_providers_softly",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.62,
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["appointment_soft_prompt"],
+  "forbidden_terms": ["schedule now", "don't wait", "dont wait"]
+}

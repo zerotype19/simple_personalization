@@ -1,31 +1,29 @@
 {
-  "name": "Eligibility + education interest",
+  "name": "Eligibility uncertainty — eligibility guidance module",
   "vertical": "healthcare",
-  "engagement_score": 48,
-  "commercial_journey_phase": "evaluation",
+  "engagement_score": 50,
+  "commercial_journey_phase": "comparison",
   "site_environment": {
     "page": {
       "generic_kind": "article_page",
-      "confidence": 0.78,
-      "signals_used": [
-        "article"
-      ]
+      "confidence": 0.76,
+      "signals_used": ["article", "coverage"]
     }
   },
   "behavior_snapshot": {
     "activation_readiness": {
-      "score_0_100": 52,
+      "score_0_100": 50,
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "evaluation"
+    "commercial_journey_phase": "comparison"
   },
   "concept_affinity": {
-    "Eligibility and covered benefits questions": 0.74
+    "Eligibility rules and covered benefits uncertainty": 0.76
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.78,
+    "confidence": 0.76,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,19 +35,12 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
     "playbook": null
   },
   "signals": {
     "cta_clicks": 0
   },
-  "expected_surfaces_to_query": [
-    "eligibility_guidance_module"
-  ]
+  "expected_surfaces_to_query": ["eligibility_guidance_module"]
 }

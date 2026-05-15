@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "insurance_coverage_helper",
+  "expected_offer_type": "insurance_billing_explainer",
+  "expected_message_angle": "payment_clarity",
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["appointment_soft_prompt"]
+}

@@ -1,0 +1,1 @@
+**Earned comparison** (readiness + compare/referral signals + CTA history beyond breadth education gate) should allow a **soft provider discussion CTA**, still **next_navigation** and **not** an **appointment** hard prompt.

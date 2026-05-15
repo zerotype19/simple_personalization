@@ -1,0 +1,1 @@
+Anonymous visitor is **reading symptom-education content** in **research** posture with **low CTA friction** so far. Doctrine: **education first** — we expect a calm **education inline** primary, not provider escalation or urgency framing.

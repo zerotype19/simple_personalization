@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "eligibility_guidance_module",
+  "expected_offer_type": "eligibility_walkthrough",
+  "expected_message_angle": "clarity_on_coverage",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.54,
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["provider_discussion_cta", "appointment_soft_prompt"]
+}

@@ -1,0 +1,25 @@
+{
+  "primary_decision": {
+    "action": "show",
+    "friction": "low"
+  },
+  "expected_surface_id": "education_inline_next_step",
+  "expected_offer_type": "next_clinical_step_guide",
+  "expected_message_angle": "education_first",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.52,
+  "regulated_vertical_safety": "healthcare",
+  "forbidden_terms": [
+    "diagnosis",
+    "diagnose",
+    "urgent",
+    "don't wait",
+    "dont wait",
+    "at risk",
+    "high risk",
+    "you may have",
+    "symptoms mean",
+    "schedule now",
+    "act now"
+  ]
+}

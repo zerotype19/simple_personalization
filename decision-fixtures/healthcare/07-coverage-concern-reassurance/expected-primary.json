@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "coverage_reassurance_inline",
+  "expected_offer_type": "coverage_faq_inline",
+  "expected_message_angle": "coverage_plain_language",
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["provider_discussion_cta", "appointment_soft_prompt"]
+}
