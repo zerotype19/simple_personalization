@@ -32,6 +32,7 @@
     "decision-fixtures": "tsx scripts/run-decision-fixtures.ts",
     "docs:generate": "node scripts/generate-session-intelligence-docs.mjs",
     "docs:copy-to-apps": "node scripts/copy-integration-docs.mjs",
+    "check:integrations": "node scripts/check-integration-examples.mjs",
     "bundle:session-intelligence-review": "bash scripts/build-session-intelligence-review-bundle.sh"
   },
   "devDependencies": {

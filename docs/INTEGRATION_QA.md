@@ -2,6 +2,10 @@
 
 Use this before shipping Optiview to production alongside GTM, Adobe, Optimizely, or CMS-driven surfaces.
 
+## Repo drift guard
+
+From the monorepo root, run **`pnpm check:integrations`** so `docs/integrations/` and `examples/integrations/` stay aligned with the public **`SessionIntel`** API (subscribe envelope vs per-surface decision, show gating, no banned storage APIs in examples, etc.).
+
 ## 1. Script loads
 
 - [ ] `si.js` returns **200** (network tab) and does not block LCP (load **async**, place per [Install](https://optiview.ai/install)).
