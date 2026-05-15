@@ -1,6 +1,110 @@
 {
   "surfaces": [
     {
+      "surface_id": "implementation_readiness_checklist",
+      "surface_type": "inline_module",
+      "min_confidence": 0.48,
+      "max_friction": "medium",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "rollout_complexity_estimator",
+      "surface_type": "interactive_module",
+      "min_confidence": 0.5,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "stakeholder_alignment_guide",
+      "surface_type": "inline_module",
+      "min_confidence": 0.48,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "migration_risk_breakdown",
+      "surface_type": "educational_module",
+      "min_confidence": 0.47,
+      "max_friction": "low",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "integration_requirements_summary",
+      "surface_type": "comparison_module",
+      "min_confidence": 0.49,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "soft_roi_framework",
+      "surface_type": "inline_module",
+      "min_confidence": 0.46,
+      "max_friction": "low",
+      "allowed_timing": ["after_scroll", "next_navigation"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "evaluation_next_steps",
+      "surface_type": "inline_cta",
+      "min_confidence": 0.47,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "team_adoption_story",
+      "surface_type": "social_proof_module",
+      "min_confidence": 0.45,
+      "max_friction": "low",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "implementation_timeline_example",
+      "surface_type": "educational_module",
+      "min_confidence": 0.46,
+      "max_friction": "low",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "operational_objection_handler",
+      "surface_type": "inline_module",
+      "min_confidence": 0.47,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "guided_walkthrough_request",
+      "surface_type": "soft_modal",
+      "min_confidence": 0.72,
+      "max_friction": "low",
+      "allowed_timing": ["next_navigation", "idle"],
+      "safe_for_zero_config": false
+    },
+    {
+      "surface_id": "workspace_readiness_assessment",
+      "surface_type": "interactive_module",
+      "min_confidence": 0.54,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "after_scroll"],
+      "safe_for_zero_config": true
+    },
+    {
+      "surface_id": "implementation_workshop_offer",
+      "surface_type": "soft_popup",
+      "min_confidence": 0.68,
+      "max_friction": "medium",
+      "allowed_timing": ["next_navigation", "idle"],
+      "safe_for_zero_config": false
+    },
+    {
       "surface_id": "homepage_hero_secondary",
       "surface_type": "inline_cta",
       "min_confidence": 0.45,

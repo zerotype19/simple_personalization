@@ -1,0 +1,49 @@
+{
+  "name": "Integration risk — technical docs reader",
+  "vertical": "b2b_saas",
+  "engagement_score": 50,
+  "commercial_journey_phase": "comparison",
+  "journey_stage": "comparison",
+  "page_type": "other",
+  "site_environment": {
+    "page": {
+      "generic_kind": "article_page",
+      "confidence": 0.78,
+      "signals_used": ["h1", "article", "api"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 48,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "comparison"
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.76,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "concept_affinity": {
+    "Integration and API scope": 0.54
+  },
+  "concept_evidence": {
+    "Integration and API scope": ["webhook", "oauth", "schema"]
+  },
+  "signals": { "cta_clicks": 0, "max_scroll_depth": 68 },
+  "expected_surfaces_to_query": ["integration_requirements_summary", "migration_risk_breakdown"]
+}

@@ -397,6 +397,48 @@ export interface ExperienceDecisionEnvelope {
   primary_decision: ExperienceDecision | null;
   secondary_decisions: ExperienceDecision[];
   suppression_summary?: string;
+  /** Human-readable progression / pacing notes (inspector + QA). */
+  progression_notes?: string[];
+}
+
+/**
+ * Coarse taxonomy for pacing and continuity (browser-local progression memory).
+ * Maps from recipes via `decision_family` or lightweight inference.
+ */
+export type ExperienceDecisionFamily =
+  | "implementation_guidance"
+  | "evaluation_support"
+  | "comparison_support"
+  | "trust_building"
+  | "commercial_readiness"
+  | "soft_conversion"
+  | "high_intent_escalation"
+  | "unknown";
+
+/**
+ * Session-scoped progression memory (no persistence contract beyond optional sessionStorage in the SDK).
+ */
+export interface ExperienceProgressionMemory {
+  /** Last surfaces that were actually emitted as primary (most recent last). */
+  recent_surfaces_shown: string[];
+  recent_recipe_ids: string[];
+  recent_decision_families: ExperienceDecisionFamily[];
+  /** Recent progression suppression reasons (debug / inspector). */
+  suppression_history: string[];
+  /**
+   * Soft “warming” counter: incremented when softer families emit as primary.
+   * Used to gate `high_intent_escalation` without ML.
+   */
+  escalation_stage: number;
+  last_decision_emit_at: number | null;
+  /** Bumped when the pathname changes (SPA-aware, runtime-maintained). */
+  navigation_tick: number;
+  last_path_seen: string;
+  last_emit_navigation_tick: number | null;
+  last_modal_emit_at: number | null;
+  last_modal_emit_navigation_tick: number | null;
+  /** Debounces rapid rebuilds of the same primary on one navigation tick. */
+  last_recorded_primary_surface?: string | null;
 }
 
 /** Partial decision payload stored on a recipe row (merged with runtime fields). */
@@ -426,6 +468,8 @@ export interface ExperienceRecipe {
   required_any_concepts?: string[];
   max_cta_clicks?: number;
   allowed_phases?: CommercialJourneyPhase[];
+  /** Decision family for progression / pacing (optional; inferred when absent). */
+  decision_family?: ExperienceDecisionFamily;
   decision: ExperienceRecipeDecisionTemplate;
 }
 
@@ -551,6 +595,11 @@ export interface SessionProfile extends SessionScores {
   intel_timeline?: SessionIntelEvent[];
   /** Dedupe / baselines for timeline emission — not sent to activation payloads. */
   intel_timeline_meta?: IntelTimelineMeta;
+  /**
+   * Browser-local experience progression (surfaces shown, families, pacing).
+   * Owned by the SDK runtime; optional on fixtures for QA.
+   */
+  experience_progression?: ExperienceProgressionMemory;
 }
 
 /** One row in the inspector “session timeline” (anonymous, in-session). */

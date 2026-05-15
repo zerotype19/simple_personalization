@@ -7,9 +7,12 @@ This document describes how we **regression-test decision quality** for the Expe
 1. **Primary decision** — surface, offer type, timing, message angle, confidence bands, optional partial fields (`action`, `friction`, `cta_label`).
 2. **Null primaries** — early research or low-intent sessions that should not force a modal or hard CTA.
 3. **Copy guardrails** — `forbidden_terms` and `bad-decisions.json` patterns must not appear in headline, body, CTA label, message angle, offer type, reasons, or evidence on the primary.
-4. **Reason quality** — `required_reason_terms` when we need the model to cite specific evidence classes.
-5. **Secondaries** — optional allow-list; global cap of **two** secondaries.
-6. **Surface slots** — `surface_slots` and `expected_surfaces_to_query` integrate with the same slot map used by `getExperienceDecision(surface_id)`.
+4. **Global weak-marketing guard** — All non-null primaries are scanned for cliché phrases (`unlock`, `frictionless`, `drive conversions`, …) via `globalWeakMarketingCopy.ts`. Failures are **fixture errors**, not runtime mutations.
+5. **Regulated vertical safety** — Healthcare and financial-services fixtures may set `regulated_vertical_safety` in `expected-primary.json` to run additional regex checks on that same primary blob (vertical-specific disallowed phrases such as diagnosis/urgency vs. guaranteed approval / distress copy). This is additive to per-fixture `forbidden_terms`.
+6. **Reason quality** — `required_reason_terms` when we need the model to cite specific evidence classes.
+7. **Secondaries** — optional allow-list; global cap of **two** secondaries.
+8. **Surface slots** — `surface_slots`, `hard_surfaces_must_not_show`, and `expected_surfaces_to_query` integrate with the same slot map used by `getExperienceDecision(surface_id)`.
+9. **Realism hints (warnings only)** — `fixtureRealismHeuristics.ts` may append `! realism:` lines to the CLI report for thin copy; these do **not** fail fixtures.
 
 Vitest also covers **credibility regressions** outside the JSON fixtures: distinct-page counts in playbook reasons (not raw `pages_viewed`), session-relative timeline clocks (`MM:SS` / `H:MM:SS`), activation payload `page.kind` normalization when the classifier is `unknown`, and NBA fallback copy that references distinct paths.
 
@@ -76,7 +79,18 @@ When authoring `bad-decisions.json` and `forbidden_terms`:
 - **Healthcare** — forbid diagnosis, risk, “you have”, treatment guarantees, countdown urgency tied to health outcomes.
 - **Financial services** — forbid predatory urgency, implied approval, creditworthiness claims, distress exploitation.
 - **Ecommerce** — forbid “act now” style pressure when the scenario calls for secondary loyalty treatment; match coupon recipes to engagement thresholds so comparison flows are not hijacked.
-- **B2B SaaS** — forbid hard demo before evaluation signals; prefer inline implementation aids for late-stage technical visitors.
+- **B2B SaaS** — forbid hard demo before evaluation signals; prefer inline implementation aids for late-stage technical visitors. The **`decision-fixtures/b2b-saas/05-*` through `16-*`** matrix locks integration, AI arrival, stakeholder alignment, comparison, ROI research pacing, progressive rollout study, earned walkthrough, workspace readiness, and thin-session restraint against `packages/shared/src/context-packs/surface-catalogs/b2b-saas.json` + `experience-recipes/b2b-saas.json`.
+
+## Regulated verticals (restraint-first)
+
+Healthcare and financial services are **restraint-first** verticals: anonymous or uncertain sessions should default to **education, comparison, and trust** surfaces—not fear, pseudo-diagnosis, guaranteed approval, or hard conversion chrome.
+
+Fixture coverage:
+
+- **`healthcare/04-education-eligibility-soft-only`** — Education/eligibility-adjacent reading with **moderate readiness below** the eligibility-module recipe floor; expects **`education_inline_next_step`** / **`next_clinical_step_guide`**, `regulated_vertical_safety: "healthcare"`, and **`hard_surfaces_must_not_show`** for aggressive provider CTAs (e.g. `provider_discussion_cta`).
+- **`financial-services/04-rate-fee-research-soft-only`** — Rate/fee comparison posture with engagement **below** the card-shopping primary recipe; expects **`finance_trust_compare_inline`** outcomes (`card_comparison_module`, **`rate_and_fee_explainer`**), `regulated_vertical_safety: "financial_services"`, and **`hard_surfaces_must_not_show`** for **`application_soft_resume`**.
+
+Runner logic for these cases lives in `packages/sdk/src/decisioning/fixtures/regulatedFixtureSafety.ts` (shared phrase lists) alongside `hard_surfaces_must_not_show` in `runFixture.ts`.
 
 ## Commands
 
@@ -93,7 +107,7 @@ Environment:
 
 ## Acceptance bar
 
-- **≥ 22** fixture cases across the seven verticals.
+- **≥ 36** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, healthcare/finance restraint cases, and other verticals).
 - `pnpm test`, `pnpm typecheck`, and `pnpm decision-fixtures` all succeed in CI and locally.
 
 This layer is the quality gate for **what** the runtime chooses; pack and recipe edits should be justified by fixture deltas or new cases.

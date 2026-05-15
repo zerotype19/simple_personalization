@@ -1,0 +1,46 @@
+{
+  "name": "Healthcare education / eligibility — soft inline only",
+  "vertical": "healthcare",
+  "engagement_score": 48,
+  "commercial_journey_phase": "comparison",
+  "site_environment": {
+    "page": {
+      "generic_kind": "article_page",
+      "confidence": 0.76,
+      "signals_used": ["article", "coverage"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 42,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "comparison"
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.72,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 0
+  },
+  "expected_surfaces_to_query": [
+    "education_inline_next_step",
+    "provider_discussion_cta"
+  ]
+}

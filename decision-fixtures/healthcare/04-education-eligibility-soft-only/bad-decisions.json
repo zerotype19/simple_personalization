@@ -1,0 +1,8 @@
+[
+  { "forbidden_substring": "fear-based screening" },
+  { "forbidden_substring": "you may have" },
+  { "forbidden_substring": "book urgent appointment" },
+  { "forbidden_substring": "limited time" },
+  { "forbidden_substring": "schedule now" },
+  { "forbidden_substring": "diagnosis" }
+]

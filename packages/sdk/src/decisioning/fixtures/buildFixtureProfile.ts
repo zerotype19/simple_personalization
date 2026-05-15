@@ -8,6 +8,7 @@ import {
 import { buildPersonalizationSignal } from "../../siteSemantics/activationPayload";
 import { minimalProfile } from "../../test/fixtures";
 import { deepMerge } from "./deepMerge";
+import { emptyExperienceProgressionMemory, mergeExperienceProgressionMemory } from "../progressionMemory";
 import minBehaviorPreset from "./presets/min-behavior.json";
 import type { FixtureSessionInput } from "./types";
 
@@ -43,6 +44,10 @@ export function buildFixtureProfile(input: FixtureSessionInput): SessionProfile 
     ...input.activation_opportunity,
   };
 
+  const experience_progression = input.experience_progression
+    ? mergeExperienceProgressionMemory(emptyExperienceProgressionMemory(), input.experience_progression)
+    : undefined;
+
   const profile = minimalProfile({
     site_context,
     site_environment,
@@ -59,6 +64,7 @@ export function buildFixtureProfile(input: FixtureSessionInput): SessionProfile 
     next_best_action: input.recommendation ?? null,
     page_type: input.page_type ?? "other",
     personalization_signal: emptyPersonalizationSignal(),
+    ...(experience_progression ? { experience_progression } : {}),
   });
 
   profile.personalization_signal = buildPersonalizationSignal(profile);

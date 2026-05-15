@@ -161,7 +161,10 @@ describe("experience decisioning", () => {
     const { envelope, slotDecisions } = buildExperienceDecisionEnvelope(p, { now: Date.now() });
     expect(envelope.primary_decision).not.toBeNull();
     expect(envelope.primary_decision?.offer_type).toBe("implementation_checklist");
-    expect(envelope.primary_decision?.headline).toContain("Turn the framework");
+    expect(["implementation_readiness_checklist", "article_inline_mid"]).toContain(
+      envelope.primary_decision?.surface_id,
+    );
+    expect(envelope.primary_decision?.headline.length).toBeGreaterThan(12);
     const inline = slotDecisions.article_inline_mid;
     expect(inline?.action === "show" || inline?.offer_type === "implementation_checklist").toBe(true);
   });

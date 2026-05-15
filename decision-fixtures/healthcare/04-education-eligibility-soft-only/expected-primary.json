@@ -1,0 +1,27 @@
+{
+  "primary_decision": {
+    "action": "show",
+    "friction": "low"
+  },
+  "expected_surface_id": "education_inline_next_step",
+  "expected_offer_type": "next_clinical_step_guide",
+  "expected_message_angle": "education_first",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.55,
+  "max_confidence": 0.64,
+  "regulated_vertical_safety": "healthcare",
+  "hard_surfaces_must_not_show": ["provider_discussion_cta"],
+  "forbidden_terms": [
+    "schedule now",
+    "you may be at risk",
+    "urgent",
+    "don't wait",
+    "dont wait",
+    "limited time",
+    "diagnosis",
+    "diagnosed",
+    "prognosis",
+    "slots disappearing",
+    "act immediately"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "expected_surface_id": "article_inline_mid",
+  "expected_offer_type": "implementation_checklist",
+  "expected_message_angle": "make_it_practical",
+  "expected_timing": "after_scroll",
+  "primary_decision": {
+    "action": "show",
+    "friction": "low"
+  },
+  "min_confidence": 0.64,
+  "max_confidence": 0.71,
+  "required_reason_terms": [
+    "recipe:b2b_implementation_readiness_inline",
+    "surface:article_inline_mid"
+  ],
+  "forbidden_terms": [
+    "book a demo",
+    "talk to sales",
+    "request pricing",
+    "schedule a demo",
+    "act now",
+    "today only",
+    "urgent",
+    "exit intent",
+    "ebook",
+    "limited time"
+  ],
+  "hard_surfaces_must_not_show": [
+    "demo_soft_escalation"
+  ]
+}

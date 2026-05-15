@@ -1,0 +1,8 @@
+[
+  { "forbidden_substring": "guaranteed approval" },
+  { "forbidden_substring": "pre-approved" },
+  { "forbidden_substring": "no credit check" },
+  { "forbidden_substring": "apply now — limited" },
+  { "forbidden_substring": "everyone qualifies" },
+  { "forbidden_substring": "creditworthiness" }
+]

@@ -4,6 +4,7 @@ import type {
   CommercialJourneyPhase,
   ExperienceDecision,
   ExperienceDecisionTiming,
+  ExperienceProgressionMemory,
   JourneyStage,
   PageType,
   Recommendation,
@@ -33,6 +34,8 @@ export interface FixtureSessionInput {
   recommendation?: Recommendation | null;
   /** Surfaces to assert via slot map (same contract as `getExperienceDecision`). */
   expected_surfaces_to_query?: string[];
+  /** Seed session progression memory for multi-step / pacing fixtures (merged into `SessionProfile`). */
+  experience_progression?: Partial<ExperienceProgressionMemory>;
 }
 
 export interface FixtureExpectedPrimary {
@@ -53,6 +56,8 @@ export interface FixtureExpectedPrimary {
   surface_slots?: Record<string, "show" | "suppress" | "none" | "any">;
   /** Slot `show` is forbidden for these surfaces (e.g. modals under `soft_cta_ready`). */
   hard_surfaces_must_not_show?: string[];
+  /** Run vertical-specific safety regex on primary blob (headline/body/CTA/reasons/evidence). */
+  regulated_vertical_safety?: "healthcare" | "financial_services";
 }
 
 export interface FixtureBadPattern {
@@ -80,4 +85,6 @@ export interface FixtureRunResult {
   primary: ExperienceDecision | null;
   suppression_summary?: string;
   expectation: FixtureExpectationSnapshot;
+  /** Non-blocking realism hints (CLI only). */
+  realism_warnings?: string[];
 }

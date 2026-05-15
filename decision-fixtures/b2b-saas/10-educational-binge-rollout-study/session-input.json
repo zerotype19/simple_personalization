@@ -1,0 +1,55 @@
+{
+  "name": "Educational binge — progressive rollout study",
+  "vertical": "b2b_saas",
+  "engagement_score": 72,
+  "commercial_journey_phase": "research",
+  "journey_stage": "browsing",
+  "page_type": "other",
+  "site_environment": {
+    "page": {
+      "generic_kind": "article_page",
+      "confidence": 0.8,
+      "signals_used": ["h1", "article", "deep_read"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 53,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "research",
+    "engagement_quality": {
+      "label": "deep_reader",
+      "rationale": ["Long session", "framework chapter depth"]
+    }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.78,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "concept_affinity": {
+    "Implementation readiness": 0.56,
+    "Deep reading": 0.42
+  },
+  "concept_evidence": {
+    "Implementation readiness": ["rollout", "playbook"],
+    "Deep reading": ["chapter", "series", "longform"]
+  },
+  "signals": { "cta_clicks": 0, "pages_viewed": 7, "max_scroll_depth": 88 },
+  "expected_surfaces_to_query": ["rollout_complexity_estimator", "article_inline_mid"]
+}

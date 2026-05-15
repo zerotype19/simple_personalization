@@ -1,0 +1,10 @@
+{
+  "expected_surface_id": "soft_roi_framework",
+  "expected_offer_type": "roi_assumption_worksheet",
+  "expected_message_angle": "value_without_hype",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:b2b_soft_roi_research_pacing"],
+  "hard_surfaces_must_not_show": ["pricing_page_secondary_cta"],
+  "forbidden_terms": ["discount today", "act now", "% off for 24 hours"]
+}

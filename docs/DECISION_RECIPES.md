@@ -47,6 +47,8 @@ They are **matched deterministically** in the SDK (no DSL, no remote fetch). Ver
 
 Multiple recipes may match. The engine **dedupes by `recipe.id`**, keeps the strongest candidate per recipe, ranks by confidence, then applies **suppression** and surface rules. At most **one primary** and **two secondaries** are emitted.
 
+When **match confidence ties** (common today because the base score is profile-wide), the **first viable recipe in JSON file order** wins the primary after stable sorting—so **recipe order is part of the product contract** and must be updated together with fixtures when you rebalance.
+
 ## Editing workflow
 
 1. Add or edit JSON in `experience-recipes/`.

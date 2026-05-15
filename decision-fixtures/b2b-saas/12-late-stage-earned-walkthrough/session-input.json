@@ -1,0 +1,64 @@
+{
+  "name": "Late-stage earned walkthrough",
+  "vertical": "b2b_saas",
+  "engagement_score": 82,
+  "commercial_journey_phase": "evaluation",
+  "journey_stage": "comparison",
+  "page_type": "other",
+  "site_environment": {
+    "page": {
+      "generic_kind": "product_page",
+      "confidence": 0.82,
+      "signals_used": ["h1", "demo", "security"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 58,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "evaluation",
+    "navigation": {
+      "journey_pattern": "evaluation_led",
+      "journey_velocity": "deliberate",
+      "comparison_behavior": true,
+      "high_intent_transition": true,
+      "path_summary": "/security → /demo-prep"
+    }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.88,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "concept_affinity": {
+    "Implementation readiness": 0.58
+  },
+  "concept_evidence": {
+    "Implementation readiness": ["rollout", "readiness", "stakeholders"]
+  },
+  "signals": { "cta_clicks": 1, "pages_viewed": 6, "max_scroll_depth": 82 },
+  "experience_progression": {
+    "escalation_stage": 3,
+    "navigation_tick": 6,
+    "last_path_seen": "/security",
+    "last_emit_navigation_tick": 5,
+    "recent_decision_families": ["implementation_guidance", "comparison_support", "evaluation_support"],
+    "recent_surfaces_shown": ["article_inline_mid", "comparison_module", "soft_roi_framework"]
+  },
+  "expected_surfaces_to_query": ["guided_walkthrough_request", "demo_soft_escalation"]
+}

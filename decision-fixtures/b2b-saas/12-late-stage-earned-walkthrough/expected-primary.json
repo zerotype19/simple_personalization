@@ -1,0 +1,12 @@
+{
+  "expected_surface_id": "guided_walkthrough_request",
+  "expected_offer_type": "guided_product_walkthrough",
+  "expected_message_angle": "respect_eval_time",
+  "expected_timing": "next_navigation",
+  "primary_decision": { "action": "show", "friction": "low" },
+  "min_confidence": 0.72,
+  "max_confidence": 0.82,
+  "required_reason_terms": ["recipe:b2b_governed_walkthrough_earned"],
+  "hard_surfaces_must_not_show": ["demo_soft_escalation"],
+  "forbidden_terms": ["today only", "slots disappearing", "unlock"]
+}

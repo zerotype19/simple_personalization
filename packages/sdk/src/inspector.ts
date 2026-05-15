@@ -1,4 +1,5 @@
 import type { ExperienceDecisionEnvelope, SessionProfile } from "@si/shared";
+import { buildExperienceOperatorNarrative, buildSessionProgressionNarrative } from "./decisioning/experienceInspectorNarrative";
 import { conceptSignalLabel } from "@si/shared/contextBrain";
 import { demoLiftPreviewCopy } from "@si/shared/demoMetrics";
 import { isAutoSiteVertical } from "@si/shared";
@@ -248,6 +249,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const p = opts.getState();
     const expEnv = opts.getExperienceDecisionEnvelope?.() ?? null;
     const primaryDecision = expEnv?.primary_decision;
+    const sessionProgressionEsc =
+      expEnv != null ? escHtml(buildSessionProgressionNarrative(p, expEnv)) : "";
     const nba = p.next_best_action;
     const exp = p.experiment_assignment;
     const persoOn = opts.getPersonalizationEnabled();
@@ -572,10 +575,18 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         )
       : "";
 
+    const operatorNarrativeEsc = escHtml(
+      buildExperienceOperatorNarrative(p, primaryDecision ?? null, expEnv?.suppression_summary),
+    );
+
     const experienceDecisionHtml = expEnv
       ? `<div class="si-panel-section">
         <div class="si-card si-card--hero si-card--experience">
           <h3>Recommended experience decision</h3>
+          <h4 class="si-subh">Operator read</h4>
+          <p class="si-muted si-muted--block">${operatorNarrativeEsc}</p>
+          <h4 class="si-subh">Session progression</h4>
+          <p class="si-muted si-muted--block">${sessionProgressionEsc}</p>
           ${
             primaryDecision
               ? `<div class="si-kv">

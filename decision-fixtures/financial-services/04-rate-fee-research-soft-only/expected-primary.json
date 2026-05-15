@@ -1,0 +1,27 @@
+{
+  "primary_decision": {
+    "action": "show",
+    "friction": "low"
+  },
+  "expected_surface_id": "card_comparison_module",
+  "expected_offer_type": "rate_and_fee_explainer",
+  "expected_message_angle": "transparent_fees",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.55,
+  "max_confidence": 0.64,
+  "regulated_vertical_safety": "financial_services",
+  "hard_surfaces_must_not_show": ["application_soft_resume"],
+  "forbidden_terms": [
+    "guaranteed approval",
+    "pre-approved",
+    "pre approved",
+    "creditworthiness",
+    "financial distress",
+    "no credit check",
+    "everyone qualifies",
+    "act now",
+    "urgent",
+    "limited time",
+    "instant approval"
+  ]
+}

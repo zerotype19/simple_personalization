@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "comparison_module",
+  "expected_offer_type": "comparison_decision_aid",
+  "expected_message_angle": "clarify_tradeoffs",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:b2b_comparison_evaluator_next_steps"],
+  "forbidden_terms": ["today only", "limited time", "unlock"]
+}

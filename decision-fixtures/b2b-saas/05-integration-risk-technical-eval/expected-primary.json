@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "integration_requirements_summary",
+  "expected_offer_type": "integration_scope_brief",
+  "expected_message_angle": "scope_the_integration",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:b2b_integration_api_rollout_pair"],
+  "forbidden_terms": ["guaranteed", "ebook", "act now", "unlock"]
+}

@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "stakeholder_alignment_guide",
+  "expected_offer_type": "stakeholder_alignment_kit",
+  "expected_message_angle": "build_internal_consensus",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:b2b_stakeholder_alignment_pack"],
+  "forbidden_terms": ["schedule demo now", "unlock", "maximize"]
+}

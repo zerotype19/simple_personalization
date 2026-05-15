@@ -1,0 +1,11 @@
+{
+  "expected_surface_id": "rollout_complexity_estimator",
+  "expected_offer_type": "rollout_complexity_walkthrough",
+  "expected_message_angle": "earn_depth_before_asks",
+  "expected_timing": "next_navigation",
+  "primary_decision": { "action": "show", "friction": "low" },
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:b2b_progressive_implementation_study"],
+  "hard_surfaces_must_not_show": ["guided_walkthrough_request", "implementation_workshop_offer"],
+  "forbidden_terms": ["unlock", "frictionless", "schedule demo now"]
+}

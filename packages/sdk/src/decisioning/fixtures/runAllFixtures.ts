@@ -73,6 +73,9 @@ export function formatFixtureReport(summary: RunAllFixturesSummary): string {
   for (const r of summary.results) {
     const label = `${r.verticalFolder}/${r.caseId} — ${r.fixtureName}`;
     lines.push(r.ok ? `✓ ${label}` : `✗ ${label}`);
+    if (r.ok && r.realism_warnings?.length) {
+      for (const w of r.realism_warnings) lines.push(`    ! realism: ${w}`);
+    }
     if (!r.ok) {
       lines.push(...formatExpectedVsActual(r));
       const { forbidden, reason, rest } = partitionErrors(r.errors);

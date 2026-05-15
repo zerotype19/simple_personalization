@@ -1,0 +1,9 @@
+{
+  "expected_surface_id": "implementation_timeline_example",
+  "expected_offer_type": "source_aligned_primer",
+  "expected_message_angle": "ground_in_primary_sources",
+  "expected_timing": "after_scroll",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:b2b_ai_answer_engine_explainer"],
+  "forbidden_terms": ["unlock", "personalized experience", "drive conversions"]
+}

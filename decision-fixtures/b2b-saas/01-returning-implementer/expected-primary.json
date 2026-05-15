@@ -1,11 +1,11 @@
 {
-  "expected_surface_id": "article_inline_mid",
+  "expected_surface_id": "implementation_readiness_checklist",
   "expected_offer_type": "implementation_checklist",
   "expected_message_angle": "make_it_practical",
-  "expected_timing": "after_scroll",
+  "expected_timing": "next_navigation",
   "min_confidence": 0.45,
   "required_reason_terms": [
-    "recipe"
+    "recipe:b2b_implementation_checklist_primary"
   ],
   "forbidden_terms": [
     "ebook",

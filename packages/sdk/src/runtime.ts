@@ -2,6 +2,7 @@ import type {
   ActivationPayloadEnvelope,
   ExperienceDecision,
   ExperienceDecisionEnvelope,
+  ExperienceProgressionMemory,
   PersonalizationSignal,
   SDKConfig,
   SessionProfile,
@@ -36,7 +37,13 @@ import { dispatchExperienceDecisionCustomEvent } from "./destinations/customEven
 import { pushExperienceDecisionToDataLayer as pushExpDecisionDataLayer } from "./destinations/dataLayerDestination";
 import { pushExperienceDecisionToOptimizely as pushExpDecisionOptimizely } from "./destinations/optimizelyDestination";
 import { buildExperienceDecisionEnvelope } from "./decisioning/buildExperienceDecisionEnvelope";
+import {
+  bumpNavigationTickIfPathChanged,
+  emptyExperienceProgressionMemory,
+  mergeExperienceProgressionMemory,
+} from "./decisioning/progressionMemory";
 import { DecisionBus } from "./decisioning/decisionBus";
+import { safeGetJSON, safeRemove, safeSetJSON } from "./storage";
 
 export interface BootOptions {
   /** Absolute URL to fetch JSON config (GET). */
@@ -63,6 +70,8 @@ export interface BootOptions {
   experienceDecisionMode?: "emit" | "observe_only";
 }
 
+const SI_EXP_PROGRESSION_KEY = "si:exp_progression";
+
 export class SessionIntelRuntime {
   private profile!: SessionProfile;
   private config: SDKConfig = structuredClone(DEFAULT_CONFIG);
@@ -78,6 +87,8 @@ export class SessionIntelRuntime {
   private decisionBus = new DecisionBus();
   private lastExperienceEnvelope: ExperienceDecisionEnvelope | null = null;
   private slotDecisions: Record<string, ExperienceDecision> = {};
+  private experienceProgression: ExperienceProgressionMemory = emptyExperienceProgressionMemory();
+  private lastProgressionPersistAt = 0;
 
   constructor(private opts: BootOptions = {}) {}
 
@@ -90,6 +101,7 @@ export class SessionIntelRuntime {
     await this.loadConfig();
     const ctx = inferPageContext();
     this.profile = loadOrCreateProfile(ctx.page_type);
+    this.hydrateExperienceProgressionFromStorage();
 
     this.profile.experiment_assignment = assignExperiments(
       this.config.experiments,
@@ -282,10 +294,39 @@ export class SessionIntelRuntime {
     pushExpDecisionOptimizely(this.getExperienceDecisionEnvelope());
   }
 
+  private hydrateExperienceProgressionFromStorage(): void {
+    const stored = safeGetJSON<{ session_id: string; memory: ExperienceProgressionMemory }>(SI_EXP_PROGRESSION_KEY);
+    if (stored?.session_id === this.profile.session_id && stored.memory) {
+      this.experienceProgression = mergeExperienceProgressionMemory(
+        emptyExperienceProgressionMemory(),
+        stored.memory,
+      );
+    } else {
+      this.experienceProgression = emptyExperienceProgressionMemory();
+    }
+    this.profile.experience_progression = this.experienceProgression;
+  }
+
+  private persistExperienceProgressionThrottled(): void {
+    const now = Date.now();
+    if (now - this.lastProgressionPersistAt < 2000) return;
+    this.lastProgressionPersistAt = now;
+    safeSetJSON(SI_EXP_PROGRESSION_KEY, {
+      session_id: this.profile.session_id,
+      memory: { ...this.experienceProgression },
+    });
+  }
+
   private syncExperienceDecisions(): void {
+    if (typeof window !== "undefined") {
+      bumpNavigationTickIfPathChanged(this.experienceProgression, window.location.pathname);
+    }
+    this.profile.experience_progression = this.experienceProgression;
     const { envelope, slotDecisions } = buildExperienceDecisionEnvelope(this.profile, {
       now: Date.now(),
       observeOnly: this.opts.experienceDecisionMode === "observe_only",
+      progression: this.experienceProgression,
+      recordProgression: true,
     });
     this.lastExperienceEnvelope = envelope;
     this.slotDecisions = slotDecisions;
@@ -293,6 +334,7 @@ export class SessionIntelRuntime {
     if (changed) {
       dispatchExperienceDecisionCustomEvent(envelope);
     }
+    this.persistExperienceProgressionThrottled();
   }
 
   private maybeEmitActivationPayload(): void {
@@ -313,12 +355,16 @@ export class SessionIntelRuntime {
    * clears applied DOM treatments, and re-runs scoring — **without** a full page reload.
    */
   softResetSession(): void {
+    safeRemove(SI_EXP_PROGRESSION_KEY);
+    this.experienceProgression = emptyExperienceProgressionMemory();
+    this.lastProgressionPersistAt = 0;
     resetProfile();
     clearTreatments();
     this.converted = false;
     this.conversionType = null;
     const ctx = inferPageContext();
     this.profile = loadOrCreateProfile(ctx.page_type);
+    this.hydrateExperienceProgressionFromStorage();
     this.profile.experiment_assignment = assignExperiments(this.config.experiments, this.profile);
     this.lastContextUrl = null;
     this.lastPersonalizationJson = "";

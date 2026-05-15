@@ -8,6 +8,9 @@ import type {
   FixtureRunResult,
   FixtureSessionInput,
 } from "./types";
+import { collectFixtureRealismWarnings } from "./fixtureRealismHeuristics";
+import { assertNoWeakMarketingCopy } from "./globalWeakMarketingCopy";
+import { assertRegulatedVerticalSafetyBlob } from "./regulatedFixtureSafety";
 
 function expectationSnapshot(expected: FixtureExpectedPrimary): FixtureExpectationSnapshot {
   return {
@@ -52,7 +55,11 @@ export function runFixtureCase(
 ): FixtureRunResult {
   const errors: string[] = [];
   const profile = buildFixtureProfile(sessionInput);
-  const { envelope, slotDecisions } = buildExperienceDecisionEnvelope(profile, { now });
+  const { envelope, slotDecisions } = buildExperienceDecisionEnvelope(profile, {
+    now,
+    progression: profile.experience_progression,
+    recordProgression: false,
+  });
   const primary = envelope.primary_decision;
 
   const expPartial = expected.primary_decision;
@@ -109,6 +116,14 @@ export function runFixtureCase(
 
   assertForbiddenTerms(primaryBlob(primary), expected.forbidden_terms, errors);
   assertBadPatterns(primaryBlob(primary), bad, errors);
+
+  if (primary && expected.regulated_vertical_safety) {
+    assertRegulatedVerticalSafetyBlob(expected.regulated_vertical_safety, primaryBlob(primary), errors);
+  }
+
+  if (primary) {
+    assertNoWeakMarketingCopy(primaryBlob(primary), errors);
+  }
 
   if (expected.allowed_secondary_surface_ids?.length) {
     for (const d of envelope.secondary_decisions) {
@@ -167,5 +182,6 @@ export function runFixtureCase(
     primary,
     suppression_summary: envelope.suppression_summary,
     expectation: expectationSnapshot(expected),
+    realism_warnings: collectFixtureRealismWarnings(sessionInput, primary),
   };
 }

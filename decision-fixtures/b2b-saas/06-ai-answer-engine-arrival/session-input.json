@@ -1,0 +1,49 @@
+{
+  "name": "AI / answer-engine arrival — education-first",
+  "vertical": "b2b_saas",
+  "engagement_score": 44,
+  "commercial_journey_phase": "research",
+  "journey_stage": "browsing",
+  "page_type": "other",
+  "site_environment": {
+    "page": {
+      "generic_kind": "article_page",
+      "confidence": 0.74,
+      "signals_used": ["h1", "article", "ai summary"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 40,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "research"
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.7,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "concept_affinity": {
+    "AI and answer-engine traffic": 0.48
+  },
+  "concept_evidence": {
+    "AI and answer-engine traffic": ["perplexity", "ai summary", "chatgpt"]
+  },
+  "signals": { "cta_clicks": 0, "pages_viewed": 2 },
+  "expected_surfaces_to_query": ["implementation_timeline_example", "article_inline_mid"]
+}

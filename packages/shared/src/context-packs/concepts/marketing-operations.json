@@ -247,6 +247,64 @@
       "recommended_surfaces": ["inline_cta", "content_module"]
     },
     {
+      "id": "integration_and_api_scope",
+      "label": "Integration and API scope",
+      "terms": [
+        "api",
+        "apis",
+        "webhook",
+        "webhooks",
+        "sdk",
+        "sdks",
+        "connector",
+        "connectors",
+        "integration",
+        "integrations",
+        "oauth",
+        "schema",
+        "payload",
+        "rate limit",
+        "service account",
+        "event stream",
+        "rest endpoint",
+        "graphql"
+      ],
+      "intent_phrases": [
+        "integrate with our stack",
+        "technical integration requirements",
+        "how the API behaves in production"
+      ],
+      "message_angles": ["technical_clarity", "scope_the_work", "reduce_surprises_at_cutover"],
+      "recommended_offers": ["integration_checklist", "api_readiness_brief", "migration_cutover_plan"],
+      "recommended_surfaces": ["comparison_module", "inline_module", "embedded_module"]
+    },
+    {
+      "id": "ai_and_answer_engine_traffic",
+      "label": "AI and answer-engine traffic",
+      "terms": [
+        "chatgpt",
+        "perplexity",
+        "gemini",
+        "claude",
+        "copilot",
+        "answer engine",
+        "llm",
+        "generative search",
+        "ai overview",
+        "zero click",
+        "sge",
+        "ai summary"
+      ],
+      "intent_phrases": [
+        "arrived from an AI summary",
+        "clicked through from a generated answer",
+        "research started in a chat interface"
+      ],
+      "message_angles": ["ground_in_primary_sources", "earn_trust_fast", "practical_next_step"],
+      "recommended_offers": ["source_aligned_primer", "implementation_outline", "evaluation_checklist"],
+      "recommended_surfaces": ["inline_module", "inline_cta", "content_module"]
+    },
+    {
       "id": "experimentation_discipline",
       "label": "Experimentation discipline",
       "terms": [

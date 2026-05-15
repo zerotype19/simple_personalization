@@ -1,0 +1,14 @@
+{
+  "expected_surface_id": "workspace_readiness_assessment",
+  "expected_offer_type": "workspace_readiness_scorecard",
+  "expected_message_angle": "operational_readiness_first",
+  "expected_timing": "next_navigation",
+  "min_confidence": 0.45,
+  "required_reason_terms": ["recipe:b2b_workspace_readiness_assessment"],
+  "hard_surfaces_must_not_show": [
+    "guided_walkthrough_request",
+    "demo_soft_escalation",
+    "implementation_workshop_offer"
+  ],
+  "forbidden_terms": ["unlock", "frictionless", "guaranteed"]
+}

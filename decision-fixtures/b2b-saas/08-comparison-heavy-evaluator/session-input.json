@@ -1,0 +1,56 @@
+{
+  "name": "Comparison-heavy evaluator",
+  "vertical": "b2b_saas",
+  "engagement_score": 62,
+  "commercial_journey_phase": "evaluation",
+  "journey_stage": "comparison",
+  "page_type": "other",
+  "site_environment": {
+    "page": {
+      "generic_kind": "product_page",
+      "confidence": 0.8,
+      "signals_used": ["compare", "features", "h1"]
+    }
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 46,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "evaluation",
+    "navigation": {
+      "journey_pattern": "comparison_led",
+      "journey_velocity": "deliberate",
+      "comparison_behavior": true,
+      "high_intent_transition": false,
+      "path_summary": "/compare/plans"
+    }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.75,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "after_scroll",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
+    "playbook": null
+  },
+  "concept_affinity": {
+    "Comparison shopping": 0.52
+  },
+  "concept_evidence": {
+    "Comparison shopping": ["versus", "side by side", "compare plans"]
+  },
+  "signals": { "cta_clicks": 1, "max_scroll_depth": 78 },
+  "expected_surfaces_to_query": ["comparison_module", "evaluation_next_steps"]
+}

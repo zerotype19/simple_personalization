@@ -1,6 +1,8 @@
 import type {
   ExperienceDecision,
   ExperienceDecisionEnvelope,
+  ExperienceProgressionMemory,
+  ExperienceRecipe,
   SessionProfile,
 } from "@si/shared";
 import {
@@ -14,6 +16,10 @@ import { matchRecipeCandidates, type RecipeMatchCandidate } from "./recipeMatche
 import { shouldSuppressDecision, summarizeSuppression } from "./decisionSuppression";
 import { findSurfaceEntry } from "./surfaceMatcher";
 import { noneDecision, suppressSlotDecision } from "./getExperienceDecision";
+import {
+  progressionGateDecision,
+  recordProgressionAfterPrimary,
+} from "./progressionMemory";
 
 export interface ExperienceDecisionContext {
   now: number;
@@ -21,6 +27,10 @@ export interface ExperienceDecisionContext {
   observeOnly?: boolean;
   /** Reserved for future frequency caps (session-local). */
   emittedKeys?: Set<string>;
+  /** Session-scoped progression memory (optional). */
+  progression?: ExperienceProgressionMemory;
+  /** When true with `progression`, updates memory after a non-null primary is chosen. */
+  recordProgression?: boolean;
 }
 
 function dedupeByRecipe(candidates: RecipeMatchCandidate[]): RecipeMatchCandidate[] {
@@ -87,6 +97,7 @@ export function buildExperienceDecisionEnvelope(
   const vertical = profile.site_context.vertical;
   const catalog = getSurfaceCatalogForVertical(vertical);
   const recipes = getExperienceRecipesForVertical(vertical);
+  const recipeById = new Map<string, ExperienceRecipe>(recipes.map((r) => [r.id, r]));
   const raw = matchRecipeCandidates(profile, recipes, catalog, vertical);
   const deduped = dedupeByRecipe(raw);
 
@@ -112,12 +123,33 @@ export function buildExperienceDecisionEnvelope(
   }
 
   const ranked = rankDecisions(viable);
-  let primary: ExperienceDecision | null = ranked[0] ?? null;
-  let secondary = ranked.slice(1, 3);
+  const progression_notes: string[] = [];
+  const gated: ExperienceDecision[] = [];
+  for (const d of ranked) {
+    const recipe = d.source_recipe_id ? recipeById.get(d.source_recipe_id) : undefined;
+    const gate = progressionGateDecision({
+      decision: d,
+      recipe,
+      progression: ctx.progression,
+      now: ctx.now,
+    });
+    if (!gate.ok) {
+      holdbackReasons.push(gate.reason);
+      progression_notes.push(`Progression held ${d.surface_id} (${gate.reason}).`);
+      continue;
+    }
+    gated.push(d);
+  }
+
+  let primary: ExperienceDecision | null = gated[0] ?? null;
+  let secondary = gated.slice(1, 3);
 
   if (ctx.observeOnly) {
     primary = null;
     secondary = [];
+  } else if (ctx.recordProgression && ctx.progression && primary) {
+    const r = primary.source_recipe_id ? recipeById.get(primary.source_recipe_id) : undefined;
+    recordProgressionAfterPrimary(ctx.progression, primary, r, ctx.now);
   }
 
   let suppression_summary: string | undefined;
@@ -136,6 +168,7 @@ export function buildExperienceDecisionEnvelope(
     primary_decision: primary,
     secondary_decisions: secondary,
     suppression_summary,
+    progression_notes: progression_notes.length ? progression_notes : undefined,
   };
 
   const slotDecisions: Record<string, ExperienceDecision> = {};

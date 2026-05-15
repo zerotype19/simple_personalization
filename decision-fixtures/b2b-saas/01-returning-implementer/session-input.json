@@ -60,6 +60,7 @@
     "max_scroll_depth": 72
   },
   "expected_surfaces_to_query": [
+    "implementation_readiness_checklist",
     "article_inline_mid"
   ]
 }
