@@ -4,15 +4,16 @@ import type {
   ExperienceDecisionEnvelope,
   SessionProfile,
 } from "@si/shared";
+import {
+  buildRuntimeEscalateIfSentence,
+  buildRuntimeStayingSentence,
+  formatEscalationPostureForBuyer,
+  getEscalationPosture,
+  getExperienceState,
+  getStateProgressionLadder,
+  ladderLabel,
+} from "./experienceStatePresentation";
 import type { ReplayResult } from "./replay/types";
-
-const LADDER: readonly string[] = [
-  "Exploring",
-  "Evaluating",
-  "Comparing",
-  "Implementation-focused",
-  "Escalation earned",
-] as const;
 
 const BUYER_REASON_COPY: Partial<Record<string, string>> = {
   first_frame: "Baseline established for this session.",
@@ -51,6 +52,15 @@ export interface BuyerInspectorView {
   progression: { steps: readonly string[]; currentIndex: number };
   whatChanged: string | null;
   families: { primary: string | null; secondary: string | null };
+  /** Numeric confidence is intentionally omitted from buyer-facing UI (`recommended.confidenceChip` is always null). */
+  statePresentation: {
+    currentStateLabel: string;
+    ladder: { steps: readonly string[]; currentIndex: number };
+    escalationPosture: string;
+    whyThisState: string;
+    whatWouldMoveForward: string;
+    strongerActionWithheld: string | null;
+  };
 }
 
 function hasLeakage(s: string): boolean {
@@ -110,69 +120,6 @@ function humanFamily(f: string | undefined): string | null {
   if (!f) return null;
   const pretty = f.replace(/_/g, " ");
   return pretty.charAt(0).toUpperCase() + pretty.slice(1);
-}
-
-function confidenceChip(conf: number | null | undefined): string | null {
-  if (conf == null || Number.isNaN(conf)) return null;
-  if (conf >= 0.72) return "High confidence";
-  if (conf >= 0.45) return "Medium confidence";
-  return "Building confidence";
-}
-
-function escalationPostureLabel(
-  profile: SessionProfile,
-  primary: ExperienceDecision | null,
-  envelope: ExperienceDecisionEnvelope | null,
-): string {
-  if (!primary && envelope?.suppression_summary?.trim()) return "Suppression preferred";
-  const bs = profile.behavior_snapshot;
-  const posture = bs?.activation_readiness.interruption_posture;
-  if (posture === "avoid_interrupt") return "Suppression preferred";
-  if (!primary) return "Cautious progression";
-  if (posture === "observe_only") return "Exploratory";
-  if (posture === "soft_cta_ready") {
-    return bs?.navigation.comparison_behavior ? "Validation-focused" : "Cautious progression";
-  }
-  if (posture === "hard_cta_ready") {
-    return bs?.navigation.comparison_behavior ? "Validation-focused" : "Escalation earned";
-  }
-  return "Cautious progression";
-}
-
-function ladderIndex(profile: SessionProfile, primary: ExperienceDecision | null): number {
-  const bs = profile.behavior_snapshot;
-  const phase = bs?.commercial_journey_phase ?? profile.commercial_journey_phase ?? "research";
-  const mem = profile.experience_progression;
-  let idx = 0;
-  switch (phase) {
-    case "discovery":
-    case "research":
-      idx = 0;
-      break;
-    case "evaluation":
-      idx = 1;
-      break;
-    case "comparison":
-      idx = 2;
-      break;
-    case "validation":
-      idx = 3;
-      break;
-    case "conversion_ready":
-      idx = 4;
-      break;
-    default:
-      idx = 1;
-  }
-  if (mem?.escalation_stage && membump(mem.escalation_stage, primary)) {
-    idx = Math.max(idx, 3);
-  }
-  if (primary && primary.confidence >= 0.72 && idx < 4) idx = Math.max(idx, 3);
-  return Math.min(Math.max(idx, 0), LADDER.length - 1);
-}
-
-function membump(stage: number, primary: ExperienceDecision | null): boolean {
-  return stage >= 2 || (!!primary && stage >= 1);
 }
 
 function buildCommercialRead(
@@ -340,25 +287,37 @@ export function buildBuyerInspectorView(
         show: primary.headline?.trim() || primary.offer_type.replace(/_/g, " "),
         surface: humanSurface(primary.surface_id),
         timing: humanTiming(primary.timing),
-        escalationPosture: escalationPostureLabel(profile, primary, envelope),
-        confidenceChip: confidenceChip(primary.confidence),
+        escalationPosture: formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
+        confidenceChip: null,
       }
     : {
         show: "Hold back until the visit clarifies",
         surface: "None selected yet",
         timing: "Waiting for clearer commercial signals",
-        escalationPosture: "Suppression preferred",
+        escalationPosture: formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
         confidenceChip: null,
       };
 
   const whyBullets = buildWhyBullets(profile, primary);
   const withheld = buildWithheld(profile, primary, envelope);
-  const progression = {
-    steps: LADDER,
-    currentIndex: ladderIndex(profile, primary),
-  };
+  const expState = getExperienceState(profile, envelope, replay);
+  const progression = getStateProgressionLadder(expState);
   const whatChanged = buildWhatChanged(replay);
   const families = buildFamilies(profile);
+
+  const withheldSummary =
+    !primary && withheld.length
+      ? withheld[0]!.replace(/^Stronger surface withheld:\s*/i, "").trim() || null
+      : null;
+
+  const statePresentation = {
+    currentStateLabel: ladderLabel(expState),
+    ladder: progression,
+    escalationPosture: formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
+    whyThisState: buildRuntimeStayingSentence(profile, envelope, replay),
+    whatWouldMoveForward: buildRuntimeEscalateIfSentence(profile, envelope),
+    strongerActionWithheld: withheldSummary,
+  };
 
   return {
     commercialRead,
@@ -368,5 +327,6 @@ export function buildBuyerInspectorView(
     progression,
     whatChanged,
     families,
+    statePresentation,
   };
 }

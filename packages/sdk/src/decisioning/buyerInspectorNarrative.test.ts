@@ -125,6 +125,10 @@ describe("buyerInspectorNarrative", () => {
       v.recommended.show,
       v.recommended.surface,
       v.recommended.timing,
+      v.statePresentation.whyThisState,
+      v.statePresentation.whatWouldMoveForward,
+      v.statePresentation.currentStateLabel,
+      v.statePresentation.escalationPosture,
     ].join(" ");
     expect(blob.includes("%")).toBe(false);
   });

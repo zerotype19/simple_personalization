@@ -10,6 +10,18 @@ export { runDecisionReplay } from "../../../packages/sdk/src/decisioning/replay"
 export { buildFixtureProfile } from "../../../packages/sdk/src/decisioning/fixtures/buildFixtureProfile";
 export { buildBuyerInspectorView } from "../../../packages/sdk/src/decisioning/buyerInspectorNarrative";
 export type { FixtureSessionInput } from "../../../packages/sdk/src/decisioning/fixtures/types";
+export {
+  buildEscalationUnlockCondition,
+  buildRuntimeEscalateIfSentence,
+  buildRuntimeStayingSentence,
+  buildStateReason,
+  formatEscalationPostureForBuyer,
+  getEscalationPosture,
+  getExperienceState,
+  getStateProgressionLadder,
+  ladderLabel,
+  describeLatestReplayTransition,
+} from "../../../packages/sdk/src/decisioning/experienceStatePresentation";
 
 const SNIPPET_ORIGIN = (import.meta.env.VITE_SI_SNIPPET_ORIGIN as string | undefined)
   ?.trim()

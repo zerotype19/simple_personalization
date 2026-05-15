@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { buildBuyerInspectorView, buildFixtureProfile, runDecisionReplay } from "@si/sdk";
+import {
+  buildBuyerInspectorView,
+  buildFixtureProfile,
+  describeLatestReplayTransition,
+  getExperienceState,
+  getStateProgressionLadder,
+  ladderLabel,
+  runDecisionReplay,
+} from "@si/sdk";
 import { SCENARIO_PRESETS, type ScenarioGroupId, type ScenarioPreset } from "../scenarioPresets/scenarios";
 
 const GROUP_ORDER: ScenarioGroupId[] = [
@@ -67,6 +75,30 @@ export default function ScenarioPresetsPanel() {
     [lastProfile, lastFrame, replay],
   );
 
+  const runtimeLadder = useMemo(
+    () => getStateProgressionLadder(getExperienceState(lastProfile, lastFrame.envelope, replay)),
+    [lastProfile, lastFrame, replay],
+  );
+
+  const stateShift = useMemo(() => {
+    if (step === 0) return null;
+    const prevSlice = profiles.slice(0, step);
+    const prevReplay = runDecisionReplay(prevSlice);
+    const pf = prevReplay.frames[prevReplay.frames.length - 1]!;
+    const pp = prevSlice[prevSlice.length - 1]!;
+    const a = getExperienceState(pp, pf.envelope, prevReplay);
+    const b = getExperienceState(lastProfile, lastFrame.envelope, replay);
+    if (a === b) return null;
+    return `${ladderLabel(a)} → ${ladderLabel(b)}`;
+  }, [step, profiles, lastProfile, lastFrame, replay]);
+
+  const replayTransitionWhy = useMemo(() => describeLatestReplayTransition(replay), [replay]);
+
+  const strongerWithheldBecause =
+    !lastFrame.envelope.primary_decision && buyer.statePresentation.strongerActionWithheld
+      ? `Stronger action withheld because ${buyer.statePresentation.strongerActionWithheld}.`
+      : null;
+
   const decisionShift = useMemo(() => {
     if (step === 0) return null;
     const prevSlice = profiles.slice(0, step);
@@ -77,10 +109,6 @@ export default function ScenarioPresetsPanel() {
     if (prevBuyer.recommended.show === buyer.recommended.show) return null;
     return `Decision shifted: ${prevBuyer.recommended.show} → ${buyer.recommended.show}`;
   }, [step, profiles, buyer]);
-
-  const escalationWithheld = !lastFrame.envelope.primary_decision
-    ? `Escalation withheld: ${normalizeHeldBack(lastFrame.envelope.suppression_summary) ?? "commercial readiness still unearned for a harder escalation."}`
-    : null;
 
   const play = () => {
     if (step >= maxStep) setStep(0);
@@ -157,6 +185,64 @@ export default function ScenarioPresetsPanel() {
           </div>
 
           <div className="mt-4 border-t border-slate-800/80 pt-4">
+            <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Runtime ladder</div>
+            <p className="mt-1 text-[11px] text-slate-500">
+              Same five-state ladder as the buyer inspector — highlights move as replay frames advance.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-2 text-xs text-slate-400">
+              {runtimeLadder.steps.map((lbl, i) => (
+                <span key={`${lbl}-r-${i}`} className="inline-flex items-center gap-2">
+                  <span
+                    className={
+                      i === runtimeLadder.currentIndex
+                        ? "rounded-md bg-slate-800 px-2 py-0.5 font-medium text-slate-100"
+                        : "rounded-md px-2 py-0.5"
+                    }
+                  >
+                    {lbl}
+                  </span>
+                  {i < runtimeLadder.steps.length - 1 ? (
+                    <span className="text-slate-600" aria-hidden>
+                      →
+                    </span>
+                  ) : null}
+                </span>
+              ))}
+            </div>
+            <div className="mt-3 space-y-1.5 text-[11px] leading-relaxed text-slate-400">
+              <div>
+                <span className="font-medium text-slate-500">Current state: </span>
+                {buyer.statePresentation.currentStateLabel}
+              </div>
+              <div>
+                <span className="font-medium text-slate-500">Escalation posture: </span>
+                {buyer.statePresentation.escalationPosture}
+              </div>
+              <div>
+                <span className="font-medium text-slate-500">Why this state: </span>
+                {buyer.statePresentation.whyThisState}
+              </div>
+              <div>
+                <span className="font-medium text-slate-500">What would move it forward: </span>
+                {buyer.statePresentation.whatWouldMoveForward}
+              </div>
+              {stateShift ? (
+                <p className="text-slate-300">
+                  <span className="font-medium text-slate-500">State shift: </span>
+                  {stateShift}
+                </p>
+              ) : null}
+              {replayTransitionWhy && step > 0 ? (
+                <p className="text-slate-400">
+                  <span className="font-medium text-slate-500">Changed reason: </span>
+                  {replayTransitionWhy}
+                </p>
+              ) : null}
+              {strongerWithheldBecause ? <p className="text-amber-100/90">{strongerWithheldBecause}</p> : null}
+            </div>
+          </div>
+
+          <div className="mt-4 border-t border-slate-800/80 pt-4">
             <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Progression</div>
             <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-2 text-xs text-slate-400">
               {selected.progressionLabels.map((lbl, i) => (
@@ -183,7 +269,6 @@ export default function ScenarioPresetsPanel() {
           <div className="mt-4 space-y-2 border-t border-slate-800/80 pt-4 text-xs leading-relaxed text-slate-300">
             {decisionShift ? <p className="text-slate-200">{decisionShift}</p> : null}
             {buyer.whatChanged && !decisionShift ? <p className="text-slate-400">{buyer.whatChanged}</p> : null}
-            {escalationWithheld ? <p className="text-amber-100/90">{escalationWithheld}</p> : null}
           </div>
 
           {buyer.withheld.length > 0 ? (
@@ -215,14 +300,4 @@ export default function ScenarioPresetsPanel() {
       </div>
     </section>
   );
-}
-
-function normalizeHeldBack(raw: string | undefined): string | null {
-  const s = raw?.trim();
-  if (!s) return null;
-  return s
-    .replace(/^Held back:\s*/i, "")
-    .replace(/^Primary:\s*[^.]+\.\s*/i, "")
-    .replace(/\.$/, "")
-    .trim();
 }

@@ -177,3 +177,18 @@ export { buildFixtureProfile } from "./decisioning/fixtures/buildFixtureProfile"
 export type { FixtureSessionInput } from "./decisioning/fixtures/types";
 export { buildBuyerInspectorView } from "./decisioning/buyerInspectorNarrative";
 export type { BuyerInspectorView } from "./decisioning/buyerInspectorNarrative";
+export {
+  buildEscalationUnlockCondition,
+  buildRuntimeEscalateIfSentence,
+  buildRuntimeStayingSentence,
+  buildStateReason,
+  formatEscalationPostureForBuyer,
+  getEscalationPosture,
+  getExperienceState,
+  getStateProgressionLadder,
+  ladderLabel,
+  ladderLabelToState,
+  describeLatestReplayTransition,
+  EXPERIENCE_LADDER_LABELS,
+} from "./decisioning/experienceStatePresentation";
+export type { ExperienceLadderState } from "./decisioning/experienceStatePresentation";

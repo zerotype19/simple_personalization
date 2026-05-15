@@ -85,16 +85,22 @@ function setInspectorPanelMode(mode: InspectorPanelMode): void {
 
 /** Buyer-facing judgment panel HTML (deterministic narrative layer). */
 function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
-  const { progression } = view;
-  const ladderRows = progression.steps
+  const sp = view.statePresentation;
+  const ladderRows = sp.ladder.steps
     .map((label, i) => {
       let cls = "si-ladder-step";
-      if (i < progression.currentIndex) cls += " si-ladder-step--past";
-      else if (i === progression.currentIndex) cls += " si-ladder-step--current";
+      if (i < sp.ladder.currentIndex) cls += " si-ladder-step--past";
+      else if (i === sp.ladder.currentIndex) cls += " si-ladder-step--current";
       else cls += " si-ladder-step--future";
       return `<li class="${cls}">${escHtml(label)}</li>`;
     })
     .join("");
+
+  const strongerWithheld =
+    sp.strongerActionWithheld != null && sp.strongerActionWithheld.trim() !== ""
+      ? `<div class="si-buyer-k">Why stronger action is withheld</div>
+         <div class="si-buyer-v">${escHtml(sp.strongerActionWithheld)}</div>`
+      : "";
 
   const why =
     view.whyBullets.length > 0
@@ -114,10 +120,6 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
         </div>`
       : "";
 
-  const postureChip = view.recommended.confidenceChip
-    ? `<span class="si-buyer-chip">${escHtml(view.recommended.confidenceChip)}</span>`
-    : "";
-
   const whatChangedBlock = view.whatChanged
     ? `<div class="si-card si-buyer-section">
         <h3>What changed</h3>
@@ -126,6 +128,24 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
     : "";
 
   return `<div class="si-buyer-stack">
+    <div class="si-card si-buyer-section si-buyer-state-card">
+      <h3>Runtime state</h3>
+      <div class="si-buyer-kv si-buyer-kv--tight">
+        <div class="si-buyer-k">Current state</div>
+        <div class="si-buyer-v">${escHtml(sp.currentStateLabel)}</div>
+        <div class="si-buyer-k">Escalation posture</div>
+        <div class="si-buyer-v">${escHtml(sp.escalationPosture)}</div>
+        <div class="si-buyer-k">Why this state</div>
+        <div class="si-buyer-v">${escHtml(sp.whyThisState)}</div>
+        <div class="si-buyer-k">What would move it forward</div>
+        <div class="si-buyer-v">${escHtml(sp.whatWouldMoveForward)}</div>
+        ${strongerWithheld}
+      </div>
+      <div class="si-buyer-state-ladder-wrap">
+        <div class="si-muted si-muted--block si-buyer-ladder-caption">Progression ladder</div>
+        <ol class="si-ladder">${ladderRows}</ol>
+      </div>
+    </div>
     <div class="si-card si-buyer-section si-card--hero">
       <h3>Current commercial read</h3>
       <p class="si-buyer-lead">${escHtml(view.commercialRead)}</p>
@@ -140,7 +160,7 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
         <div class="si-buyer-k">Timing</div>
         <div class="si-buyer-v">${escHtml(view.recommended.timing)}</div>
         <div class="si-buyer-k">Escalation posture</div>
-        <div class="si-buyer-v">${escHtml(view.recommended.escalationPosture)}${postureChip ? ` ${postureChip}` : ""}</div>
+        <div class="si-buyer-v">${escHtml(view.recommended.escalationPosture)}</div>
       </div>
       ${famBlock}
     </div>
@@ -151,10 +171,6 @@ function formatBuyerInspectorHtml(view: BuyerInspectorView): string {
     <div class="si-card si-buyer-section si-buyer-withhold-card">
       <h3>Why stronger escalation was withheld</h3>
       ${withheld}
-    </div>
-    <div class="si-card si-buyer-section">
-      <h3>Progression</h3>
-      <ol class="si-ladder">${ladderRows}</ol>
     </div>
     ${whatChangedBlock}
     <div class="si-card si-card--privacy si-buyer-privacy">

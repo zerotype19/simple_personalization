@@ -519,6 +519,23 @@ button.si-mode-btn.si-mode-active {
   font-size: 12px;
   margin-top: 6px;
 }
+.si-buyer-kv--tight {
+  grid-template-columns: minmax(112px, 42%) 1fr;
+  gap: 6px 10px;
+}
+.si-buyer-state-card {
+  border-color: #334155;
+  background: linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
+}
+.si-buyer-state-ladder-wrap {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #1f2937;
+}
+.si-buyer-ladder-caption {
+  font-size: 10px;
+  margin-bottom: 4px;
+}
 .si-buyer-k {
   color: #64748b;
   font-size: 11px;
