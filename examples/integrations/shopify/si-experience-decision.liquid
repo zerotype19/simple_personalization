@@ -1,0 +1,22 @@
+{%- comment -%}
+  Optiview loader + mount points. Place before </body> or in a theme section.
+  1. Copy si-optiview-surfaces.js to assets/ (see README).
+  2. Replace YOUR_SITE_SLUG and YOUR_PUBLISHABLE_KEY.
+{%- endcomment -%}
+
+<script
+  async
+  src="https://cdn.optiview.ai/si.js"
+  data-si-site="YOUR_SITE_SLUG"
+  data-si-key="YOUR_PUBLISHABLE_KEY"
+></script>
+
+{{ 'si-optiview-surfaces.js' | asset_url | script_tag }}
+
+<div id="si-shipping-reassurance" class="si-optiview-mount" hidden>
+  <p>Shipping reassurance module (edit in theme editor).</p>
+</div>
+
+<div id="si-product-comparison" class="si-optiview-mount" hidden>
+  <p>Product comparison module (edit in theme editor).</p>
+</div>

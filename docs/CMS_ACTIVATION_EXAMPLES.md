@@ -1,83 +1,45 @@
-# CMS activation examples (experience decisions)
+# CMS activation examples (surface contract)
 
-Use **`si:experience-decision`** or `window.SessionIntel.getExperienceDecision*` so your CMS, tag manager, or experimentation tool applies **only** what you approve — the tag does not auto-mutate the DOM.
+Optiview’s **experience layer** is built around stable **`surface_id`** values declared in per-vertical [surface catalogs](SURFACE_CATALOGS.md) (e.g. `packages/shared/src/context-packs/surface-catalogs/`). Recipes in JSON packs choose a **primary** surface when confidence, suppression, and progression gates pass.
 
-## Vanilla JS — listen once
+## What you integrate
 
-```js
-window.addEventListener("si:experience-decision", (e) => {
-  const env = e.detail;
-  const d = env.primary_decision;
-  if (!d || d.action === "suppress" || d.action === "none") return;
-  // Map d.surface_id + d.headline / d.cta_label to your own slots.
-});
-```
+| Concept | Meaning |
+|---------|---------|
+| **`surface_id`** | Stable string your CMS / Target / component maps to a **region** or **component variant**. Same ID in the catalog, recipes, and your integration code. |
+| **Primary vs slots** | The **envelope** has at most one **primary** decision plus secondaries. Each catalog **surface** also has a **slot** decision (`getExperienceDecision(surfaceId)`) for suppress/none vs show. |
+| **No silent DOM writes** | The tag does not inject offer markup into arbitrary CMS regions. **Your** listener renders or suppresses. |
 
-## Google Tag Manager — Custom Event trigger
+## Read API (browser)
 
-1. Trigger type: **Custom Event**, Event name: `si_experience_decision` (if you push to dataLayer) **or** use a **Custom Event** listener in a tag template that listens to `si:experience-decision` on `window`.
-2. DataLayer push (optional) — call `SessionIntel.pushExperienceDecisionToDataLayer()` from a tag that runs **After** SessionIntel boot (`window.__siBootFromTag` promise).
+After **`SessionIntel`** / `boot` (hosted `si.js`) or **`@si/sdk`** `boot()`:
 
-```html
-<script>
-  window.__siBootFromTag?.then(() => {
-    window.SessionIntel?.pushExperienceDecisionToDataLayer?.();
-  });
-</script>
-```
+- **`getExperienceDecisionEnvelope()`** — full envelope (`primary_decision`, `secondary_decisions`, `suppression_summary`, …).
+- **`getExperienceDecision(surfaceId)`** — slot decision for one surface (use for gated render).
+- **`subscribeToDecision(surfaceId, cb)`** — fires when the experience **meaningfully** changes; callback receives **envelope** — then call `getExperienceDecision(surfaceId)` inside (see [integrations README](integrations/README.md)).
+- **`subscribeToAllDecisions(cb)`** — same, for all surfaces you want one stream.
+- **`pushExperienceDecisionToDataLayer()`** / **`pushExperienceDecisionToAdobeDataLayer()`** / **`pushExperienceDecisionToOptimizely()`** — push normalized payload (see [GTM guide](integrations/google-tag-manager.md)).
 
-## Adobe Client Data Layer (AEP-style)
+**CustomEvent:** `si:experience-decision` — `detail` is the envelope (useful in AEM / Webflow without a module bundler).
 
-```js
-window.addEventListener("si:experience-decision", (e) => {
-  window.adobeDataLayer = window.adobeDataLayer || [];
-  window.adobeDataLayer.push({
-    event: "optiviewExperienceDecision",
-    optiview: e.detail,
-  });
-});
-```
+## Integration guides (copy-paste)
 
-Or use `SessionIntel.pushExperienceDecisionToAdobeDataLayer()`.
+All guides live in **`docs/integrations/`**:
 
-## Optimizely Web
+- [README — standard pattern + hub](integrations/README.md)
+- [Google Tag Manager](integrations/google-tag-manager.md)
+- [Adobe Target](integrations/adobe-target.md)
+- [Adobe Experience Platform Web SDK](integrations/adobe-aep-web-sdk.md)
+- [Adobe Experience Manager (AEM)](integrations/adobe-aem.md)
+- [Optimizely](integrations/optimizely.md)
+- [Shopify](integrations/shopify.md)
+- [React / headless](integrations/react-headless.md)
+- [Webflow](integrations/webflow.md)
 
-```js
-window.addEventListener("si:experience-decision", (e) => {
-  window.optimizely = window.optimizely || [];
-  window.optimizely.push({
-    type: "event",
-    eventName: "si_experience_decision",
-    tags: {
-      surface_id: e.detail.primary_decision?.surface_id ?? null,
-      confidence: e.detail.primary_decision?.confidence ?? null,
-    },
-  });
-});
-```
+## Examples in repo
 
-## React — subscribe after boot
+Runnable / pasteable samples: **`examples/integrations/`** (GTM, Target, AEM, Optimizely, Shopify, React, Webflow).
 
-```tsx
-useEffect(() => {
-  let unsub: (() => void) | undefined;
-  window.__siBootFromTag?.then(() => {
-    unsub = window.SessionIntel?.subscribeToAllDecisions?.((env) => {
-      setDecision(env.primary_decision);
-    });
-  });
-  return () => unsub?.();
-}, []);
-```
+## QA
 
-## AEM / CMS slot mapping
-
-Map stable **`surface_id`** values from the [surface catalogs](SURFACE_CATALOGS.md) to authoring keys (e.g. `experienceFragment:pricing_assist`) in your delivery layer. Keep mapping server- or CDN-configured; the tag only **suggests** `surface_id` + copy fields.
-
-## Shopify / headless
-
-Treat the envelope as **input** to your theme app extension or Hydrogen loader — fetch product or promo data **yourself**; Optiview supplies **which surface** and **which message angle** to prefer.
-
-## AEM / Target combined pattern
-
-Use the decision as **input** to a Target mbox or AEM ContextHub key — e.g. set `digitalData.optiview = envelope` then read it in your existing launch rules.
+Use **[INTEGRATION_QA.md](INTEGRATION_QA.md)** before go-live.

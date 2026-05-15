@@ -396,6 +396,7 @@ Architecture returns diminish after this file. Invest next in:
 
 - [Experience decisions (API + envelope)](EXPERIENCE_DECISIONS.md)
 - [CMS activation examples](CMS_ACTIVATION_EXAMPLES.md)
+- [Integration guides (GTM, Adobe, Shopify, React, …)](integrations/README.md)
 - [Decision recipes (pack format)](DECISION_RECIPES.md)
 - [Surface catalogs](SURFACE_CATALOGS.md)
 

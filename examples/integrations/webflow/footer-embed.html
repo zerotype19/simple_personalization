@@ -1,0 +1,29 @@
+<script async src="https://cdn.optiview.ai/si.js"
+  data-si-site="YOUR_SITE_SLUG"
+  data-si-key="YOUR_PUBLISHABLE_KEY"></script>
+<script>
+(function () {
+  function applyOne(surfaceId) {
+    if (!window.SessionIntel) return;
+    var d = window.SessionIntel.getExperienceDecision(surfaceId);
+    var nodes = document.querySelectorAll('[data-si-surface="' + surfaceId + '"]');
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].style.display = d.action === "show" ? "block" : "none";
+    }
+  }
+  function refresh() {
+    document.querySelectorAll("[data-si-surface]").forEach(function (el) {
+      var id = el.getAttribute("data-si-surface");
+      if (id) applyOne(id);
+    });
+  }
+  function wire() {
+    if (!window.SessionIntel || !window.SessionIntel.subscribeToAllDecisions) return;
+    window.SessionIntel.subscribeToAllDecisions(refresh);
+    refresh();
+  }
+  var boot = window.__siBootFromTag;
+  if (boot && typeof boot.then === "function") boot.then(wire).catch(function () {});
+  else wire();
+})();
+</script>

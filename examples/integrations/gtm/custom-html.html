@@ -1,0 +1,25 @@
+<script>
+(function () {
+  function pushSiExperience() {
+    if (!window.SessionIntel || !window.SessionIntel.pushExperienceDecisionToDataLayer) return;
+    window.SessionIntel.pushExperienceDecisionToDataLayer();
+  }
+  function wire() {
+    if (!window.SessionIntel || !window.SessionIntel.subscribeToAllDecisions) return;
+    window.SessionIntel.subscribeToAllDecisions(function () {
+      pushSiExperience();
+    });
+    pushSiExperience();
+  }
+  var boot = window.__siBootFromTag;
+  if (boot && typeof boot.then === "function") {
+    boot.then(wire).catch(function () {});
+  } else {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", wire);
+    } else {
+      wire();
+    }
+  }
+})();
+</script>
