@@ -1,9 +1,11 @@
 import type { Recommendation, SessionProfile, SiteVertical } from "@si/shared";
 import { isAutoSiteVertical } from "@si/shared";
+import { distinctPagesExploredCount } from "../sessionMetrics";
 
 function reasonsGeneric(p: SessionProfile, extra: string[]): string[] {
   const r: string[] = [];
-  if (p.signals.pages_viewed >= 3) r.push(`${p.signals.pages_viewed} pages in session`);
+  const distinct = distinctPagesExploredCount(p);
+  if (distinct >= 3) r.push(`${distinct} distinct pages explored this session`);
   if (p.signals.max_scroll_depth >= 50) r.push("Strong scroll depth on key pages");
   if (p.signals.cta_clicks >= 1) r.push("CTA engagement");
   if (p.signals.return_visit) r.push("Return visitor");

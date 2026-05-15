@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildActivationPayload } from "./activationPayload";
+import { createBlankSignals } from "../session";
+import { buildActivationPayload, buildPersonalizationSignal } from "./activationPayload";
 import { buildBehaviorSnapshot } from "./behaviorSnapshot";
+import { inferActivationOpportunity } from "./conversionArchitecture";
+import { emptyPageSemantics } from "./defaults";
+import { emptySiteEnvironmentSnapshot } from "../siteEnvironment/emptySnapshot";
 import { minimalProfile } from "../test/fixtures";
 
 describe("buildActivationPayload behavior.timeline_preview", () => {
@@ -40,5 +44,45 @@ describe("buildActivationPayload behavior.timeline_preview", () => {
     const preview = behavior.timeline_preview as string[];
     expect(preview[0]).toContain("/foo?x=1");
     expect(preview[0]).not.toContain("https://");
+  });
+});
+
+describe("buildActivationPayload page.kind normalization", () => {
+  it("coerces classifier unknown to article_page with display_kind when path hints exist", () => {
+    const seed = minimalProfile();
+    const env = {
+      ...emptySiteEnvironmentSnapshot(),
+      page: {
+        ...emptySiteEnvironmentSnapshot().page,
+        generic_kind: "unknown" as const,
+        confidence: 0.42,
+        signals_used: ["insufficient page-specific cues"],
+      },
+    };
+    const profile = minimalProfile({
+      site_context: { ...seed.site_context, vertical: "b2b_saas" },
+      site_environment: env,
+      signals: {
+        ...createBlankSignals(),
+        path_sequence: ["/", "/dive-into-rhythm90/manifesto"],
+      },
+      page_journey: [
+        { path: "/", generic_kind: "homepage", title_snippet: null, t: 1 },
+        { path: "/dive-into-rhythm90/manifesto", generic_kind: "unknown", title_snippet: null, t: 2 },
+      ],
+    });
+    const ao = inferActivationOpportunity({
+      profile,
+      env,
+      scan: profile.site_context.scan,
+      semantics: emptyPageSemantics(),
+    });
+    const full = { ...profile, activation_opportunity: ao };
+    full.personalization_signal = buildPersonalizationSignal(full);
+    const payload = buildActivationPayload(full);
+    const page = payload.si.page as Record<string, unknown>;
+    expect(page.kind).toBe("article_page");
+    expect(page.classifier_kind).toBe("unknown");
+    expect(String(page.display_kind)).toMatch(/manifesto|Guide/i);
   });
 });

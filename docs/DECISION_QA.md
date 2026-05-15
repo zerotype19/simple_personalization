@@ -11,6 +11,8 @@ This document describes how we **regression-test decision quality** for the Expe
 5. **Secondaries** — optional allow-list; global cap of **two** secondaries.
 6. **Surface slots** — `surface_slots` and `expected_surfaces_to_query` integrate with the same slot map used by `getExperienceDecision(surface_id)`.
 
+Vitest also covers **credibility regressions** outside the JSON fixtures: distinct-page counts in playbook reasons (not raw `pages_viewed`), session-relative timeline clocks (`MM:SS` / `H:MM:SS`), activation payload `page.kind` normalization when the classifier is `unknown`, and NBA fallback copy that references distinct paths.
+
 Implementation: `packages/sdk/src/decisioning/fixtures/` and Vitest `decision-fixtures.test.ts`.
 
 ## How to add a fixture

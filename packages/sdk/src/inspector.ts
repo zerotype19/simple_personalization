@@ -20,6 +20,7 @@ import {
 } from "./siteIntelligence/panelLabelMapper";
 import { humanGenericPageLabel, timelineHumanPageLabel } from "./siteEnvironment";
 import { formatTimelineClock } from "./sessionIntel";
+import { distinctPagesExploredCount } from "./sessionMetrics";
 import {
   marketerArrivalSourceHeadline,
   marketerLikelyVisitorMindset,
@@ -378,12 +379,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
     const landingIntentConf = bs ? `${bs.campaign_intent.confidence_0_100}%` : "—";
     const refCatEsc = bs ? escHtml(bs.referrer.category.replace(/_/g, " ")) : "—";
     const refNarrEsc = bs ? escHtml(bs.referrer.narrative) : "—";
-    const distinctPagesExplored =
-      p.page_journey && p.page_journey.length > 0
-        ? new Set(
-            p.page_journey.map((e) => ((e.path.split("?")[0] || "/").trim() || "/").toLowerCase()),
-          ).size
-        : Math.max(new Set(p.signals.path_sequence ?? []).size, 1);
+    const distinctPagesExplored = distinctPagesExploredCount(p);
     const pathSummaryRaw =
       p.page_journey && p.page_journey.length > 0
         ? analyzeNavigationPattern(p.page_journey, p.signals).path_summary
@@ -719,12 +715,14 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         </div>
       </div>`;
 
+    const activationPayloadJson = formatActivationPayloadJson(p);
+    const activationPayloadEsc = escHtml(activationPayloadJson);
+
     const playbookExplainHtml =
       urlHasSiDebug() && ao.playbook
         ? `<div class="si-muted si-muted--mb6">Why this match (${escHtml(ao.playbook.label)})</div>
           <ul class="si-reason">${ao.playbook.why.map((x) => `<li>${escHtml(x)}</li>`).join("")}</ul>`
         : "";
-    const activationMetaOpenAttr = " open";
     const nbaBlockHtml =
       urlHasSiDebug() && nba
         ? `<h4 class="si-subh">Next best action</h4>
@@ -775,8 +773,9 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
                 : ""
             }
           </div>
-          <details class="si-activation-meta"${activationMetaOpenAttr}>
-            <summary>Evidence &amp; integration signal</summary>
+          <details class="si-legacy-signal-payload">
+            <summary>Legacy personalization signal &amp; activation payload (integrations)</summary>
+            <p class="si-muted si-muted--block">Prefer <code class="si-code">getExperienceDecisionEnvelope()</code> / <code class="si-code">pushExperienceDecisionToDataLayer()</code> for the experience layer. This drawer keeps evidence, <code class="si-code">getPersonalizationSignal()</code>, and <code class="si-code">si_personalization_signal</code> JSON for existing GTM / Adobe / Optimizely wiring.</p>
             ${playbookExplainHtml}
             <div class="si-muted si-muted--mb6">Evidence</div>
             <ul class="si-reason">${ao.evidence.map((x) => `<li>${escHtml(x)}</li>`).join("") || "<li>—</li>"}</ul>
@@ -789,6 +788,14 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
               <div>Signal confidence</div><div class="si-metric">${(sig.confidence * 100).toFixed(0)}%</div>
             </div>
             ${nbaBlockHtml}
+            <h4 class="si-subh">Activation payload (<code class="si-code">si_personalization_signal</code>)</h4>
+            <p class="si-muted si-muted--block">
+              <code class="si-code">getActivationPayload()</code>,
+              <code class="si-code">pushPersonalizationSignalToDataLayer()</code>,
+              <code class="si-code">pushPersonalizationSignalAll()</code> — dispatches
+              <code class="si-code">si:personalization-signal</code> / <code class="si-code">si:activation</code> when the signal meaningfully changes.
+            </p>
+            <pre class="si-pre si-pre--activation-payload">${activationPayloadEsc}</pre>
           </details>
         </div>
       </div>`;
@@ -835,26 +842,6 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
         <ul class="si-reason">${safePlanLines.map((line) => `<li>${escHtml(line)}</li>`).join("")}</ul>
       </div>`
         : "";
-
-    const activationPayloadJson = formatActivationPayloadJson(p);
-    const activationPayloadEsc = escHtml(activationPayloadJson);
-
-    const platformOpenAttr = " open";
-    const platformSectionHtml = `
-      <div class="si-panel-section">
-        <details class="si-platform-activation"${platformOpenAttr}>
-          <summary class="si-platform-activation-summary">Activation payload ready for Adobe Target, Optimizely, Google Tag Manager, Epsilon, and similar stacks.</summary>
-          <div class="si-card si-card--platform-inner">
-            <p class="si-muted si-muted--block">
-              Use <code class="si-code">getActivationPayload()</code>, <code class="si-code">getPersonalizationSignal()</code>, or
-              <code class="si-code">pushPersonalizationSignalToDataLayer()</code> (and vendor equivalents).
-              <code class="si-code">pushPersonalizationSignalAll()</code> fans out to common targets and dispatches
-              <code class="si-code">si:personalization-signal</code> / <code class="si-code">si:activation</code> when the signal meaningfully changes.
-            </p>
-            <pre class="si-pre si-pre--activation-payload">${activationPayloadEsc}</pre>
-          </div>
-        </details>
-      </div>`;
 
     const sessionControlsInnerHtml = `
         ${safePlanHtml}
@@ -961,7 +948,6 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       ${sessionJourneyHtml}
       ${sitePageHtml}
       ${activationSectionHtml}
-      ${platformSectionHtml}
       ${secondaryDrawerHtml}
       ${liveSignalsHtml}
     `;

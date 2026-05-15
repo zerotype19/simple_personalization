@@ -78,9 +78,19 @@ export function appendIntelMilestones(
   }
 }
 
+/**
+ * Session-relative elapsed time for inspector / payload timelines.
+ * Under 1 hour: `MM:SS`. At 1 hour+: `H:MM:SS` (never unbounded `1525:41`-style minute counts).
+ */
 export function formatTimelineClock(startedAt: number, t: number): string {
   const sec = Math.max(0, Math.floor((t - startedAt) / 1000));
-  const m = Math.floor(sec / 60);
+  if (sec < 3600) {
+    const minutes = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+  const hours = Math.floor(sec / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
   const s = sec % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return `${hours}:${String(minutes).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }

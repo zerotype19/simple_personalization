@@ -1,11 +1,48 @@
-import type { ActivationPayloadEnvelope, PersonalizationSignal, SessionProfile } from "@si/shared";
+import type { ActivationPayloadEnvelope, GenericPageKind, PersonalizationSignal, SessionProfile } from "@si/shared";
 import { formatTimelineClock } from "../sessionIntel";
+import { timelineHumanPageLabel } from "../siteEnvironment/genericPageClassifier";
 import { publicSiteTypeLabel } from "../siteIntelligence/publicLabels";
 
 const TIMELINE_PREVIEW_CAP = 5;
 
 function r2(n: number): number {
   return Math.round(n * 100) / 100;
+}
+
+function currentPathForPayload(profile: SessionProfile): string {
+  if (profile.page_journey?.length)
+    return profile.page_journey[profile.page_journey.length - 1]!.path || "/";
+  const seq = profile.signals.path_sequence;
+  if (seq?.length) return seq[seq.length - 1]! || "/";
+  return "/";
+}
+
+/** Payload `page.kind` should not stay `unknown` when path hints give a human content/homepage read. */
+function buildPayloadPage(
+  profile: SessionProfile,
+  env: SessionProfile["site_environment"],
+  sem: SessionProfile["page_semantics"],
+): Record<string, unknown> {
+  const pathRecent = currentPathForPayload(profile);
+  const raw = env.page.generic_kind;
+  const display = timelineHumanPageLabel(raw, pathRecent);
+  const base: Record<string, unknown> = {
+    primary_promise: sem.primary_promise ?? env.object.object_name,
+    schema_types: sem.schema_types_detected,
+  };
+  if (raw !== "unknown") {
+    return { kind: raw, confidence: r2(env.page.confidence), ...base };
+  }
+  const p = (pathRecent.split("?")[0] || "/").trim() || "/";
+  const coercedKind: GenericPageKind = p === "/" || p === "" ? "homepage" : "article_page";
+  return {
+    kind: coercedKind,
+    confidence: r2(env.page.confidence),
+    classifier_kind: "unknown",
+    low_confidence: env.page.confidence < 0.55,
+    display_kind: display,
+    ...base,
+  };
 }
 
 /** Strip accidental full URLs from timeline lines bound for vendor payloads (keep path + search when parseable). */
@@ -136,12 +173,7 @@ export function buildActivationPayload(profile: SessionProfile): ActivationPaylo
         confidence: r2(env.site.confidence),
         business_context: publicSiteTypeLabel(env.site.site_type),
       },
-      page: {
-        kind: env.page.generic_kind,
-        confidence: r2(env.page.confidence),
-        primary_promise: sem.primary_promise ?? env.object.object_name,
-        schema_types: sem.schema_types_detected,
-      },
+      page: buildPayloadPage(profile, env, sem),
       session: {
         id: profile.session_id,
         journey_stage: sig.journey_stage,

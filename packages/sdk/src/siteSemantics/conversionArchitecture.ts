@@ -70,8 +70,8 @@ export function inferActivationOpportunity(input: {
     primary_path_label = "Guide, demo, or implementation engagement";
     secondary_path_label = "Framework and product education";
     soft_path_label = "Related content depth and repeat visits";
-    inferred_need = "Make the operating model practical for their team";
-    message_angle = "Implementation support and practical next steps";
+    inferred_need = "Turn the operating model into a cadence your team can run";
+    message_angle = "Operator-grade framing — planning rhythm, ownership, and next-cycle execution";
     offer_type = "Implementation guide, checklist, or soft demo CTA";
   } else if (v === "nonprofit") {
     primary_path_label = "Donation, volunteer, or mission engagement";

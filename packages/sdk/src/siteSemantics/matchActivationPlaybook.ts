@@ -5,6 +5,7 @@ import type {
   SiteScanSummary,
   SiteVertical,
 } from "@si/shared";
+import { distinctPagesExploredCount } from "../sessionMetrics";
 import b2bJson from "../../../shared/src/context-packs/playbooks/b2b-marketing-ops.json";
 import genDeepJson from "../../../shared/src/context-packs/playbooks/generic-deep-content-no-signup.json";
 import genHighJson from "../../../shared/src/context-packs/playbooks/generic-high-engagement-no-cta.json";
@@ -60,9 +61,10 @@ export interface ActivationPlaybookMatchResult {
 
 function sessionMomentumOk(profile: SessionProfile, w: PlaybookWhen): boolean {
   if (w.momentum_match !== "any_of_return_pages_or_scroll") return false;
+  const distinctPaths = distinctPagesExploredCount(profile);
   return (
     profile.signals.return_visit ||
-    profile.signals.pages_viewed >= w.min_pages_viewed ||
+    distinctPaths >= w.min_pages_viewed ||
     profile.signals.max_scroll_depth >= w.min_scroll_depth
   );
 }
@@ -119,9 +121,13 @@ function tryMatchOne(
   }
 
   const why: string[] = [];
+  const distinctPaths = distinctPagesExploredCount(profile);
   if (profile.signals.return_visit) why.push("Return visitor — likely comparing or going deeper");
-  if (profile.signals.pages_viewed >= w.min_pages_viewed)
-    why.push(`Multiple pages viewed (${profile.signals.pages_viewed}) — sustained interest`);
+  if (distinctPaths >= w.min_pages_viewed) {
+    why.push(
+      `Explored ${distinctPaths} distinct ${distinctPaths === 1 ? "page" : "pages"} — sustained interest`,
+    );
+  }
   if (profile.signals.max_scroll_depth >= w.min_scroll_depth)
     why.push(`Deep scroll (${profile.signals.max_scroll_depth}%) — reading in depth on this page`);
   if (profile.engagement_score >= w.min_engagement_score)
