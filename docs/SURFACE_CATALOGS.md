@@ -94,6 +94,16 @@ Loaded via `getSurfaceCatalogForVertical()` in `@si/shared/experiencePacks`.
 | `dealer_locator_soft_prompt` | Dealer search (`soft_modal`; high readiness in recipes) |
 | `owner_resource_assist` | Warranty, manual, service resources |
 
+### Auto retail surfaces
+
+| `surface_id` | Role |
+|--------------|------|
+| `inventory_assist_module` | Listings / availability / VIN context |
+| `finance_payment_assist` | Payment or lease estimate clarity |
+| `trade_in_soft_prompt` | Soft appraisal / trade value |
+| `test_drive_secondary_cta` | Earned test-drive booking |
+| `dealer_contact_assist` | Call / text / contact dealer (high intent) |
+
 ## Why this matters
 
 Enterprise integrations map **stable IDs** (e.g. `pricing_page_secondary_cta`) to CMS slots, Target mboxes, or GTM triggers. Generic labels like “popup” are intentionally avoided in favor of **role-specific** IDs.

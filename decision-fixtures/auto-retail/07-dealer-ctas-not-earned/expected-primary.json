@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "inventory_assist_module",
+  "expected_offer_type": "inventory_snapshot",
+  "min_confidence": 0.45,
+  "hard_surfaces_must_not_show": ["test_drive_secondary_cta", "dealer_contact_assist"],
+  "forbidden_terms": ["only one left", "act now", "limited time offer"]
+}

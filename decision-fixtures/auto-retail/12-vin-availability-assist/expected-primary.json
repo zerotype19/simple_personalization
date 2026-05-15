@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "inventory_assist_module",
+  "expected_offer_type": "inventory_snapshot",
+  "min_confidence": 0.45
+}

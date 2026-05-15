@@ -89,6 +89,7 @@ When authoring `bad-decisions.json` and `forbidden_terms`:
   - Fixture matrix **`decision-fixtures/ecommerce/04-*` through `13-*`** plus `01–03` locks comparison, coupon-secondary, cart reassurance, AOV trust, mobile compare, null browse, fit/variant, inventory, and anti-discount-spam outcomes against `surface-catalogs/ecommerce.json` + `experience-recipes/ecommerce.json`.
 - **B2B SaaS** — forbid hard demo before evaluation signals; prefer inline implementation aids for late-stage technical visitors. The **`decision-fixtures/b2b-saas/05-*` through `16-*`** matrix locks integration, AI arrival, stakeholder alignment, comparison, ROI research pacing, progressive rollout study, earned walkthrough, workspace readiness, and thin-session restraint against `packages/shared/src/context-packs/surface-catalogs/b2b-saas.json` + `experience-recipes/b2b-saas.json`.
 - **Auto OEM** — progress **model → trim → build/configure** before **dealer locator** or inventory handoff; forbid **“buy now”**, **“contact dealer now”**, and **“schedule test drive”** on early education sessions unless fixtures explicitly allow; avoid fake scarcity without inventory signals. **`decision-fixtures/auto-oem/04-*` through `15-*`** lock the realism matrix against `surface-catalogs/auto-oem.json` + `experience-recipes/auto-oem.json`.
+- **Auto retail** — **inventory** / **payment** / **trade-in** inline paths stay appropriate to thin sessions; **dealer contact** and **test drive** recipes require **`required_any_concepts`** and readiness; forbid **urgency / scarcity** tone on payment and inventory primaries where fixtures say so. **`decision-fixtures/auto-retail/04-*` through `13-*`** lock the matrix against `surface-catalogs/auto-retail.json` + `experience-recipes/auto-retail.json`.
 
 ## Regulated verticals (restraint-first)
 
@@ -100,6 +101,8 @@ Healthcare and financial services are **restraint-first** verticals: anonymous o
 
 **Auto OEM doctrine (fixtures + packs):** anonymous decisions should help visitors move from **model education** toward **configuration confidence**—**not** jump to **dealer handoff** until **build, inventory, incentive, or dealer-intent** signals are earned; **`dealer_locator_soft_prompt`** stays recipe-gated to **high readiness** and dealer/test-drive concepts; copy avoids showroom-pressure phrases on pure research sessions.
 
+**Auto retail doctrine (fixtures + packs):** anonymous decisions should support **lot-style jobs**—**availability**, **payment clarity**, **trade-in**, and **earned dealer/test-drive CTAs**—without shoveling **contact** or **test drive** into thin inventory readers; recipes use **concept gates** so **dealer_contact_assist** / **test_drive_secondary_cta** only appear with matching affinity and thresholds.
+
 Fixture coverage:
 
 - **`healthcare/04-education-eligibility-soft-only`** — Education/eligibility-adjacent reading with **moderate readiness below** the eligibility-module recipe floor; expects **`education_inline_next_step`** / **`next_clinical_step_guide`**, `regulated_vertical_safety: "healthcare"`, and **`hard_surfaces_must_not_show`** for aggressive provider CTAs (e.g. `provider_discussion_cta`).
@@ -108,6 +111,7 @@ Fixture coverage:
 - **`financial-services/05-card-comparison-confidence` → `16-distress-inference-forbidden`** — Expanded finance surface catalog with **`regulated_vertical_safety`**, **`hard_surfaces_must_not_show`** where application escalation is inappropriate, and copy **`forbidden_terms`** for approval/urgency/distress patterns.
 
 - **`auto-oem/04-model-research-no-dealer` → `15-hard-dealer-handoff-forbidden`** — OEM realism matrix (discovery, trim, build, EV, family, payment, inventory transition, configurator resume, owner resources) with **`hard_surfaces_must_not_show`** on **`dealer_locator_soft_prompt`** where handoff is not earned, and copy **`forbidden_terms`** for dealer/test-drive pressure.
+- **`auto-retail/04-test-drive-earned` → `13-dealer-beats-test-drive-order`** — Retail matrix (payment, inventory, trade-in, earned test drive and dealer contact, ordering ties, null browse) with **`hard_surfaces_must_not_show`** where CTAs are not earned and copy guards on urgency.
 
 Runner logic for these cases lives in `packages/sdk/src/decisioning/fixtures/regulatedFixtureSafety.ts` (shared phrase lists) alongside `hard_surfaces_must_not_show` in `runFixture.ts`.
 
@@ -126,7 +130,7 @@ Environment:
 
 ## Acceptance bar
 
-- **≥ 85** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, **13 ecommerce** merchandising cases, **16 healthcare** realism + restraint cases, **16 financial-services** cases, **15 auto OEM** cases including the OEM realism matrix, **3 auto retail** cases, and other verticals).
+- **≥ 95** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, **13 ecommerce** merchandising cases, **16 healthcare** realism + restraint cases, **16 financial-services** cases, **15 auto OEM** cases, **13 auto retail** cases including the retail realism matrix, and other verticals).
 - `pnpm test`, `pnpm typecheck`, and `pnpm decision-fixtures` all succeed in CI and locally.
 
 This layer is the quality gate for **what** the runtime chooses; pack and recipe edits should be justified by fixture deltas or new cases.

@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "dealer_contact_assist",
+  "expected_offer_type": "retailer_contact_soft",
+  "min_confidence": 0.45
+}

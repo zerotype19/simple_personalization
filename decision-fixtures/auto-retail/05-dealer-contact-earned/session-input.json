@@ -1,31 +1,29 @@
 {
-  "name": "Inventory + payment intent",
+  "name": "Dealer contact — earned intent",
   "vertical": "auto_retail",
-  "engagement_score": 48,
-  "commercial_journey_phase": "evaluation",
+  "engagement_score": 56,
+  "commercial_journey_phase": "validation",
   "site_environment": {
     "page": {
-      "generic_kind": "inventory",
-      "confidence": 0.78,
-      "signals_used": [
-        "inventory"
-      ]
+      "generic_kind": "product_detail_page",
+      "confidence": 0.82,
+      "signals_used": ["inventory", "product"]
     }
+  },
+  "concept_affinity": {
+    "Call dealer sales about out the door price": 0.8
   },
   "behavior_snapshot": {
     "activation_readiness": {
-      "score_0_100": 48,
+      "score_0_100": 64,
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "evaluation"
-  },
-  "concept_affinity": {
-    "Monthly payment estimate on this VIN listing": 0.77
+    "commercial_journey_phase": "validation"
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.76,
+    "confidence": 0.78,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,17 +35,11 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha", "fixture reason beta"],
     "playbook": null
   },
   "signals": {
-    "cta_clicks": 0,
-    "finance_interactions": 1
+    "cta_clicks": 1
   }
 }

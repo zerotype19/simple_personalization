@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "finance_payment_assist",
+  "expected_offer_type": "payment_estimate_walkthrough",
+  "min_confidence": 0.45
+}

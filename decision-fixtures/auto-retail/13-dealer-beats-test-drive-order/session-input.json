@@ -1,31 +1,30 @@
 {
-  "name": "Inventory + payment intent",
+  "name": "Contact dealer beats test drive when both earned",
   "vertical": "auto_retail",
-  "engagement_score": 48,
-  "commercial_journey_phase": "evaluation",
+  "engagement_score": 58,
+  "commercial_journey_phase": "conversion_ready",
   "site_environment": {
     "page": {
-      "generic_kind": "inventory",
-      "confidence": 0.78,
-      "signals_used": [
-        "inventory"
-      ]
+      "generic_kind": "product_detail_page",
+      "confidence": 0.83,
+      "signals_used": ["inventory", "product"]
     }
+  },
+  "concept_affinity": {
+    "Text dealer sales about same-day pickup": 0.81,
+    "Book a test drive online this SUV": 0.76
   },
   "behavior_snapshot": {
     "activation_readiness": {
-      "score_0_100": 48,
+      "score_0_100": 66,
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "evaluation"
-  },
-  "concept_affinity": {
-    "Monthly payment estimate on this VIN listing": 0.77
+    "commercial_journey_phase": "conversion_ready"
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.76,
+    "confidence": 0.8,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,17 +36,11 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha"],
     "playbook": null
   },
   "signals": {
-    "cta_clicks": 0,
-    "finance_interactions": 1
+    "cta_clicks": 1
   }
 }

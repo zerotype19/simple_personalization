@@ -1,31 +1,26 @@
 {
-  "name": "Early inventory browse",
+  "name": "Low-intent retail browse — null primary",
   "vertical": "auto_retail",
-  "engagement_score": 38,
+  "engagement_score": 22,
   "commercial_journey_phase": "research",
   "site_environment": {
     "page": {
-      "generic_kind": "inventory",
-      "confidence": 0.68,
-      "signals_used": [
-        "inventory"
-      ]
+      "generic_kind": "home",
+      "confidence": 0.55,
+      "signals_used": []
     }
   },
   "behavior_snapshot": {
     "activation_readiness": {
-      "score_0_100": 36,
-      "interruption_posture": "soft_cta_ready",
+      "score_0_100": 24,
+      "interruption_posture": "observe_only",
       "rationale": []
     },
     "commercial_journey_phase": "research"
   },
-  "concept_affinity": {
-    "New SUV inventory listings by metro region": 0.72
-  },
   "activation_opportunity": {
-    "status": "ready",
-    "confidence": 0.72,
+    "status": "weak",
+    "confidence": 0.38,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,13 +32,8 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha"],
     "playbook": null
   },
   "signals": {

@@ -1,31 +1,29 @@
 {
-  "name": "Inventory + payment intent",
+  "name": "Inventory browse — dealer CTAs not earned",
   "vertical": "auto_retail",
-  "engagement_score": 48,
-  "commercial_journey_phase": "evaluation",
+  "engagement_score": 40,
+  "commercial_journey_phase": "research",
   "site_environment": {
     "page": {
       "generic_kind": "inventory",
-      "confidence": 0.78,
-      "signals_used": [
-        "inventory"
-      ]
+      "confidence": 0.72,
+      "signals_used": ["inventory"]
     }
+  },
+  "concept_affinity": {
+    "Certified pre-owned inventory filters nearby": 0.7
   },
   "behavior_snapshot": {
     "activation_readiness": {
-      "score_0_100": 48,
+      "score_0_100": 38,
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "evaluation"
-  },
-  "concept_affinity": {
-    "Monthly payment estimate on this VIN listing": 0.77
+    "commercial_journey_phase": "research"
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.76,
+    "confidence": 0.72,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -37,17 +35,11 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha"],
     "playbook": null
   },
   "signals": {
-    "cta_clicks": 0,
-    "finance_interactions": 1
+    "cta_clicks": 0
   }
 }

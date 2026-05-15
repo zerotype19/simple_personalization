@@ -1,0 +1,5 @@
+{
+  "expected_surface_id": "test_drive_secondary_cta",
+  "expected_offer_type": "test_drive_booking_soft",
+  "min_confidence": 0.45
+}

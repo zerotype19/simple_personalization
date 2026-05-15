@@ -1,34 +1,25 @@
 {
-  "name": "Trade-in consideration",
+  "name": "Lease payment research on inventory",
   "vertical": "auto_retail",
   "engagement_score": 46,
-  "commercial_journey_phase": "comparison",
+  "commercial_journey_phase": "research",
   "site_environment": {
     "page": {
-      "generic_kind": "product_detail_page",
-      "confidence": 0.76,
-      "signals_used": [
-        "trade"
-      ]
-    }
-  },
-  "behavior_snapshot": {
-    "activation_readiness": {
-      "score_0_100": 46,
-      "interruption_posture": "soft_cta_ready",
-      "rationale": []
-    },
-    "commercial_journey_phase": "comparison",
-    "navigation": {
-      "journey_pattern": "trade",
-      "journey_velocity": "deliberate",
-      "comparison_behavior": true,
-      "high_intent_transition": false,
-      "path_summary": "/vdp"
+      "generic_kind": "inventory",
+      "confidence": 0.74,
+      "signals_used": ["inventory"]
     }
   },
   "concept_affinity": {
-    "Trade in appraisal instant offer on VDP": 0.79
+    "Lease payment calculator SUV inventory": 0.76
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 44,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "research"
   },
   "activation_opportunity": {
     "status": "ready",
@@ -44,13 +35,8 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha"],
     "playbook": null
   },
   "signals": {

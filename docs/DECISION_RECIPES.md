@@ -55,6 +55,8 @@ When **match confidence ties** (common today because the base score is profile-w
 
 **Auto OEM pack order (intentional):** **`auto_oem_incentive_inline`** first for stackable-offer sessions; **`auto_oem_model_discovery_soft`** for **discovery/research** only; **`auto_oem_capability_explainer`**, **`auto_oem_trim_compare`** (requires trim-grade concepts), **`auto_oem_configurator_resume_soft`** before **`auto_oem_build_price_focus`** so resume tokens beat generic configurator lanes; **EV**, **family**, **payment estimate**, **owner**, **inventory transition**, then **`auto_oem_dealer_locator_earned`** last among positives (high readiness + dealer/test-drive concepts). See `decision-fixtures/auto-oem/04-*`–`15-*`.
 
+**Auto retail pack order (intentional):** **`auto_retail_dealer_contact_earned`** first among high-intent CTAs (explicit **call/text/contact dealer** concepts + readiness); **`auto_retail_finance_payment_assist`** before **`auto_retail_test_drive_earned`** so payment comparisons beat drive-booking ties; **`auto_retail_trade_in_soft`** then **`auto_retail_inventory_assist`** as the broad inventory catch-all (concept-gated). See `decision-fixtures/auto-retail/04-*`–`13-*`.
+
 ## Editing workflow
 
 1. Add or edit JSON in `experience-recipes/`.

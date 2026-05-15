@@ -1,16 +1,17 @@
 {
-  "name": "Trade-in consideration",
+  "name": "VIN detail — availability assist",
   "vertical": "auto_retail",
-  "engagement_score": 46,
-  "commercial_journey_phase": "comparison",
+  "engagement_score": 48,
+  "commercial_journey_phase": "evaluation",
   "site_environment": {
     "page": {
       "generic_kind": "product_detail_page",
-      "confidence": 0.76,
-      "signals_used": [
-        "trade"
-      ]
+      "confidence": 0.84,
+      "signals_used": ["inventory", "product"]
     }
+  },
+  "concept_affinity": {
+    "VIN decoded vehicle availability check": 0.77
   },
   "behavior_snapshot": {
     "activation_readiness": {
@@ -18,21 +19,11 @@
       "interruption_posture": "soft_cta_ready",
       "rationale": []
     },
-    "commercial_journey_phase": "comparison",
-    "navigation": {
-      "journey_pattern": "trade",
-      "journey_velocity": "deliberate",
-      "comparison_behavior": true,
-      "high_intent_transition": false,
-      "path_summary": "/vdp"
-    }
-  },
-  "concept_affinity": {
-    "Trade in appraisal instant offer on VDP": 0.79
+    "commercial_journey_phase": "evaluation"
   },
   "activation_opportunity": {
     "status": "ready",
-    "confidence": 0.74,
+    "confidence": 0.75,
     "visitor_read": "fixture",
     "inferred_need": "fixture need",
     "message_angle": "fixture angle",
@@ -44,13 +35,8 @@
     "secondary_path_label": "",
     "soft_path_label": "",
     "opportunity_note": null,
-    "evidence": [
-      "fixture evidence"
-    ],
-    "reason": [
-      "fixture reason alpha",
-      "fixture reason beta"
-    ],
+    "evidence": ["fixture evidence"],
+    "reason": ["fixture reason alpha"],
     "playbook": null
   },
   "signals": {

@@ -138,6 +138,10 @@ For **financial_services** packs, anonymous decisions should **build comparison 
 
 For **`auto_oem`**, help visitors progress from **model education** to **configuration confidence**—trim comparison and build/price assist **before** **`dealer_locator_soft_prompt`**; dealer and inventory handoffs stay **recipe-gated** to inventory/dealer concepts and readiness; pack copy avoids showroom CTAs on thin research. **`decision-fixtures/auto-oem/*`** encodes this without collector or architecture changes.
 
+### Auto retail realism (pack-level)
+
+For **`auto_retail`**, favor **inventory**, **payment**, and **trade-in** surfaces when concepts match; **dealer contact** and **test drive** stay behind explicit retail intents and readiness so anonymous sessions are not pushed into showroom CTAs during light listing browse. **`decision-fixtures/auto-retail/*`** locks ordering and gates without API or collector changes.
+
 ### What the market needs (vs what it does not)
 
 The wedge is **better anonymous decisions** — when to interrupt, when **not** to interrupt, appropriate **ask intensity**, which **surface** to activate vs leave quiet, when to **escalate** vs **suppress** — not more dashboards, raw visitor telemetry, or identity-adjacent enrichment for v1.
