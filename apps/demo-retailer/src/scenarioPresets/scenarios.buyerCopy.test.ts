@@ -8,6 +8,7 @@ import {
   joinBuyerInspectorNarrativeForTests,
   runDecisionReplay,
   BUYER_RUNTIME_SIGNAL_STILL_GATHERING,
+  type ReplayResult,
 } from "@si/sdk";
 import { joinScenarioPanelBuyerTextForTests } from "../components/ScenarioPresetsPanel";
 import { SCENARIO_PRESETS } from "./scenarios";
@@ -63,7 +64,7 @@ describe("scenario preset buyer copy", () => {
 
 describe("describeLatestReplayTransition buyer safety", () => {
   it("collapses unknown transition reasons to the canonical gathering line", () => {
-    const replay = {
+    const replay: ReplayResult = {
       frames: [],
       transitions: [
         {
