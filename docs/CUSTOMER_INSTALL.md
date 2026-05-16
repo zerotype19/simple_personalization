@@ -37,9 +37,25 @@ You can also append **`?si_debug=1`** to the **page** URL, use **`sessionStorage
 ## What the tag does
 
 - Runs **entirely in the visitor’s browser** after download from your snippet host (for example Cloudflare Pages on `cdn.optiview.ai`).
-- Maintains **anonymous** session state in **`sessionStorage`** (no accounts required for the default path).
-- Does **not** fingerprint visitors beyond ordinary page interaction signals described in your DPA / privacy policy.
+- Maintains **anonymous** session state in **`sessionStorage`** under `si:session` (no accounts required for the default path).
+- May set **one** `localStorage` key on your origin — `si:returning` — to detect a prior visit (timestamp only). This is **not** used for identity stitching, not shared across sites, and not required for core decisions.
+- Does **not** set tracking cookies, fingerprint visitors, or build a cross-site identity graph.
+- Does **not** read `input.value` / `textarea.value` or store raw search queries; commercial intent uses structure-only form classification.
 - Does **not** collect PII by design; do not place PII into fields you ask the tag to read.
+
+### Browser storage keys (reference)
+
+| Storage | Key | Purpose |
+|---------|-----|---------|
+| sessionStorage | `si:session` | Anonymous session profile (signals, commercial intent, decisions) |
+| sessionStorage | `si:exp_progression` | Experience progression memory for the session |
+| sessionStorage | `si:debug` | Optional inspector/debug (when enabled) |
+| sessionStorage | `si:inspector_mode` | Inspector buyer vs operator view |
+| sessionStorage | `si:surface_mappings` | Optional operator surface-map preview (per host+path) |
+| sessionStorage | `si:surface_mapper_overlay` | Optional surface-map overlay toggle |
+| localStorage | `si:returning` | Return-visit flag (timestamp); **only** localStorage key in the default runtime |
+
+Visitors can clear these via browser settings. See [PRIVACY_QA.md](./PRIVACY_QA.md) and the marketing [privacy page](https://optiview.ai/privacy).
 - Emits a **personalization signal** and related activation context for your personalisation / experimentation stack.
 - Can push summaries to **`dataLayer`**, **`adobeDataLayer`**, and **Optimizely** helpers exposed on `window.SessionIntel`.
 - Optionally sends **aggregated / batched** analytics to your Session Intelligence **Worker** (`/collect`) as configured.

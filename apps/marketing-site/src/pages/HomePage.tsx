@@ -125,9 +125,8 @@ export function HomePage() {
 
       <Section title="Privacy posture">
         <ul className="list-disc space-y-2 pl-5">
-          <li>Anonymous sessionStorage scope for the decision envelope / personalization surface we expose in-browser</li>
-          <li>No fingerprinting</li>
-          <li>No cross-site identity graph</li>
+          <li>Anonymous sessionStorage for in-browser session state; one optional localStorage key (<code className="text-xs">si:returning</code>) for return-visit detection on your origin only</li>
+          <li>No cookies, fingerprinting, or cross-site identity graph</li>
           <li>No keystroke logging</li>
           <li>No raw form values</li>
           <li>Query themes only where applicable, not raw query storage in the product flow described here</li>

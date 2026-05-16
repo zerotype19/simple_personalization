@@ -66,9 +66,19 @@ Dedupe keys: `form:<form_type>`. Buyer read uses `form_type_counts` qualitativel
 
 ## Privacy boundaries
 
-- Session-scoped `commercial_intent` on `SessionProfile`
+- Session-scoped `commercial_intent` on `SessionProfile` (stored in **sessionStorage** via `si:session`, not cookies)
 - Counts, stages, families — never clicked label text persisted
 - Timeline uses buyer-safe milestone labels only
+
+### Browser storage (not part of commercial intent, but relevant to privacy reviews)
+
+| Mechanism | Key | What is stored |
+|-----------|-----|----------------|
+| **sessionStorage** | `si:session` | Full anonymous `SessionProfile`, including `commercial_intent` |
+| **sessionStorage** | `si:exp_progression` | Experience progression memory |
+| **localStorage** | `si:returning` | **Only** localStorage key: prior-visit timestamp for return-visit detection on the **current origin** — not identity stitching, not cross-site |
+
+Optiview does **not** use cookies for visitor tracking, fingerprinting, or cross-site identity graphs. See [PRIVACY_QA.md](./PRIVACY_QA.md) and [CUSTOMER_INSTALL.md](./CUSTOMER_INSTALL.md).
 
 ## Vertical examples
 
@@ -144,3 +154,4 @@ pnpm decision-fixtures
 - **Forms:** `classifyFormIntent` reads field **names, types, and button labels** only — never `input.value` or `textarea.value`. Submit wiring in `observer.ts` uses the same boundary; timeline and buyer copy never include form action URLs or field names.
 - **Buyer copy:** `buildBuyerCommercialIntentRead` + `buyerCopySafety` filter taxonomy ids, engineering tokens, and unsafe CTA strings from inspector output.
 - **Timeline:** `buyerSafeTimelineLabel` maps families to human milestones (e.g. “Moved toward an in-person test drive”).
+- **Privacy QA:** [PRIVACY_QA.md](./PRIVACY_QA.md) — manual and CI checks before external beta.
