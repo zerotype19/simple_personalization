@@ -71,6 +71,17 @@ describe("classifyCtaElement", () => {
     const r = classifyCtaElement(document.querySelector("button")!)!;
     expect(r.action.action_family).toBe("schedule_test_drive");
   });
+
+  it("honors data-si-intent over generic data-si-cta=primary", () => {
+    document.body.innerHTML = `<button data-si-cta="primary" data-si-intent="schedule_test_drive">Book test drive</button>`;
+    const r = classifyCtaElement(document.querySelector("button")!, {
+      dataSiCta: "primary",
+      dataSiIntent: "schedule_test_drive",
+    })!;
+    expect(r.action.action_family).toBe("schedule_test_drive");
+    expect(r.should_count_as_high_intent).toBe(true);
+    expect(r.timeline_label).toMatch(/in-person test drive/i);
+  });
 });
 
 describe("classifyFormIntent", () => {

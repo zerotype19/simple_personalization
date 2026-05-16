@@ -127,6 +127,8 @@ export interface CommercialMomentum {
 /** Session-scoped commercial interpretation memory (no raw text, no PII). */
 export interface CommercialIntentMemory {
   action_counts: Record<string, number>;
+  /** Count of classified form submissions by {@link FormIntentType} (structure only). */
+  form_type_counts?: Record<string, number>;
   strongest_action_family: string | null;
   stage_sequence: CommercialStage[];
   blockers: CommercialBlocker[];

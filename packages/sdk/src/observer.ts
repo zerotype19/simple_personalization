@@ -1,5 +1,11 @@
 import type { PageType, SessionProfile } from "@si/shared";
-import { classifyCtaElement, updateCommercialIntentMemory } from "./commercialIntent";
+import {
+  classifyCtaElement,
+  classifyFormIntent,
+  updateCommercialIntentFromForm,
+  updateCommercialIntentMemory,
+} from "./commercialIntent";
+import { buyerSafeFormTimelineLabel } from "./commercialIntent/formTimelineLabels";
 import { pushIntelEvent } from "./sessionIntel";
 
 type Update = (mut: (p: SessionProfile) => void) => void;
@@ -16,6 +22,26 @@ function eventTargetElement(ev: Event): Element | null {
 }
 
 /** Clicks on try/demo/lab-style controls often sit outside `<main>` (hero, header). */
+const GENERIC_DATA_SI_MARKERS = new Set(["primary", "secondary", "tertiary", "default"]);
+
+function hasExplicitDataSiIntent(el: HTMLElement | null): boolean {
+  const norm = el?.getAttribute("data-si-intent")?.trim().replace(/-/g, "_");
+  return Boolean(norm && !GENERIC_DATA_SI_MARKERS.has(norm));
+}
+
+/** Header/nav links to high-intent demo routes (Velocity retailer and similar). */
+function navCommercialLink(el: Element): HTMLElement | null {
+  const link = el.closest<HTMLElement>("nav a[href], header nav a[href]");
+  if (!link || link.closest("#si-inspector-root")) return null;
+  const href = (link.getAttribute("href") ?? "").toLowerCase();
+  if (/\/(test-drive|finance|compare|checkout|cart|apply|demo|contact|schedule)\b/.test(href)) {
+    return link;
+  }
+  const text = (link.textContent ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+  if (/\b(test drive|financ|compare|checkout|apply|demo|contact)\b/.test(text)) return link;
+  return null;
+}
+
 function clickLooksLikeProductTrialExploration(el: Element): boolean {
   const host = el.closest("button, a[href], [role='button']");
   if (!host || host.closest("#si-inspector-root")) return false;
@@ -100,21 +126,20 @@ export function startObserver(
   document.addEventListener("focusin", focusHandler, { passive: true, capture: true });
 
   const submitHandler = (e: Event) => {
-    const form = (e.target as HTMLElement | null)?.closest?.("form");
-    if (!form) return;
-    const action = (form.getAttribute("action") ?? "").toLowerCase();
-    const hasSearch =
-      action.includes("search") ||
-      !!form.querySelector('input[name="q"],input[name="query"],input[type="search"]');
-    if (!hasSearch) return;
+    const raw = (e.target as HTMLElement | null)?.closest?.("form");
+    if (!raw || !(raw instanceof HTMLFormElement)) return;
+    if (raw.closest("#si-inspector-root")) return;
+
+    const form = raw;
+    const intent = classifyFormIntent(form);
+
     update((p) => {
       seedLanding(p);
-      p.signals.onsite_search_events++;
-      pushIntelEvent(
-        p,
-        "Submitted an on-site search (query text is not captured)",
-        `onsite_search:${p.signals.onsite_search_events}`,
-      );
+      if (intent.form_type === "search") {
+        p.signals.onsite_search_events++;
+      }
+      p.commercial_intent = updateCommercialIntentFromForm(p, intent);
+      pushIntelEvent(p, buyerSafeFormTimelineLabel(intent.form_type), `form:${intent.form_type}`);
     });
   };
   document.addEventListener("submit", submitHandler, { passive: true, capture: true });
@@ -173,7 +198,8 @@ export function startObserver(
       !explicitCta && !contentInteractive && clickLooksLikeProductTrialExploration(el)
         ? el.closest<HTMLElement>("button, a[href], [role='button']")
         : null;
-    const ctaHost = explicitCta ?? contentInteractive ?? trialHost;
+    const navHost = !explicitCta && !contentInteractive && !trialHost ? navCommercialLink(el) : null;
+    const ctaHost = explicitCta ?? contentInteractive ?? trialHost ?? navHost;
     const fromTrialHeuristic = Boolean(trialHost && !explicitCta && !contentInteractive);
 
     if (ctaHost) {
@@ -186,13 +212,33 @@ export function startObserver(
         update((p) => {
           seedLanding(p);
           p.commercial_intent = updateCommercialIntentMemory(p, interpretation);
-          if (interpretation.should_count_as_cta_click || fromTrialHeuristic) {
+          const countClick = interpretation.should_count_as_cta_click || fromTrialHeuristic;
+          const timelineWorthy =
+            interpretation.should_count_as_high_intent ||
+            hasExplicitDataSiIntent(ctaHost) ||
+            [
+              "schedule_test_drive",
+              "schedule_demo",
+              "talk_to_sales",
+              "book_appointment",
+              "contact_dealer",
+              "begin_checkout",
+              "add_to_cart",
+              "apply",
+              "check_eligibility",
+              "view_financing",
+              "compare",
+            ].includes(interpretation.action.action_family);
+
+          if (countClick) {
             p.signals.cta_clicks++;
-            if (p.signals.cta_clicks === 1) {
-              pushIntelEvent(p, interpretation.timeline_label, "cta_first_click");
-            } else {
-              pushIntelEvent(p, interpretation.timeline_label, `cta:${interpretation.action.action_family}`);
-            }
+          }
+          if (timelineWorthy) {
+            const dedupe =
+              p.signals.cta_clicks <= 1 && countClick
+                ? "cta_first_click"
+                : `cta:${interpretation.action.action_family}`;
+            pushIntelEvent(p, interpretation.timeline_label, dedupe);
           }
           const fam = interpretation.action.action_family;
           if (fam === "view_financing" || fam === "calculate") p.signals.finance_interactions++;

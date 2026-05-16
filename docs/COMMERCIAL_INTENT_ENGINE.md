@@ -43,6 +43,26 @@ Located in `packages/shared/src/context-packs/commercial-intent/`:
 - `inferCommercialBlockers` — active objections
 - `inferJourneyMomentum` — increasing / validating / hesitating
 - `updateCommercialIntentMemory` — session memory
+- `updateCommercialIntentFromForm` — form submit → memory + `form_type_counts`
+- `buyerSafeFormTimelineLabel` — buyer-safe form milestone copy
+
+## Form submit wiring
+
+On every `submit` (capture phase), `observer.ts` classifies the form with `classifyFormIntent` and updates `commercial_intent` via `updateCommercialIntentFromForm`. **No field values are read** — only structure (action URL, method, names, labels, placeholders, autocomplete, submit text, types, data attributes).
+
+| Form type | Timeline label (examples) | Memory emphasis |
+|-----------|---------------------------|-----------------|
+| lead | Submitted a lead or contact form | human escalation, high intent |
+| application | Moved into an application flow | commitment, high intent |
+| appointment | Moved toward scheduling… | human escalation (auto → test drive family) |
+| eligibility | Requested eligibility or coverage guidance | qualification |
+| checkout | Moved toward checkout | commitment, high intent |
+| quote | Requested a quote… | qualification |
+| support | Submitted a support or help request | trust validation |
+| search | Submitted a search | low exploration; also increments `onsite_search_events` |
+| newsletter | Signed up for updates… | low exploration (does not over-escalate) |
+
+Dedupe keys: `form:<form_type>`. Buyer read uses `form_type_counts` qualitatively — never field names or raw action URLs.
 
 ## Privacy boundaries
 
@@ -80,6 +100,7 @@ Implementation: `packages/sdk/src/decisioning/commercialIntentDecisionCoupling.t
 | Suite | Purpose |
 |-------|---------|
 | `commercialIntent.test.ts` | Phrase matching, DOM CTA weighting, form/page roles, buyer-safe copy |
+| `formSubmitCommercialIntent.test.ts` | Form structure classification, memory/timeline/buyer copy, no `.value` usage |
 | `__tests__/commercial-intent-replay.test.ts` | Vertical journey replay via `testUtils/buildCommercialIntentJourney.ts` |
 | `decisioning/commercialIntentDecisionCoupling.test.ts` | Bounded deltas, suppression, regulated restraint, ranking shifts per vertical |
 | `decision-fixtures/auto-retail/14-compare-finance-intent-coupling` | Fixture: finance intent + blocker → payment assist primary |
@@ -117,6 +138,6 @@ pnpm decision-fixtures
 ### Privacy guardrails (tests + runtime)
 
 - **Persisted:** action family counts, stage sequence, blocker ids, momentum direction — never raw clicked label text.
-- **Forms:** `classifyFormIntent` reads field **names, types, and button labels** only — never `input.value`.
+- **Forms:** `classifyFormIntent` reads field **names, types, and button labels** only — never `input.value` or `textarea.value`. Submit wiring in `observer.ts` uses the same boundary; timeline and buyer copy never include form action URLs or field names.
 - **Buyer copy:** `buildBuyerCommercialIntentRead` + `buyerCopySafety` filter taxonomy ids, engineering tokens, and unsafe CTA strings from inspector output.
 - **Timeline:** `buyerSafeTimelineLabel` maps families to human milestones (e.g. “Moved toward an in-person test drive”).

@@ -21,6 +21,7 @@ const QUALIFICATION_FAMILIES = new Set([
   "check_eligibility",
   "view_financing",
   "configure",
+  "request_quote",
 ]);
 
 const TRUST_FAMILIES = new Set(["view_security", "view_returns", "view_faq", "read_reviews"]);
@@ -28,6 +29,7 @@ const TRUST_FAMILIES = new Set(["view_security", "view_returns", "view_faq", "re
 export function emptyCommercialIntentMemory(): CommercialIntentMemory {
   return {
     action_counts: {},
+    form_type_counts: {},
     strongest_action_family: null,
     stage_sequence: [],
     blockers: [],

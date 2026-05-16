@@ -21,6 +21,23 @@ export function buildBuyerCommercialIntentRead(profile: SessionProfile): string[
     lines.push("Commercial posture looks exploratory so far — the runtime is staying patient.");
   }
 
+  const formCounts = mem.form_type_counts ?? {};
+  if ((formCounts.appointment ?? 0) > 0) {
+    lines.push("A scheduling or visit-oriented form step suggests readiness for an in-person next step.");
+  } else if ((formCounts.lead ?? 0) > 0 || (formCounts.quote ?? 0) > 0) {
+    lines.push("A contact or quote form submission signals stronger commercial interest than browsing alone.");
+  } else if ((formCounts.application ?? 0) > 0) {
+    lines.push("An application-style form step is active in this session.");
+  } else if ((formCounts.checkout ?? 0) > 0) {
+    lines.push("Checkout-related form activity suggests purchase intent is building.");
+  } else if ((formCounts.eligibility ?? 0) > 0) {
+    lines.push("Eligibility or coverage questions surfaced through a form interaction.");
+  } else if ((formCounts.support ?? 0) > 0) {
+    lines.push("A help or support form was used — trust and reassurance may matter more than escalation.");
+  } else if ((formCounts.newsletter ?? 0) > 0 && (formCounts.lead ?? 0) === 0) {
+    lines.push("Lightweight signup activity only — the runtime stays patient before a harder ask.");
+  }
+
   if (mem.human_escalation_interactions > 0) {
     lines.push("Recent actions suggest interest in human contact or an in-person next step.");
   } else if (mem.qualification_interactions > 0) {

@@ -39,7 +39,7 @@ export default function Layout() {
             <NavLink className={linkClass} to="/trade-in">
               Trade-in
             </NavLink>
-            <NavLink className={linkClass} to="/test-drive">
+            <NavLink className={linkClass} to="/test-drive" data-si-intent="schedule_test_drive">
               Test drive
             </NavLink>
           </nav>

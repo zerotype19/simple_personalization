@@ -68,6 +68,17 @@ export function classifyFormIntent(form: HTMLFormElement): FormIntent {
     };
   }
 
+  if (/\b(test drive|book test drive|schedule test drive)\b/.test(blob)) {
+    evidence.push("test_drive_form");
+    return {
+      form_type: "appointment",
+      friction_level: "high",
+      commitment_level: "human_contact",
+      commercial_stage: "human_escalation",
+      evidence,
+    };
+  }
+
   if (/\b(date|time|appointment|schedule|provider)\b/.test(blob)) {
     evidence.push("appointment_fields");
     return {

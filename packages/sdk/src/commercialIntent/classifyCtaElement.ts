@@ -91,6 +91,18 @@ export function classifyCtaElement(
   if (opts?.dataSiCta === "finance") action = { ...action, action_family: "view_financing", evidence: [...action.evidence, "data_si_cta_finance"] };
   if (opts?.dataSiCta === "compare") action = { ...action, action_family: "compare", evidence: [...action.evidence, "data_si_cta_compare"] };
 
+  const intentNorm = opts?.dataSiIntent?.trim().replace(/-/g, "_");
+  if (intentNorm && !GENERIC_DATA_SI_MARKERS.has(intentNorm)) {
+    action = {
+      ...action,
+      action_family: intentNorm,
+      confidence: Math.max(action.confidence, 0.72),
+      intent_strength: isHighIntent(intentNorm) ? "very_high" : action.intent_strength,
+      commercial_stage: isHumanEscalation(intentNorm) ? "human_escalation" : action.commercial_stage,
+      evidence: [...action.evidence, "data_si_intent"],
+    };
+  }
+
   const element_role = inferElementRole(host);
   const is_repeated_chrome_cta = element_role === "header_nav" || element_role === "footer";
   const is_primary_visual_cta = element_role === "hero" || element_role === "pricing_section";

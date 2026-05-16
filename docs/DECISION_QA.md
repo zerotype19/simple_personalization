@@ -132,6 +132,10 @@ Authoring tip: seed `commercial_intent` in fixtures when you need to lock **rank
 - **`docs/DECISION_REPLAY.md`** — philosophy, `si:*` event shapes, debugging workflow, explicit non-goals (no remote engine, no DB).
 - **Vitest** — `packages/sdk/src/decisioning/__tests__/decision-replay.test.ts` (determinism + B2B deepen scenario + diff helper).
 
+## Commercial intent (forms + CTAs)
+
+Form-submit and high-intent CTA behavior are covered in Vitest (`formSubmitCommercialIntent.test.ts`, `commercialIntent.test.ts`, `commercial-intent-replay.test.ts`), not in JSON decision fixtures today. When adding a fixture that depends on form-derived memory, set `commercial_intent` / `form_type_counts` explicitly in `session-input.json` (replay helper: `buildCommercialIntentJourney`) rather than simulating DOM submit in the fixture runner.
+
 ## Commands
 
 | Command | Purpose |

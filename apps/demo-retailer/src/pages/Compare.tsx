@@ -87,7 +87,12 @@ export default function ComparePage() {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link data-si-cta="primary" className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white" to="/test-drive">
+          <Link
+            data-si-cta="primary"
+            data-si-intent="schedule_test_drive"
+            className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white"
+            to="/test-drive"
+          >
             Book a test drive
           </Link>
           <Link data-si-cta="finance" className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-white" to="/finance">
