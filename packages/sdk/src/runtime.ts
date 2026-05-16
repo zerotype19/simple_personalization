@@ -13,6 +13,7 @@ import { Batcher } from "./batcher";
 import { DEFAULT_CONFIG } from "./defaults";
 import { assignExperiments } from "./experiments";
 import { mountInspector } from "./inspector";
+import { applyCommercialIntentTick } from "./commercialIntent";
 import { startObserver } from "./observer";
 import { applyTreatment, clearTreatments, selectTreatments } from "./personalization";
 import { chooseRecommendation } from "./recommender";
@@ -126,6 +127,7 @@ export class SessionIntelRuntime {
         mut(this.profile);
         this.tick();
       },
+      { getVertical: () => this.profile.site_context.vertical },
     );
 
     this.batcher = new Batcher({
@@ -570,6 +572,7 @@ export class SessionIntelRuntime {
       this.profile.page_journey = steps;
     }
 
+    applyCommercialIntentTick(this.profile);
     buildBehaviorSnapshot(this.profile);
     this.profile.activation_opportunity = inferActivationOpportunity({
       profile: this.profile,

@@ -206,6 +206,18 @@ export {
 export type { ExperienceLadderState } from "./decisioning/experienceStatePresentation";
 
 export {
+  classifyCommercialAction,
+  classifyCtaElement,
+  classifyFormIntent,
+  classifyPageRole,
+  inferCommercialBlockers,
+  inferJourneyMomentum,
+  updateCommercialIntentMemory,
+  buildBuyerCommercialIntentRead,
+} from "./commercialIntent";
+export type { ClassifyCommercialActionInput } from "./commercialIntent";
+
+export {
   addMapping,
   attachDecisionsToRegions,
   buildCssSelector,

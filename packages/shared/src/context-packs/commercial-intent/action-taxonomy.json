@@ -1,0 +1,275 @@
+{
+  "actions": [
+    {
+      "id": "learn_more",
+      "label": "Learn more",
+      "commercial_stage": "exploration",
+      "intent_strength": "low",
+      "friction_level": "low",
+      "commitment_level": "content",
+      "verbs": ["learn", "read", "discover", "explore"],
+      "nouns": ["more", "overview", "details"],
+      "phrases": ["learn more", "read more", "see how it works", "find out more", "discover"],
+      "negative_context": ["learn about financing", "learn about returns"]
+    },
+    {
+      "id": "explore",
+      "commercial_stage": "exploration",
+      "intent_strength": "low",
+      "friction_level": "low",
+      "commitment_level": "content",
+      "verbs": ["explore", "browse", "view", "see"],
+      "nouns": ["inventory", "models", "products", "catalog"],
+      "phrases": ["explore", "browse inventory", "view models", "view products", "see all"]
+    },
+    {
+      "id": "compare",
+      "commercial_stage": "comparison",
+      "intent_strength": "medium",
+      "friction_level": "low",
+      "commitment_level": "evaluation",
+      "verbs": ["compare", "contrast"],
+      "nouns": ["plans", "models", "trims", "options"],
+      "phrases": ["compare", "compare plans", "compare models", "compare trims", "side by side"]
+    },
+    {
+      "id": "view_pricing",
+      "commercial_stage": "comparison",
+      "intent_strength": "medium",
+      "friction_level": "medium",
+      "commitment_level": "evaluation",
+      "verbs": ["see", "view", "get"],
+      "nouns": ["pricing", "plans", "rates", "fees"],
+      "phrases": ["see pricing", "view pricing", "pricing", "plans and pricing", "get pricing"]
+    },
+    {
+      "id": "calculate",
+      "commercial_stage": "qualification",
+      "intent_strength": "high",
+      "friction_level": "medium",
+      "commitment_level": "tool_use",
+      "verbs": ["calculate", "estimate", "compute"],
+      "nouns": ["payment", "payment", "rate", "apr", "lease"],
+      "phrases": ["calculate payment", "payment calculator", "estimate payment", "calculate", "estimate"]
+    },
+    {
+      "id": "check_eligibility",
+      "commercial_stage": "qualification",
+      "intent_strength": "high",
+      "friction_level": "medium",
+      "commitment_level": "tool_use",
+      "verbs": ["check", "see", "verify"],
+      "nouns": ["eligibility", "coverage", "qualify"],
+      "phrases": ["check eligibility", "see if you qualify", "coverage checker", "am i eligible"]
+    },
+    {
+      "id": "read_reviews",
+      "commercial_stage": "objection_resolution",
+      "intent_strength": "medium",
+      "friction_level": "low",
+      "commitment_level": "evaluation",
+      "verbs": ["read", "see", "view"],
+      "nouns": ["reviews", "ratings", "testimonials"],
+      "phrases": ["read reviews", "see reviews", "customer reviews", "ratings"]
+    },
+    {
+      "id": "start_trial",
+      "commercial_stage": "commitment",
+      "intent_strength": "high",
+      "friction_level": "high",
+      "commitment_level": "account_or_cart",
+      "verbs": ["start", "begin", "try"],
+      "nouns": ["trial", "free trial"],
+      "phrases": ["start free trial", "start trial", "try free", "begin trial"],
+      "negative_context": ["watch demo video", "demo video"]
+    },
+    {
+      "id": "get_started",
+      "commercial_stage": "commitment",
+      "intent_strength": "medium",
+      "friction_level": "medium",
+      "commitment_level": "account_or_cart",
+      "verbs": ["get", "start", "begin"],
+      "nouns": ["started"],
+      "phrases": ["get started", "start now", "begin"]
+    },
+    {
+      "id": "add_to_cart",
+      "commercial_stage": "commitment",
+      "intent_strength": "high",
+      "friction_level": "high",
+      "commitment_level": "purchase",
+      "verbs": ["add"],
+      "nouns": ["cart", "bag"],
+      "phrases": ["add to cart", "add to bag", "buy now", "purchase"]
+    },
+    {
+      "id": "begin_checkout",
+      "commercial_stage": "commitment",
+      "intent_strength": "very_high",
+      "friction_level": "high",
+      "commitment_level": "purchase",
+      "verbs": ["checkout", "complete", "continue"],
+      "nouns": ["checkout", "order"],
+      "phrases": ["checkout", "continue to checkout", "complete purchase", "place order"]
+    },
+    {
+      "id": "continue_application",
+      "commercial_stage": "commitment",
+      "intent_strength": "very_high",
+      "friction_level": "high",
+      "commitment_level": "lead",
+      "verbs": ["continue", "resume", "finish"],
+      "nouns": ["application"],
+      "phrases": ["continue application", "resume application", "finish application"]
+    },
+    {
+      "id": "request_quote",
+      "commercial_stage": "human_escalation",
+      "intent_strength": "high",
+      "friction_level": "high",
+      "commitment_level": "lead",
+      "verbs": ["request", "get"],
+      "nouns": ["quote", "pricing"],
+      "phrases": ["request quote", "get a quote", "request pricing"]
+    },
+    {
+      "id": "schedule_demo",
+      "commercial_stage": "human_escalation",
+      "intent_strength": "very_high",
+      "friction_level": "high",
+      "commitment_level": "human_contact",
+      "verbs": ["schedule", "book", "request"],
+      "nouns": ["demo", "consultation", "walkthrough"],
+      "phrases": ["schedule demo", "book a demo", "request demo", "schedule a call"],
+      "negative_context": ["watch demo", "demo video", "cancel demo"]
+    },
+    {
+      "id": "talk_to_sales",
+      "commercial_stage": "human_escalation",
+      "intent_strength": "very_high",
+      "friction_level": "high",
+      "commitment_level": "human_contact",
+      "verbs": ["talk", "contact", "speak"],
+      "nouns": ["sales", "advisor", "representative"],
+      "phrases": ["talk to sales", "contact sales", "speak to sales", "contact us"]
+    },
+    {
+      "id": "schedule_test_drive",
+      "commercial_stage": "human_escalation",
+      "intent_strength": "very_high",
+      "friction_level": "high",
+      "commitment_level": "human_contact",
+      "verbs": ["schedule", "book", "reserve"],
+      "nouns": ["test drive", "drive"],
+      "phrases": [
+        "schedule test drive",
+        "book test drive",
+        "test drive",
+        "book a drive",
+        "reserve your drive",
+        "take it for a spin",
+        "try it in person"
+      ],
+      "vertical_overrides": {
+        "auto_retail": { "phrases": ["schedule test drive", "book test drive", "drive this vehicle"] },
+        "auto_oem": { "phrases": ["schedule test drive", "book test drive"] }
+      }
+    },
+    {
+      "id": "book_appointment",
+      "commercial_stage": "human_escalation",
+      "intent_strength": "high",
+      "friction_level": "high",
+      "commitment_level": "human_contact",
+      "verbs": ["book", "schedule"],
+      "nouns": ["appointment", "visit"],
+      "phrases": ["book appointment", "schedule appointment"],
+      "negative_context": ["cancel appointment"]
+    },
+    {
+      "id": "contact_dealer",
+      "commercial_stage": "human_escalation",
+      "intent_strength": "high",
+      "friction_level": "medium",
+      "commitment_level": "human_contact",
+      "verbs": ["contact", "find", "locate"],
+      "nouns": ["dealer", "store", "location"],
+      "phrases": ["contact dealer", "find dealer", "dealer locator", "find a dealer"]
+    },
+    {
+      "id": "view_financing",
+      "commercial_stage": "qualification",
+      "intent_strength": "high",
+      "friction_level": "medium",
+      "commitment_level": "tool_use",
+      "verbs": ["view", "explore", "see"],
+      "nouns": ["financing", "finance", "payment"],
+      "phrases": ["view financing", "financing options", "payment options", "finance"]
+    },
+    {
+      "id": "view_security",
+      "commercial_stage": "objection_resolution",
+      "intent_strength": "medium",
+      "friction_level": "low",
+      "commitment_level": "evaluation",
+      "verbs": ["view", "see", "read"],
+      "nouns": ["security", "privacy", "compliance"],
+      "phrases": ["security", "privacy", "compliance", "trust center"],
+      "blocker_category": "trust_security_concern"
+    },
+    {
+      "id": "view_returns",
+      "commercial_stage": "objection_resolution",
+      "intent_strength": "medium",
+      "friction_level": "low",
+      "commitment_level": "evaluation",
+      "verbs": ["view", "see"],
+      "nouns": ["returns", "shipping", "warranty"],
+      "phrases": ["returns", "shipping", "warranty", "refund policy"],
+      "blocker_category": "shipping_returns_uncertainty"
+    },
+    {
+      "id": "view_faq",
+      "commercial_stage": "objection_resolution",
+      "intent_strength": "low",
+      "friction_level": "low",
+      "commitment_level": "content",
+      "verbs": ["view", "read"],
+      "nouns": ["faq", "help"],
+      "phrases": ["faq", "frequently asked", "help center"]
+    },
+    {
+      "id": "save_for_later",
+      "commercial_stage": "exploration",
+      "intent_strength": "low",
+      "friction_level": "passive",
+      "commitment_level": "content",
+      "verbs": ["save"],
+      "nouns": ["later", "wishlist"],
+      "phrases": ["save for later", "save item", "wishlist"]
+    },
+    {
+      "id": "configure",
+      "label": "Configure",
+      "commercial_stage": "evaluation",
+      "intent_strength": "medium",
+      "friction_level": "medium",
+      "commitment_level": "tool_use",
+      "verbs": ["build", "configure", "customize", "design"],
+      "nouns": ["price", "vehicle", "package"],
+      "phrases": ["build and price", "configure", "customize", "build your"]
+    },
+    {
+      "id": "apply",
+      "label": "Apply",
+      "commercial_stage": "commitment",
+      "intent_strength": "very_high",
+      "friction_level": "high",
+      "commitment_level": "lead",
+      "verbs": ["apply", "submit"],
+      "nouns": ["application", "now"],
+      "phrases": ["apply now", "start application", "apply today"]
+    }
+  ]
+}

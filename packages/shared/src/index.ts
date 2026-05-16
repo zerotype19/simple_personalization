@@ -1,3 +1,5 @@
+import type { CommercialIntentMemory } from "./commercialIntentTypes";
+
 export type JourneyStage = "discovery" | "browsing" | "comparison" | "conversion";
 
 /**
@@ -600,6 +602,11 @@ export interface SessionProfile extends SessionScores {
    * Owned by the SDK runtime; optional on fixtures for QA.
    */
   experience_progression?: ExperienceProgressionMemory;
+  /**
+   * Deterministic commercial intent interpretation (CTA semantics, momentum, blockers).
+   * Session-local; no raw labels, form values, or query strings stored.
+   */
+  commercial_intent?: CommercialIntentMemory;
 }
 
 /** One row in the inspector “session timeline” (anonymous, in-session). */
@@ -868,5 +875,34 @@ export const DEFAULT_THRESHOLDS = {
   high_urgency: 60,
   high_engagement: 65,
 } as const;
+
+export type {
+  CommercialStage,
+  IntentStrength,
+  FrictionLevel,
+  CommitmentLevel,
+  PageRole,
+  MomentumDirection,
+  CommercialActionInterpretation,
+  CtaElementRole,
+  CtaElementInterpretation,
+  FormIntentType,
+  FormIntent,
+  PageRoleInterpretation,
+  CommercialBlocker,
+  CommercialBlockerInference,
+  CommercialMomentum,
+  CommercialIntentMemory,
+} from "./commercialIntentTypes";
+
+export {
+  COMMERCIAL_ACTION_TAXONOMY,
+  COMMERCIAL_BLOCKER_TAXONOMY,
+  COMMERCIAL_PAGE_ROLE_TAXONOMY,
+  COMMERCIAL_MULTILINGUAL_PHRASES,
+  getActionTaxonomyEntry,
+  phrasesForAction,
+} from "./commercialIntentPack";
+export type { ActionTaxonomyEntry, BlockerTaxonomyEntry, PageRoleTaxonomyEntry } from "./commercialIntentPack";
 
 export { GENERIC_HOSTED_SDK_CONFIG, VELOCITY_RETAIL_DEMO_SDK_CONFIG } from "./presetConfigs";

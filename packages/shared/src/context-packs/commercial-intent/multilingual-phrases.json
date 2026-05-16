@@ -1,0 +1,137 @@
+{
+  "learn_more": {
+    "en": ["learn more", "read more", "find out more"],
+    "es": ["saber más", "leer más", "descubrir más"],
+    "fr": ["en savoir plus", "lire la suite"],
+    "de": ["mehr erfahren", "weiterlesen"],
+    "it": ["scopri di più", "leggi di più"],
+    "pt": ["saiba mais", "leia mais"],
+    "nl": ["meer informatie", "lees meer"]
+  },
+  "compare": {
+    "en": ["compare", "compare plans", "side by side"],
+    "es": ["comparar", "comparar planes"],
+    "fr": ["comparer", "comparer les offres"],
+    "de": ["vergleichen", "pläne vergleichen"],
+    "it": ["confronta", "confronta i piani"],
+    "pt": ["comparar", "comparar planos"],
+    "nl": ["vergelijken", "plannen vergelijken"]
+  },
+  "view_pricing": {
+    "en": ["pricing", "see pricing", "plans"],
+    "es": ["precios", "ver precios", "planes"],
+    "fr": ["tarifs", "voir les tarifs"],
+    "de": ["preise", "preise ansehen"],
+    "it": ["prezzi", "vedi prezzi"],
+    "pt": ["preços", "ver preços"],
+    "nl": ["prijzen", "bekijk prijzen"]
+  },
+  "schedule_demo": {
+    "en": ["schedule demo", "book a demo", "request demo"],
+    "es": ["programar demo", "solicitar demo", "reservar demo"],
+    "fr": ["demander une démo", "planifier une démo"],
+    "de": ["demo anfordern", "demo buchen"],
+    "it": ["richiedi una demo", "prenota una demo"],
+    "pt": ["solicitar demonstração", "agendar demo"],
+    "nl": ["demo aanvragen", "demo plannen"]
+  },
+  "start_trial": {
+    "en": ["start free trial", "try free", "begin trial"],
+    "es": ["prueba gratis", "iniciar prueba"],
+    "fr": ["essai gratuit", "commencer l'essai"],
+    "de": ["kostenlos testen", "testversion starten"],
+    "it": ["prova gratuita", "inizia la prova"],
+    "pt": ["teste grátis", "iniciar teste"],
+    "nl": ["gratis proberen", "proef starten"]
+  },
+  "begin_checkout": {
+    "en": ["checkout", "buy now", "add to cart"],
+    "es": ["pagar", "comprar ahora", "añadir al carrito"],
+    "fr": ["commander", "acheter", "ajouter au panier"],
+    "de": ["zur kasse", "jetzt kaufen"],
+    "it": ["acquista", "aggiungi al carrello"],
+    "pt": ["finalizar compra", "comprar agora"],
+    "nl": ["afrekenen", "nu kopen"]
+  },
+  "schedule_test_drive": {
+    "en": ["schedule test drive", "book test drive", "test drive"],
+    "es": ["programar prueba de manejo", "prueba de manejo"],
+    "fr": ["essai routier", "réserver un essai"],
+    "de": ["probefahrt", "probefahrt buchen"],
+    "it": ["test drive", "prenota un test drive"],
+    "pt": ["test drive", "agendar test drive"],
+    "nl": ["proefrit", "proefrit plannen"]
+  },
+  "contact_dealer": {
+    "en": ["contact dealer", "find dealer", "dealer locator"],
+    "es": ["contactar concesionario", "buscar concesionario"],
+    "fr": ["contacter un concessionnaire"],
+    "de": ["händler finden", "händler kontaktieren"],
+    "it": ["contatta concessionario"],
+    "pt": ["contatar concessionária"],
+    "nl": ["dealer zoeken", "dealer contact"]
+  },
+  "view_financing": {
+    "en": ["financing", "payment calculator", "finance"],
+    "es": ["financiación", "calculadora de pagos"],
+    "fr": ["financement", "calcul de paiement"],
+    "de": ["finanzierung", "finanzrechner"],
+    "it": ["finanziamento", "calcolo rata"],
+    "pt": ["financiamento", "calculadora"],
+    "nl": ["financiering", "betaling berekenen"]
+  },
+  "apply": {
+    "en": ["apply now", "start application"],
+    "es": ["solicitar ahora", "iniciar solicitud"],
+    "fr": ["postuler", "demander maintenant"],
+    "de": ["jetzt bewerben", "antrag starten"],
+    "it": ["candidati ora", "inizia richiesta"],
+    "pt": ["candidatar-se", "iniciar candidatura"],
+    "nl": ["nu aanvragen", "aanvraag starten"]
+  },
+  "request_quote": {
+    "en": ["request quote", "get a quote"],
+    "es": ["solicitar cotización"],
+    "fr": ["demander un devis"],
+    "de": ["angebot anfordern"],
+    "it": ["richiedi preventivo"],
+    "pt": ["solicitar orçamento"],
+    "nl": ["offerte aanvragen"]
+  },
+  "talk_to_sales": {
+    "en": ["talk to sales", "contact sales"],
+    "es": ["hablar con ventas", "contactar ventas"],
+    "fr": ["parler aux ventes", "contacter les ventes"],
+    "de": ["vertrieb kontaktieren"],
+    "it": ["parla con le vendite"],
+    "pt": ["falar com vendas"],
+    "nl": ["neem contact op met sales"]
+  },
+  "check_eligibility": {
+    "en": ["check eligibility", "see if you qualify"],
+    "es": ["verificar elegibilidad"],
+    "fr": ["vérifier l'éligibilité"],
+    "de": ["berechtigung prüfen"],
+    "it": ["verifica idoneità"],
+    "pt": ["verificar elegibilidade"],
+    "nl": ["geschiktheid controleren"]
+  },
+  "read_reviews": {
+    "en": ["reviews", "read reviews"],
+    "es": ["reseñas", "leer reseñas"],
+    "fr": ["avis", "lire les avis"],
+    "de": ["bewertungen"],
+    "it": ["recensioni"],
+    "pt": ["avaliações"],
+    "nl": ["beoordelingen"]
+  },
+  "view_returns": {
+    "en": ["returns", "shipping", "warranty"],
+    "es": ["devoluciones", "envío", "garantía"],
+    "fr": ["retours", "livraison", "garantie"],
+    "de": ["rückgabe", "versand", "garantie"],
+    "it": ["resi", "spedizione", "garanzia"],
+    "pt": ["devoluções", "envio", "garantia"],
+    "nl": ["retourneren", "verzending", "garantie"]
+  }
+}

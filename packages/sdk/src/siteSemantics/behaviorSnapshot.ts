@@ -102,6 +102,12 @@ function activationReadiness(p: SessionProfile): ActivationReadinessRead {
       (s.return_visit ? 10 : 0) -
       (s.cta_clicks >= 3 ? 12 : 0),
   );
+  const ci = p.commercial_intent;
+  if (ci?.human_escalation_interactions) score += 10;
+  else if ((ci?.high_intent_interactions ?? 0) >= 2) score += 6;
+  if (ci?.momentum.direction === "increasing") score += 5;
+  if (ci?.momentum.direction === "validating") score -= 3;
+  if (ci?.momentum.direction === "hesitating") score -= 6;
   score = Math.max(0, Math.min(100, score));
 
   let interruption_posture: ActivationReadinessRead["interruption_posture"] = "observe_only";

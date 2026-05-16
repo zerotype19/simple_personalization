@@ -1,4 +1,5 @@
 import type { ExperienceDecisionEnvelope, ExperienceDecision, SessionProfile } from "@si/shared";
+import { buildBuyerCommercialIntentRead } from "./commercialIntent";
 import { buyerSafeLineOrNull } from "./decisioning/buyerCopySafety";
 import {
   buildBuyerInspectorView,
@@ -139,6 +140,7 @@ function formatBuyerInspectorHtml(
   view: BuyerInspectorView,
   buyerTimeline?: { t: number; displayMessage: string }[],
   sessionStartedAt?: number,
+  commercialIntentLines?: string[],
 ): string {
   const sp = view.statePresentation;
   const showPrimary = view.hasPrimaryExperience;
@@ -204,6 +206,14 @@ function formatBuyerInspectorHtml(
       </div>`
     : "";
 
+  const commercialIntentBlock =
+    commercialIntentLines && commercialIntentLines.length > 0
+      ? `<div class="si-card si-buyer-section">
+      <h3>Commercial intent read</h3>
+      <ul class="si-reason si-buyer-list">${commercialIntentLines.map((line) => `<li>${escHtml(line)}</li>`).join("")}</ul>
+    </div>`
+      : "";
+
   return `<div class="si-buyer-stack">
     <div class="si-card si-buyer-section si-buyer-state-card">
       <h3>Runtime state</h3>
@@ -226,6 +236,7 @@ function formatBuyerInspectorHtml(
       <h3>Current commercial read</h3>
       <p class="si-buyer-lead">${escHtml(view.commercialRead)}</p>
     </div>
+    ${commercialIntentBlock}
     <div class="si-card si-buyer-section">
       <h3>Recommended next experience</h3>
       <div class="si-buyer-kv">
@@ -553,7 +564,12 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       replayFrames.length >= 2 ? runDecisionReplay(replayFrames) : null;
     const buyerView = buildBuyerInspectorView(p, expEnv, replayResult);
     const buyerTimelineRows = curateIntelTimelineForInspector(p);
-    const buyerPanelHtml = formatBuyerInspectorHtml(buyerView, buyerTimelineRows, p.started_at);
+    const buyerPanelHtml = formatBuyerInspectorHtml(
+      buyerView,
+      buyerTimelineRows,
+      p.started_at,
+      buildBuyerCommercialIntentRead(p),
+    );
     const sessionProgressionEsc =
       expEnv != null ? escHtml(buildSessionProgressionNarrative(p, expEnv)) : "";
     const nba = p.next_best_action;

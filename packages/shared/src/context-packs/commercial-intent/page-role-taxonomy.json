@@ -1,0 +1,54 @@
+{
+  "roles": [
+    {
+      "page_role": "awareness",
+      "path_hints": ["blog", "news", "insights", "resources", "learn", "about", "glossary"],
+      "title_hints": ["blog", "news", "about", "what is"]
+    },
+    {
+      "page_role": "exploration",
+      "path_hints": ["features", "product", "solutions", "services", "how-it-works", "overview"],
+      "title_hints": ["features", "overview", "how it works"]
+    },
+    {
+      "page_role": "comparison",
+      "path_hints": ["compare", "vs", "alternatives", "competitors", "plans", "pricing"],
+      "title_hints": ["compare", "pricing", "plans"]
+    },
+    {
+      "page_role": "qualification",
+      "path_hints": ["calculator", "estimate", "finance", "payment", "eligibility", "coverage", "quote"],
+      "title_hints": ["calculator", "estimate", "finance", "payment"]
+    },
+    {
+      "page_role": "trust_validation",
+      "path_hints": ["reviews", "testimonials", "case-stud", "security", "privacy", "compliance", "trust"],
+      "title_hints": ["reviews", "security", "privacy", "customers"]
+    },
+    {
+      "page_role": "objection_resolution",
+      "path_hints": ["faq", "help", "returns", "shipping", "warranty", "support", "implementation", "integration"],
+      "title_hints": ["faq", "help", "returns", "shipping"]
+    },
+    {
+      "page_role": "implementation",
+      "path_hints": ["implementation", "rollout", "onboard", "docs", "developer", "api", "migration"],
+      "title_hints": ["implementation", "documentation", "api"]
+    },
+    {
+      "page_role": "configuration",
+      "path_hints": ["build", "configure", "customize", "design", "configurator"],
+      "title_hints": ["build", "configure", "customize"]
+    },
+    {
+      "page_role": "conversion",
+      "path_hints": ["checkout", "cart", "apply", "schedule", "book", "signup", "register", "trial"],
+      "title_hints": ["checkout", "apply", "schedule", "sign up"]
+    },
+    {
+      "page_role": "support",
+      "path_hints": ["support", "contact", "service", "help-center"],
+      "title_hints": ["support", "contact", "help"]
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "blockers": [
+    {
+      "id": "pricing_uncertainty",
+      "label": "Pricing uncertainty",
+      "suggested_response_family": "pricing_explainer",
+      "path_hints": ["pricing", "plans", "fees", "rates", "cost", "subscription"],
+      "phrase_hints": ["pricing", "how much", "cost", "fees", "rates", "plans"]
+    },
+    {
+      "id": "implementation_risk",
+      "label": "Implementation risk",
+      "suggested_response_family": "implementation_checklist",
+      "path_hints": ["implementation", "rollout", "deploy", "onboard", "setup", "migration"],
+      "phrase_hints": ["implementation", "rollout", "deploy", "onboarding", "setup"]
+    },
+    {
+      "id": "integration_concern",
+      "label": "Integration concern",
+      "suggested_response_family": "integration_summary",
+      "path_hints": ["integration", "api", "connect", "sso", "webhook"],
+      "phrase_hints": ["integration", "api", "connect", "sso"]
+    },
+    {
+      "id": "trust_security_concern",
+      "label": "Trust or security concern",
+      "suggested_response_family": "trust_reassurance",
+      "path_hints": ["security", "privacy", "compliance", "trust", "gdpr", "soc"],
+      "phrase_hints": ["security", "privacy", "compliance", "trust"]
+    },
+    {
+      "id": "coverage_or_eligibility_uncertainty",
+      "label": "Coverage or eligibility uncertainty",
+      "suggested_response_family": "eligibility_helper",
+      "path_hints": ["eligibility", "coverage", "qualify", "requirements", "who-qualifies"],
+      "phrase_hints": ["eligibility", "coverage", "qualify", "requirements"]
+    },
+    {
+      "id": "financing_or_payment_uncertainty",
+      "label": "Financing or payment uncertainty",
+      "suggested_response_family": "finance_helper",
+      "path_hints": ["finance", "financing", "payment", "calculator", "apr", "lease", "loan"],
+      "phrase_hints": ["financing", "payment", "calculator", "apr", "lease", "loan"]
+    },
+    {
+      "id": "shipping_returns_uncertainty",
+      "label": "Shipping or returns uncertainty",
+      "suggested_response_family": "shipping_returns_reassurance",
+      "path_hints": ["shipping", "delivery", "returns", "refund", "warranty"],
+      "phrase_hints": ["shipping", "delivery", "returns", "refund", "warranty"]
+    },
+    {
+      "id": "fit_or_variant_uncertainty",
+      "label": "Fit or variant uncertainty",
+      "suggested_response_family": "comparison_guidance",
+      "path_hints": ["compare", "vs", "specs", "features", "trim", "models"],
+      "phrase_hints": ["compare", "which", "specs", "features", "trim"]
+    },
+    {
+      "id": "inventory_availability_uncertainty",
+      "label": "Inventory or availability uncertainty",
+      "suggested_response_family": "availability_checker",
+      "path_hints": ["inventory", "availability", "in-stock", "stock", "locator", "dealer"],
+      "phrase_hints": ["availability", "in stock", "inventory", "locator"]
+    },
+    {
+      "id": "human_contact_hesitation",
+      "label": "Human contact hesitation",
+      "suggested_response_family": "soft_human_escalation",
+      "path_hints": ["contact", "support", "faq", "help"],
+      "phrase_hints": ["contact", "talk to", "call us", "support"]
+    },
+    {
+      "id": "application_friction",
+      "label": "Application friction",
+      "suggested_response_family": "application_assist",
+      "path_hints": ["apply", "application", "checkout", "enroll"],
+      "phrase_hints": ["apply", "application", "continue application"]
+    },
+    {
+      "id": "warranty_or_support_concern",
+      "label": "Warranty or support concern",
+      "suggested_response_family": "support_reassurance",
+      "path_hints": ["warranty", "support", "service", "maintenance", "care"],
+      "phrase_hints": ["warranty", "support", "service plan"]
+    }
+  ]
+}

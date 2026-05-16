@@ -1,7 +1,12 @@
 import type { PageType, SessionProfile } from "@si/shared";
+import { classifyCtaElement, updateCommercialIntentMemory } from "./commercialIntent";
 import { pushIntelEvent } from "./sessionIntel";
 
 type Update = (mut: (p: SessionProfile) => void) => void;
+
+export type ObserverOptions = {
+  getVertical?: () => import("@si/shared").SiteVertical;
+};
 
 /** Clicks often target `Text` nodes; `closest` exists only on `Element`. */
 function eventTargetElement(ev: Event): Element | null {
@@ -43,7 +48,11 @@ function seedLanding(p: SessionProfile): void {
  * Wire up DOM observers and event listeners. We aim for low-frequency,
  * high-signal events rather than streaming raw telemetry.
  */
-export function startObserver(getPageType: () => PageType, update: Update): () => void {
+export function startObserver(
+  getPageType: () => PageType,
+  update: Update,
+  opts: ObserverOptions = {},
+): () => void {
   const start = Date.now();
   let visMark = performance.now();
   let docVisible = !document.hidden;
@@ -142,46 +151,55 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
       });
     }
 
-    const ctaEl = el.closest<HTMLElement>(
-      "[data-si-cta], [data-si-intent], button.primary, a.cta",
-    );
-    const contentInteractive = el.closest<HTMLElement>(
-      [
-        "main a[href]",
-        "main button",
-        "article a[href]",
-        "article button",
-        "[role='main'] a[href]",
-        "[role='main'] button",
-        "[role='dialog'] a[href]",
-        "[role='dialog'] button",
-        "[aria-modal='true'] a[href]",
-        "[aria-modal='true'] button",
-      ].join(", "),
-    );
-    if (ctaEl) {
-      const role = ctaEl.getAttribute("data-si-cta") ?? "generic";
-      update((p) => {
-        seedLanding(p);
-        p.signals.cta_clicks++;
-        if (p.signals.cta_clicks === 1) {
-          pushIntelEvent(p, "Clicked a primary call-to-action", "cta_first_click");
-        }
-        if (role === "finance") p.signals.finance_interactions++;
-        if (role === "compare") p.signals.compare_interactions++;
+    const vertical = opts.getVertical?.();
+    const explicitCta = el.closest<HTMLElement>("[data-si-cta], [data-si-intent], button.primary, a.cta");
+    const contentInteractive =
+      !explicitCta &&
+      el.closest<HTMLElement>(
+        [
+          "main a[href]",
+          "main button",
+          "article a[href]",
+          "article button",
+          "[role='main'] a[href]",
+          "[role='main'] button",
+          "[role='dialog'] a[href]",
+          "[role='dialog'] button",
+          "[aria-modal='true'] a[href]",
+          "[aria-modal='true'] button",
+        ].join(", "),
+      );
+    const trialHost =
+      !explicitCta && !contentInteractive && clickLooksLikeProductTrialExploration(el)
+        ? el.closest<HTMLElement>("button, a[href], [role='button']")
+        : null;
+    const ctaHost = explicitCta ?? contentInteractive ?? trialHost;
+    const fromTrialHeuristic = Boolean(trialHost && !explicitCta && !contentInteractive);
+
+    if (ctaHost) {
+      const interpretation = classifyCtaElement(ctaHost, {
+        vertical,
+        dataSiCta: ctaHost.getAttribute("data-si-cta"),
+        dataSiIntent: ctaHost.getAttribute("data-si-intent"),
       });
-    } else if (contentInteractive) {
-      // In-content links/buttons without data-si-cta still move scores (many sites omit `<main>`).
-      update((p) => {
-        seedLanding(p);
-        p.signals.cta_clicks++;
-      });
-    } else if (clickLooksLikeProductTrialExploration(el)) {
-      update((p) => {
-        seedLanding(p);
-        p.signals.cta_clicks++;
-        pushIntelEvent(p, "Engaged with try, demo, or lab-style entry point", "product_trial_entry");
-      });
+      if (interpretation) {
+        update((p) => {
+          seedLanding(p);
+          p.commercial_intent = updateCommercialIntentMemory(p, interpretation);
+          if (interpretation.should_count_as_cta_click || fromTrialHeuristic) {
+            p.signals.cta_clicks++;
+            if (p.signals.cta_clicks === 1) {
+              pushIntelEvent(p, interpretation.timeline_label, "cta_first_click");
+            } else {
+              pushIntelEvent(p, interpretation.timeline_label, `cta:${interpretation.action.action_family}`);
+            }
+          }
+          const fam = interpretation.action.action_family;
+          if (fam === "view_financing" || fam === "calculate") p.signals.finance_interactions++;
+          if (fam === "compare") p.signals.compare_interactions++;
+          if (fam === "view_pricing") p.signals.pricing_views++;
+        });
+      }
     }
     if (el.closest("[data-si-price]")) {
       update((p) => {
