@@ -1,0 +1,68 @@
+{
+  "name": "Compare → finance commercial intent — payment before dealer",
+  "vertical": "auto_retail",
+  "engagement_score": 52,
+  "commercial_journey_phase": "comparison",
+  "concept_affinity": {
+    "monthly_payment": 0.82,
+    "compare": 0.76,
+    "call_dealer": 0.68
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 48,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "comparison",
+    "engagement_quality": { "label": "comparison_reviewer", "rationale": [] }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.76,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "next_navigation",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["compare and finance paths in session"],
+    "reason": ["comparison-oriented navigation"],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 1,
+    "compare_interactions": 1,
+    "finance_interactions": 1
+  },
+  "commercial_intent": {
+    "action_counts": { "compare": 1, "view_financing": 1 },
+    "strongest_action_family": "view_financing",
+    "stage_sequence": ["comparison", "qualification"],
+    "blockers": [
+      {
+        "id": "financing_or_payment_uncertainty",
+        "confidence": 0.72,
+        "evidence": ["path:finance"],
+        "suggested_response_family": "finance_helper"
+      }
+    ],
+    "momentum": {
+      "direction": "validating",
+      "confidence": 0.68,
+      "evidence": ["finance engagement"],
+      "stage_sequence": ["comparison", "qualification"]
+    },
+    "last_interaction_label": null,
+    "high_intent_interactions": 1,
+    "human_escalation_interactions": 0,
+    "qualification_interactions": 1,
+    "trust_validation_interactions": 0,
+    "validated_topics": []
+  }
+}

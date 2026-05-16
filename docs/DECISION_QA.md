@@ -115,6 +115,17 @@ Fixture coverage:
 
 Runner logic for these cases lives in `packages/sdk/src/decisioning/fixtures/regulatedFixtureSafety.ts` (shared phrase lists) alongside `hard_surfaces_must_not_show` in `runFixture.ts`.
 
+## Commercial intent → decision coupling fixtures
+
+When `session-input.json` includes `commercial_intent`, the runtime applies bounded ranking deltas and commercial holdbacks (`commercialIntentDecisionCoupling.ts`) on top of recipe matching — without changing collect schema or public APIs.
+
+| Case | Intent story | Expected policy |
+|------|----------------|-----------------|
+| `auto-retail/14-compare-finance-intent-coupling` | Compare + finance path, `financing_or_payment_uncertainty` | `finance_payment_assist` over dealer/inventory |
+| Vitest `commercialIntentDecisionCoupling.test.ts` | Full vertical matrix (auto, B2B, ecommerce, healthcare, finance) | Ranking order, suppression, buyer-safe reasons |
+
+Authoring tip: seed `commercial_intent` in fixtures when you need to lock **ranking** behavior; use journey replay tests when you need to lock **classification → memory** behavior.
+
 ## Decision replay (observability)
 
 - **`packages/sdk/src/decisioning/replay/`** — deterministic replay (`runDecisionReplay`), transition reason codes, operator narrative templates (`buildOperatorSessionStory`), and observability predicates (flicker / escalation heuristics).

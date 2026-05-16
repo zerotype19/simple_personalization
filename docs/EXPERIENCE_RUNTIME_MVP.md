@@ -33,6 +33,8 @@ signals → existing inference → activation opportunity → recipe match → e
 
 Recipes **match** on top of today’s concepts / playbooks / behavior / readiness — they do **not** replace or re-implement that stack. No nested boolean DSL; simple thresholds and required concepts only.
 
+When `commercial_intent` is present on the session profile, recipe candidates receive **bounded** confidence nudges and optional commercial holdbacks (`commercialIntentDecisionCoupling.ts`) before ranking — so interpreted intent changes recommendations, not only inspector copy. See `docs/COMMERCIAL_INTENT_ENGINE.md`.
+
 ## Positioning (GTM)
 
 **Sell (one sentence):** Optiview helps websites decide the **next best experience** before a visitor identifies themselves.

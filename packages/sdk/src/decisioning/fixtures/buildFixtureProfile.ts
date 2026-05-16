@@ -65,6 +65,7 @@ export function buildFixtureProfile(input: FixtureSessionInput): SessionProfile 
     page_type: input.page_type ?? "other",
     personalization_signal: emptyPersonalizationSignal(),
     ...(experience_progression ? { experience_progression } : {}),
+    ...(input.commercial_intent ? { commercial_intent: structuredClone(input.commercial_intent) } : {}),
   });
 
   profile.personalization_signal = buildPersonalizationSignal(profile);

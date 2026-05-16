@@ -58,12 +58,31 @@ Located in `packages/shared/src/context-packs/commercial-intent/`:
 
 **Ecommerce:** category → compare → reviews → add to cart → trust_validation if returns after cart.
 
+## How intent influences decisions
+
+Commercial intent is not inspector-only. After recipe matching, `commercialIntentDecisionCoupling.ts` applies **bounded** confidence deltas (max **+0.12** / **−0.18**) and optional commercial holdbacks before ranking:
+
+| Signal | Effect |
+|--------|--------|
+| **Strongest action family** | Nudges recipes whose surfaces/angles align (e.g. finance → `finance_payment_assist`, compare → comparison modules). |
+| **Active blockers** | Favor the blocker’s response family (pricing → ROI/rate explainer, integration → integration summary, etc.). Penalize hard escalation when finance or human-contact hesitation is active. |
+| **Momentum** | `validating` / `hesitating` / `regressing` bias toward reassurance and away from modals; `increasing` allows progression only when readiness supports it. |
+| **Regulated verticals** | Healthcare and financial services add extra restraint (no urgency/approval pressure; appointment/application only when earned). |
+
+Hard suppression in `decisionSuppression.ts` always wins — commercial coupling **cannot** bypass confidence floors, regulated safety, or progression gates.
+
+Buyer-facing “why” bullets come from `buildCommercialIntentDecisionReasons` (plain language, no taxonomy ids).
+
+Implementation: `packages/sdk/src/decisioning/commercialIntentDecisionCoupling.ts`, wired in `experienceDecisionPipeline.ts`.
+
 ## Tests
 
 | Suite | Purpose |
 |-------|---------|
 | `commercialIntent.test.ts` | Phrase matching, DOM CTA weighting, form/page roles, buyer-safe copy |
 | `__tests__/commercial-intent-replay.test.ts` | Vertical journey replay via `testUtils/buildCommercialIntentJourney.ts` |
+| `decisioning/commercialIntentDecisionCoupling.test.ts` | Bounded deltas, suppression, regulated restraint, ranking shifts per vertical |
+| `decision-fixtures/auto-retail/14-compare-finance-intent-coupling` | Fixture: finance intent + blocker → payment assist primary |
 
 ### How we test commercial intent journeys
 

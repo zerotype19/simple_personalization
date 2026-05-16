@@ -1,6 +1,7 @@
 import type {
   ActivationOpportunity,
   BehaviorSnapshot,
+  CommercialIntentMemory,
   CommercialJourneyPhase,
   ExperienceDecision,
   ExperienceDecisionTiming,
@@ -36,6 +37,8 @@ export interface FixtureSessionInput {
   expected_surfaces_to_query?: string[];
   /** Seed session progression memory for multi-step / pacing fixtures (merged into `SessionProfile`). */
   experience_progression?: Partial<ExperienceProgressionMemory>;
+  /** Optional commercial intent memory for coupling fixtures. */
+  commercial_intent?: CommercialIntentMemory;
 }
 
 export interface FixtureExpectedPrimary {

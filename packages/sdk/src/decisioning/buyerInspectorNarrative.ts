@@ -20,6 +20,7 @@ import {
   filterBuyerSafeLines,
   isBuyerUnsafeString,
 } from "./buyerCopySafety";
+import { buildCommercialIntentDecisionReasons } from "./commercialIntentDecisionCoupling";
 
 const BUYER_REASON_COPY: Record<DecisionTransitionReason, string> = {
   first_frame: "Baseline established for this session.",
@@ -218,10 +219,18 @@ function buildWhyBullets(profile: SessionProfile, primary: ExperienceDecision | 
     out.push("Multiple pages explored in this visit.");
   }
 
+  if (profile.commercial_intent) {
+    for (const r of buildCommercialIntentDecisionReasons(profile, primary)) {
+      const b = sanitizeBullet(r);
+      if (b && !out.includes(b)) out.push(b);
+      if (out.length >= 5) break;
+    }
+  }
+
   if (primary?.reason?.length) {
     for (const r of primary.reason) {
       const b = sanitizeBullet(r);
-      if (b) out.push(b);
+      if (b && !out.includes(b)) out.push(b);
       if (out.length >= 5) break;
     }
   }

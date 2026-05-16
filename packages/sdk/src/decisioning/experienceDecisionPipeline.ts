@@ -12,6 +12,11 @@ import {
 import { polishHeadline } from "./decisionCopy";
 import { rankDecisions } from "./decisionRanking";
 import { clampTimingForSurface } from "./decisionTiming";
+import {
+  buildCommercialIntentDecisionReasons,
+  rankCandidatesWithCommercialIntent,
+  shouldSuppressForCommercialIntent,
+} from "./commercialIntentDecisionCoupling";
 import { matchRecipeCandidates, type RecipeMatchCandidate } from "./recipeMatcher";
 import { shouldSuppressDecision, summarizeSuppression } from "./decisionSuppression";
 import { findSurfaceEntry } from "./surfaceMatcher";
@@ -120,7 +125,7 @@ export function runExperienceDecisionPipeline(
   const recipes = getExperienceRecipesForVertical(vertical);
   const recipeById = new Map<string, ExperienceRecipe>(recipes.map((r) => [r.id, r]));
   const raw = matchRecipeCandidates(profile, recipes, catalog, vertical);
-  const deduped = dedupeByRecipe(raw);
+  const deduped = rankCandidatesWithCommercialIntent(dedupeByRecipe(raw), profile);
 
   const holdbackReasons: string[] = [];
   const surfaceFirstFail = new Map<string, string>();
@@ -145,6 +150,19 @@ export function runExperienceDecisionPipeline(
 
   for (const c of deduped) {
     const dec = buildDecisionFromCandidate(profile, c, ctx.now);
+    const commercialSup = shouldSuppressForCommercialIntent(dec, profile);
+    if (commercialSup) {
+      holdbackReasons.push(commercialSup.reason);
+      if (!surfaceFirstFail.has(dec.surface_id)) {
+        surfaceFirstFail.set(dec.surface_id, commercialSup.reason);
+      }
+      diagnostics?.suppressed.push({
+        recipe_id: c.recipe.id,
+        surface_id: c.surface_id,
+        reason: commercialSup.reason,
+      });
+      continue;
+    }
     const sup = shouldSuppressDecision({
       profile,
       vertical,
@@ -211,6 +229,13 @@ export function runExperienceDecisionPipeline(
     suppression_summary = summarizeSuppression(holdbackReasons);
   } else if (holdbackReasons.length) {
     suppression_summary = `Primary: ${primary.surface_id}. ${summarizeSuppression(holdbackReasons.slice(0, 4))}`;
+  }
+
+  if (primary && profile.commercial_intent) {
+    const intentReasons = buildCommercialIntentDecisionReasons(profile, primary);
+    if (intentReasons.length) {
+      primary.reason = [...intentReasons, ...primary.reason].slice(0, 8);
+    }
   }
 
   const envelope: ExperienceDecisionEnvelope = {
