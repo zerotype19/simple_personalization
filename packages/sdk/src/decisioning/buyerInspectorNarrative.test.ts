@@ -27,6 +27,8 @@ const BUYER_FORBIDDEN = [
   /\bevaluation\s+tick\b/i,
   /\bticks?\s+counted\b/i,
   /\bfired\b/i,
+  /\bprogression_surface_cooldown\b/i,
+  /\bProgression held\b/i,
 ];
 
 function behaviorSnapshot(
@@ -274,6 +276,39 @@ describe("buyerInspectorNarrative", () => {
     expect(v.recommended.restraintBody?.toLowerCase()).toContain("engagement");
     const blob = joinBuyerInspectorNarrativeForTests(v);
     expect((blob.match(/No strong experience decision yet/gi) ?? []).length).toBe(0);
+  });
+
+  it("withheld excludes progression engine debug notes for buyers", () => {
+    const p = minimalProfile({
+      behavior_snapshot: behaviorSnapshot({
+        activation_readiness: {
+          score_0_100: 70,
+          interruption_posture: "soft_cta_ready",
+          rationale: [],
+        },
+      }),
+    });
+    const env: ExperienceDecisionEnvelope = {
+      event: "si_experience_decision",
+      generated_at: Date.now(),
+      session_id: "sess-1",
+      primary_decision: null,
+      secondary_decisions: [],
+      progression_notes: [
+        "Progression held implementation_readiness_checklist (progression_surface_cooldown)",
+      ],
+    };
+    const v = buildBuyerInspectorView(p, env, null);
+    expect(
+      v.withheld.some((w) =>
+        /progression_surface_cooldown|implementation_readiness_checklist|Progression held/i.test(w),
+      ),
+    ).toBe(false);
+    const blob = joinBuyerInspectorNarrativeForTests(v);
+    for (const r of BUYER_FORBIDDEN) {
+      expect(blob, `matched ${r}`).not.toMatch(r);
+    }
+    expect(buyerInspectorNarrativeCredibilityIssue(v)).toBeNull();
   });
 
   it("operator session progression narrative keeps diagnostic routing language", () => {

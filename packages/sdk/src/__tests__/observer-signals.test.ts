@@ -61,4 +61,38 @@ describe("startObserver click targets", () => {
 
     expect(profile.signals.compare_interactions).toBeGreaterThanOrEqual(1);
   });
+
+  it("increments cta_clicks for try/demo/lab phrasing outside main", () => {
+    const header = document.createElement("header");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Try the signal lab";
+    header.appendChild(btn);
+    document.body.appendChild(header);
+
+    stop = startObserver(() => "home", (mut) => {
+      mut(profile);
+    });
+
+    btn.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+    expect(profile.signals.cta_clicks).toBe(1);
+  });
+
+  it("increments cta_clicks for links inside article (no main landmark)", () => {
+    const article = document.createElement("article");
+    const link = document.createElement("a");
+    link.href = "/docs";
+    link.textContent = "Read more";
+    article.appendChild(link);
+    document.body.appendChild(article);
+
+    stop = startObserver(() => "home", (mut) => {
+      mut(profile);
+    });
+
+    link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+    expect(profile.signals.cta_clicks).toBe(1);
+  });
 });

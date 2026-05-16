@@ -10,6 +10,17 @@ function eventTargetElement(ev: Event): Element | null {
   return t.nodeType === Node.ELEMENT_NODE ? (t as Element) : t.parentElement;
 }
 
+/** Clicks on try/demo/lab-style controls often sit outside `<main>` (hero, header). */
+function clickLooksLikeProductTrialExploration(el: Element): boolean {
+  const host = el.closest("button, a[href], [role='button']");
+  if (!host || host.closest("#si-inspector-root")) return false;
+  if (host.closest("footer")) return false;
+  if (host.hasAttribute("data-si-intent")) return true;
+  const t = (host.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+  if (t.length < 2 || t.length > 100) return false;
+  return /\b(try|demo|trial|signal|lab|get started|launch|playground|sandbox|see how|explore the)\b/i.test(t);
+}
+
 function appendPathIfNew(p: SessionProfile, pathname: string): void {
   const seq = p.signals.path_sequence;
   const last = seq[seq.length - 1];
@@ -132,7 +143,21 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
     }
 
     const ctaEl = el.closest<HTMLElement>(
-      "[data-si-cta], button.primary, a.cta",
+      "[data-si-cta], [data-si-intent], button.primary, a.cta",
+    );
+    const contentInteractive = el.closest<HTMLElement>(
+      [
+        "main a[href]",
+        "main button",
+        "article a[href]",
+        "article button",
+        "[role='main'] a[href]",
+        "[role='main'] button",
+        "[role='dialog'] a[href]",
+        "[role='dialog'] button",
+        "[aria-modal='true'] a[href]",
+        "[aria-modal='true'] button",
+      ].join(", "),
     );
     if (ctaEl) {
       const role = ctaEl.getAttribute("data-si-cta") ?? "generic";
@@ -145,11 +170,17 @@ export function startObserver(getPageType: () => PageType, update: Update): () =
         if (role === "finance") p.signals.finance_interactions++;
         if (role === "compare") p.signals.compare_interactions++;
       });
-    } else if (el.closest("main a[href], main button")) {
-      // Nav links and in-page buttons without data-si-cta still move scores (demo feedback).
+    } else if (contentInteractive) {
+      // In-content links/buttons without data-si-cta still move scores (many sites omit `<main>`).
       update((p) => {
         seedLanding(p);
         p.signals.cta_clicks++;
+      });
+    } else if (clickLooksLikeProductTrialExploration(el)) {
+      update((p) => {
+        seedLanding(p);
+        p.signals.cta_clicks++;
+        pushIntelEvent(p, "Engaged with try, demo, or lab-style entry point", "product_trial_entry");
       });
     }
     if (el.closest("[data-si-price]")) {

@@ -91,8 +91,21 @@ function hasOperatorJargon(s: string): boolean {
     /\bevaluation\s+tick\b/i,
     /\bticks?\s+counted\b/i,
     /\bfired\b/i,
+    /\bprogression_surface_cooldown\b/i,
+    /\bProgression held\b/i,
   ];
   return patterns.some((r) => r.test(t));
+}
+
+/** Raw progression-memory lines — never buyer-facing. */
+function isProgressionEngineeringNote(raw: string): boolean {
+  const n = raw.trim();
+  if (!n) return false;
+  if (/\bprogression_surface_cooldown\b/i.test(n)) return true;
+  if (/\bProgression held\b/i.test(n)) return true;
+  if (/\bprogression_gate\b/i.test(n)) return true;
+  if (/\bsurface_cooldown\b/i.test(n)) return true;
+  return false;
 }
 
 function hasLeakage(s: string): boolean {
@@ -269,7 +282,8 @@ function buildWithheld(
   if (!primary) {
     const notes = envelope?.progression_notes?.filter(Boolean) ?? [];
     for (const n of notes) {
-      if (!/hold|cool|pacing|restraint|back|withheld|pause/i.test(n)) continue;
+      if (isProgressionEngineeringNote(n)) continue;
+      if (!/hold|\bcool\b|pacing|restraint|back|withheld|pause/i.test(n)) continue;
       if (hasLeakage(n) || hasOperatorJargon(n)) continue;
       lines.push(tidySentence(n.trim()));
     }
@@ -289,7 +303,12 @@ function buildWithheld(
 
   const notes = envelope?.progression_notes?.filter(Boolean) ?? [];
   for (const n of notes) {
-    if (/hold|cool|pacing|restraint|back|withheld/i.test(n) && !hasLeakage(n) && !hasOperatorJargon(n)) {
+    if (isProgressionEngineeringNote(n)) continue;
+    if (
+      /hold|\bcool\b|pacing|restraint|back|withheld|pause/i.test(n) &&
+      !hasLeakage(n) &&
+      !hasOperatorJargon(n)
+    ) {
       lines.push(tidySentence(n));
     }
   }
