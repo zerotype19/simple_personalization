@@ -33,6 +33,32 @@ const SNIPPET_ORIGIN = (import.meta.env.VITE_SI_SNIPPET_ORIGIN as string | undef
   ?.trim()
   .replace(/\/+$/, "");
 
+const USE_HOSTED_SNIPPET =
+  import.meta.env.VITE_SI_DEMO_USE_HOSTED_SNIPPET === "1" ||
+  import.meta.env.VITE_SI_DEMO_USE_HOSTED_SNIPPET === "true";
+
+/** Demo-only: bust CDN cache for hosted `si.js` during QA (not used in customer install snippets). */
+export function snippetCacheBustVersion(): string {
+  const explicit = import.meta.env.VITE_SI_SNIPPET_VERSION?.trim();
+  if (explicit) return explicit;
+  const gitSha = import.meta.env.VITE_GIT_SHA?.trim();
+  if (gitSha) return gitSha;
+  if (typeof __SI_SNIPPET_GIT_SHA__ === "string" && __SI_SNIPPET_GIT_SHA__ && __SI_SNIPPET_GIT_SHA__ !== "unknown") {
+    return __SI_SNIPPET_GIT_SHA__;
+  }
+  if (import.meta.env.DEV) return String(Date.now());
+  return __SI_SNIPPET_GIT_SHA__ || "unknown";
+}
+
+function cdnAssetUrl(path: string): string {
+  if (!SNIPPET_ORIGIN) return path;
+  const base = `${SNIPPET_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
+  if (!USE_HOSTED_SNIPPET) return base;
+  const v = snippetCacheBustVersion();
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}v=${encodeURIComponent(v)}`;
+}
+
 declare global {
   interface Window {
     __siBootFromTag?: Promise<void>;
@@ -55,7 +81,7 @@ function loadSnippet(): Promise<void> {
       new Error("VITE_SI_SNIPPET_ORIGIN is required when using the CDN snippet bridge."),
     );
   }
-  const src = `${SNIPPET_ORIGIN}/si.js`;
+  const src = cdnAssetUrl("/si.js");
   return new Promise((resolve, reject) => {
     const s = document.createElement("script");
     s.async = true;

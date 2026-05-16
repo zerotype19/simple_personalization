@@ -9,6 +9,10 @@ interface ImportMetaEnv {
   readonly VITE_SI_DEMO_USE_HOSTED_SNIPPET?: string;
   /** When "1", adds data-inspector="1" to the dynamically loaded snippet script (CDN demo builds). */
   readonly VITE_SI_DEMO_SNIPPET_INSPECTOR?: string;
+  /** Demo-only: cache-bust query for hosted `si.js` (prefer CDN `version.json` commit at deploy). */
+  readonly VITE_SI_SNIPPET_VERSION?: string;
+  /** Demo-only fallback for snippet cache-bust when `VITE_SI_SNIPPET_VERSION` is unset. */
+  readonly VITE_GIT_SHA?: string;
 }
 
 interface ImportMeta {
