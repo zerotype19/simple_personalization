@@ -151,7 +151,7 @@ Environment:
 
 ## Acceptance bar
 
-- **≥ 95** fixture cases across verticals (includes the expanded B2B SaaS realism matrix, **13 ecommerce** merchandising cases, **16 healthcare** realism + restraint cases, **16 financial-services** cases, **15 auto OEM** cases, **13 auto retail** cases including the retail realism matrix, and other verticals).
+- **≥ 99** fixture cases across verticals (includes commercial-intent coupling cases for auto retail, B2B SaaS, financial services, and healthcare; expanded B2B SaaS realism matrix; **13 ecommerce**; **17 healthcare**; **17 financial-services**; **15 auto OEM**; **13 auto retail**; and other verticals).
 - `pnpm test`, `pnpm typecheck`, and `pnpm decision-fixtures` all succeed in CI and locally.
 
 This layer is the quality gate for **what** the runtime chooses; pack and recipe edits should be justified by fixture deltas or new cases.

@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "rate_fee_explainer",
+  "expected_offer_type": "rate_and_fee_explainer",
+  "min_confidence": 0.45,
+  "forbidden_terms": ["application_soft_resume", "guaranteed_approval"],
+  "required_reason_terms": ["rate"]
+}

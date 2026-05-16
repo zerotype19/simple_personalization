@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "eligibility_guidance_module",
+  "expected_offer_type": "eligibility_walkthrough",
+  "min_confidence": 0.45,
+  "forbidden_terms": ["appointment_soft_prompt", "limited_time_booking", "Book urgent"],
+  "required_reason_terms": ["eligibility"]
+}

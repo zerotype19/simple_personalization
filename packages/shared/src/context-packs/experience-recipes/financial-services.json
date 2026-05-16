@@ -9,6 +9,7 @@
     "min_activation_readiness": 40,
     "max_cta_clicks": 3,
     "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision_family": "trust_building",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",
@@ -32,6 +33,7 @@
     "min_activation_readiness": 62,
     "max_cta_clicks": 4,
     "allowed_phases": ["evaluation", "validation", "conversion_ready"],
+    "decision_family": "evaluation_support",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",
@@ -55,6 +57,7 @@
     "min_activation_readiness": 72,
     "max_cta_clicks": 4,
     "allowed_phases": ["conversion_ready", "validation"],
+    "decision_family": "high_intent_escalation",
     "decision": {
       "action": "show",
       "surface_type": "inline",
@@ -78,6 +81,7 @@
     "min_activation_readiness": 48,
     "max_cta_clicks": 1,
     "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision_family": "comparison_support",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",
@@ -101,6 +105,7 @@
     "min_activation_readiness": 42,
     "max_cta_clicks": 2,
     "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision_family": "implementation_guidance",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",
@@ -124,6 +129,7 @@
     "min_activation_readiness": 40,
     "max_cta_clicks": 2,
     "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision_family": "evaluation_support",
     "decision": {
       "action": "show",
       "surface_type": "inline",
@@ -147,6 +153,7 @@
     "min_activation_readiness": 42,
     "max_cta_clicks": 2,
     "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision_family": "evaluation_support",
     "decision": {
       "action": "show",
       "surface_type": "inline",
@@ -170,6 +177,7 @@
     "min_activation_readiness": 36,
     "max_cta_clicks": 2,
     "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision_family": "evaluation_support",
     "decision": {
       "action": "show",
       "surface_type": "inline",
@@ -193,6 +201,7 @@
     "min_activation_readiness": 40,
     "max_cta_clicks": 2,
     "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision_family": "evaluation_support",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",
@@ -216,6 +225,7 @@
     "min_activation_readiness": 46,
     "max_cta_clicks": 2,
     "allowed_phases": ["comparison", "evaluation", "validation"],
+    "decision_family": "evaluation_support",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",
@@ -238,6 +248,7 @@
     "min_activation_readiness": 44,
     "max_cta_clicks": 2,
     "allowed_phases": ["comparison", "evaluation", "research"],
+    "decision_family": "comparison_support",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",
@@ -260,6 +271,7 @@
     "min_activation_readiness": 38,
     "max_cta_clicks": 2,
     "allowed_phases": ["research", "comparison", "evaluation"],
+    "decision_family": "comparison_support",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",
@@ -282,6 +294,7 @@
     "min_activation_readiness": 15,
     "max_cta_clicks": 0,
     "allowed_phases": ["research"],
+    "decision_family": "evaluation_support",
     "decision": {
       "action": "show",
       "surface_type": "inline_module",

@@ -1,0 +1,6 @@
+[
+  { "forbidden_substring": "Book now" },
+  { "forbidden_substring": "slots disappearing" },
+  { "forbidden_substring": "you may have" },
+  { "forbidden_substring": "guaranteed coverage" }
+]

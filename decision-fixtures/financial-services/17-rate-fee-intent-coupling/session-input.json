@@ -1,0 +1,67 @@
+{
+  "name": "Rate/fee research + finance intent — explainer before apply",
+  "vertical": "financial_services",
+  "engagement_score": 50,
+  "commercial_journey_phase": "comparison",
+  "concept_affinity": {
+    "apr": 0.82,
+    "interest_rate": 0.78,
+    "annual_fee": 0.74
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 48,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "comparison",
+    "engagement_quality": { "label": "rate_researcher", "rationale": [] }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.74,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "next_navigation",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["rates and calculator paths"],
+    "reason": ["comparison-oriented finance research"],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 1,
+    "finance_interactions": 1
+  },
+  "commercial_intent": {
+    "action_counts": { "compare": 1, "view_financing": 1, "calculate": 1 },
+    "strongest_action_family": "view_financing",
+    "stage_sequence": ["comparison", "qualification"],
+    "blockers": [
+      {
+        "id": "pricing_uncertainty",
+        "confidence": 0.72,
+        "evidence": ["path:/rates"],
+        "suggested_response_family": "rate_fee_explainer"
+      }
+    ],
+    "momentum": {
+      "direction": "validating",
+      "confidence": 0.68,
+      "evidence": ["rate and fee engagement"],
+      "stage_sequence": ["comparison", "qualification"]
+    },
+    "last_interaction_label": null,
+    "high_intent_interactions": 1,
+    "human_escalation_interactions": 0,
+    "qualification_interactions": 2,
+    "trust_validation_interactions": 0,
+    "validated_topics": []
+  }
+}

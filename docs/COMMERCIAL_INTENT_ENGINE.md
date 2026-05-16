@@ -104,6 +104,9 @@ Implementation: `packages/sdk/src/decisioning/commercialIntentDecisionCoupling.t
 | `__tests__/commercial-intent-replay.test.ts` | Vertical journey replay via `testUtils/buildCommercialIntentJourney.ts` |
 | `decisioning/commercialIntentDecisionCoupling.test.ts` | Bounded deltas, suppression, regulated restraint, ranking shifts per vertical |
 | `decision-fixtures/auto-retail/14-compare-finance-intent-coupling` | Fixture: finance intent + blocker → payment assist primary |
+| `decision-fixtures/b2b-saas/20-integration-trust-intent-coupling` | Fixture: integration blocker → integration summary, not walkthrough |
+| `decision-fixtures/financial-services/17-rate-fee-intent-coupling` | Fixture: finance intent + pricing uncertainty → rate/fee explainer |
+| `decision-fixtures/healthcare/17-eligibility-intent-coupling` | Fixture: eligibility intent → eligibility guidance, not appointment push |
 
 ### How we test commercial intent journeys
 

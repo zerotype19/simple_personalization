@@ -1,0 +1,6 @@
+[
+  { "forbidden_substring": "guaranteed approval" },
+  { "forbidden_substring": "pre-approved" },
+  { "forbidden_substring": "Get approved now" },
+  { "forbidden_substring": "act now" }
+]

@@ -1,0 +1,7 @@
+{
+  "expected_surface_id": "integration_requirements_summary",
+  "expected_offer_type": "integration_scope_brief",
+  "min_confidence": 0.45,
+  "forbidden_terms": ["guided_walkthrough_request", "implementation_workshop_offer"],
+  "required_reason_terms": ["integration"]
+}

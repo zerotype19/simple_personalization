@@ -1,0 +1,67 @@
+{
+  "name": "Integration + trust commercial intent — implementation before demo",
+  "vertical": "b2b_saas",
+  "engagement_score": 58,
+  "commercial_journey_phase": "evaluation",
+  "concept_affinity": {
+    "implementation_readiness": 0.82,
+    "integration_and_api_scope": 0.78,
+    "security": 0.76
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 52,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "evaluation",
+    "engagement_quality": { "label": "technical_evaluator", "rationale": [] }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.76,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "next_navigation",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["integrations and security paths in session"],
+    "reason": ["technical evaluation posture"],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 2,
+    "pages_viewed": 4
+  },
+  "commercial_intent": {
+    "action_counts": { "learn_more": 1, "view_security": 1, "view_pricing": 1 },
+    "strongest_action_family": "view_security",
+    "stage_sequence": ["evaluation", "objection_resolution"],
+    "blockers": [
+      {
+        "id": "integration_concern",
+        "confidence": 0.74,
+        "evidence": ["path:/integrations"],
+        "suggested_response_family": "integration_summary"
+      }
+    ],
+    "momentum": {
+      "direction": "validating",
+      "confidence": 0.7,
+      "evidence": ["security and integration depth"],
+      "stage_sequence": ["evaluation", "objection_resolution"]
+    },
+    "last_interaction_label": null,
+    "high_intent_interactions": 0,
+    "human_escalation_interactions": 0,
+    "qualification_interactions": 0,
+    "trust_validation_interactions": 1,
+    "validated_topics": []
+  }
+}

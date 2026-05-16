@@ -1,0 +1,67 @@
+{
+  "name": "Eligibility commercial intent — guidance before appointment push",
+  "vertical": "healthcare",
+  "engagement_score": 48,
+  "commercial_journey_phase": "evaluation",
+  "concept_affinity": {
+    "eligibility": 0.85,
+    "coverage": 0.8,
+    "benefits": 0.76
+  },
+  "behavior_snapshot": {
+    "activation_readiness": {
+      "score_0_100": 50,
+      "interruption_posture": "soft_cta_ready",
+      "rationale": []
+    },
+    "commercial_journey_phase": "evaluation",
+    "engagement_quality": { "label": "coverage_researcher", "rationale": [] }
+  },
+  "activation_opportunity": {
+    "status": "ready",
+    "confidence": 0.73,
+    "visitor_read": "fixture",
+    "inferred_need": "fixture need",
+    "message_angle": "fixture angle",
+    "offer_type": "fixture offer",
+    "surface": "inline",
+    "timing": "next_navigation",
+    "friction": "low",
+    "primary_path_label": "",
+    "secondary_path_label": "",
+    "soft_path_label": "",
+    "opportunity_note": null,
+    "evidence": ["eligibility and coverage interest"],
+    "reason": ["coverage questions active"],
+    "playbook": null
+  },
+  "signals": {
+    "cta_clicks": 1
+  },
+  "commercial_intent": {
+    "action_counts": { "check_eligibility": 1, "learn_more": 1 },
+    "form_type_counts": { "eligibility": 1 },
+    "strongest_action_family": "check_eligibility",
+    "stage_sequence": ["qualification", "evaluation"],
+    "blockers": [
+      {
+        "id": "coverage_or_eligibility_uncertainty",
+        "confidence": 0.76,
+        "evidence": ["path:/eligibility"],
+        "suggested_response_family": "eligibility_guidance"
+      }
+    ],
+    "momentum": {
+      "direction": "validating",
+      "confidence": 0.7,
+      "evidence": ["eligibility form or CTA"],
+      "stage_sequence": ["qualification", "evaluation"]
+    },
+    "last_interaction_label": null,
+    "high_intent_interactions": 0,
+    "human_escalation_interactions": 0,
+    "qualification_interactions": 1,
+    "trust_validation_interactions": 0,
+    "validated_topics": []
+  }
+}
