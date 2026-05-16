@@ -1,4 +1,5 @@
 import type { ExperienceDecisionEnvelope, ExperienceDecision, SessionProfile } from "@si/shared";
+import { buyerSafeLineOrNull } from "./decisioning/buyerCopySafety";
 import {
   buildBuyerInspectorView,
   type BuyerInspectorView,
@@ -78,12 +79,16 @@ function escHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function escBuyerHtml(s: string | null | undefined, fallback = ""): string {
+  return escHtml(buyerSafeLineOrNull(s) ?? fallback);
+}
+
 function formatBuyerSurfaceMapperHtml(regions: SurfaceRegion[], hasSlotApi: boolean): string {
   if (!hasSlotApi) {
-    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface mapper</h3><p class="si-muted si-muted--block">Slot preview needs a booted Session Intelligence runtime with <code class="si-code">getExperienceDecision</code>.</p></div>`;
+    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface preview</h3><p class="si-muted si-muted--block">Experience preview needs a booted Session Intelligence runtime with <code class="si-code">getExperienceDecision</code>.</p></div>`;
   }
   if (!regions.length) {
-    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface mapper</h3><p class="si-muted si-muted--block">No regions yet. Add <code class="si-code">data-si-surface="surface_id"</code> on host DOM, or use operator mode to map a region for this path (sessionStorage only).</p></div>`;
+    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface preview</h3><p class="si-muted si-muted--block">No regions yet. Add <code class="si-code">data-si-surface="surface_id"</code> on host DOM, or use operator mode to map a region for this path (sessionStorage only).</p></div>`;
   }
   const rows = regions
     .map((r) => {
@@ -91,10 +96,10 @@ function formatBuyerSurfaceMapperHtml(regions: SurfaceRegion[], hasSlotApi: bool
       const pr = d ? buildSurfaceDecisionPreview(d) : null;
       const withheld =
         pr && (d!.action === "suppress" || d!.action === "none")
-          ? `<div class="si-muted si-sm-withheld">${escHtml(pr.suppressionLine ?? pr.headline)}</div>`
+          ? `<div class="si-muted si-sm-withheld">${escBuyerHtml(pr.suppressionLine ?? pr.headline)}</div>`
           : "";
-      const timing = pr ? escHtml(pr.timing) : "—";
-      const action = pr ? escHtml(pr.actionLine) : "—";
+      const timing = pr ? escBuyerHtml(pr.timing, "—") : "—";
+      const action = pr ? escBuyerHtml(pr.actionLine, "—") : "—";
       return `<div class="si-sm-buyer-row">
         <div class="si-sm-buyer-k">${escHtml(r.surface_id.replace(/_/g, " "))}</div>
         <div class="si-sm-buyer-v">
@@ -104,7 +109,7 @@ function formatBuyerSurfaceMapperHtml(regions: SurfaceRegion[], hasSlotApi: bool
       </div>`;
     })
     .join("");
-  return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface mapper</h3><p class="si-muted si-muted--block">Mapped surfaces on this page — preview only.</p><div class="si-sm-buyer-grid">${rows}</div></div>`;
+  return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface preview</h3><p class="si-muted si-muted--block">Mapped surfaces on this page — preview only.</p><div class="si-sm-buyer-grid">${rows}</div></div>`;
 }
 
 const INSPECTOR_MODE_STORAGE_KEY = "si:inspector_mode";
@@ -118,7 +123,7 @@ function getInspectorPanelMode(): InspectorPanelMode {
   } catch {
     /* storage blocked */
   }
-  return urlHasSiDebug() ? "operator" : "buyer";
+  return "buyer";
 }
 
 function setInspectorPanelMode(mode: InspectorPanelMode): void {
@@ -158,7 +163,7 @@ function formatBuyerInspectorHtml(
       ? `<ul class="si-reason si-buyer-withheld">${view.withheld.map((w) => `<li>${escHtml(w)}</li>`).join("")}</ul>`
       : `<p class="si-muted si-muted--block">${
           showPrimary
-            ? "No additional restraint notes on this tick — pacing looks appropriate."
+            ? "No additional restraint notes right now — pacing looks appropriate."
             : "No extra holdback detail beyond the judgment above — restraint is intentional for now."
         }</p>`;
 
@@ -176,7 +181,9 @@ function formatBuyerInspectorHtml(
         .map((ev, i) => {
           const prev = i > 0 ? buyerTimeline[i - 1]!.t : null;
           const lab = formatTimelineLabelForBuyer(sessionStartedAt, ev.t, prev);
-          return `<li><time>${escHtml(lab)}</time><span>${escHtml(ev.displayMessage)}</span></li>`;
+          const msg = buyerSafeLineOrNull(ev.displayMessage);
+          if (!msg) return "";
+          return `<li><time>${escHtml(lab)}</time> <span>${escHtml(msg)}</span></li>`;
         })
         .join("")}</ul>
     </div>`
@@ -366,13 +373,20 @@ function appendInspectorShell(root: HTMLElement): void {
 
   headerActions.append(modeBuyer, modeOp);
 
+  const minimizeBtn = document.createElement("button");
+  minimizeBtn.type = "button";
+  minimizeBtn.className = "si-btn";
+  minimizeBtn.id = "si-minimize";
+  minimizeBtn.textContent = "Minimize";
+  minimizeBtn.title = "Collapse to a compact floating panel";
+
   const closeBtn = document.createElement("button");
   closeBtn.type = "button";
   closeBtn.className = "si-btn";
   closeBtn.id = "si-close";
   closeBtn.textContent = "Close";
 
-  header.append(headerMain, headerActions, closeBtn);
+  header.append(headerMain, headerActions, minimizeBtn, closeBtn);
 
   const panelBody = document.createElement("div");
   panelBody.id = "si-inspector-body";
@@ -417,6 +431,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
   const panel = root.querySelector("#si-inspector-panel") as HTMLElement;
   const body = root.querySelector("#si-inspector-body") as HTMLElement;
   const closeBtn = root.querySelector("#si-close") as HTMLButtonElement;
+  const minimizeBtn = root.querySelector("#si-minimize") as HTMLButtonElement;
   const launcher = root.querySelector("#si-inspector-launcher") as HTMLButtonElement;
   const modeBuyerBtn = root.querySelector("#si-mode-buyer") as HTMLButtonElement;
   const modeOperatorBtn = root.querySelector("#si-mode-operator") as HTMLButtonElement;
@@ -431,15 +446,68 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
   }
 
   let open = false;
+  let minimized = false;
   let mapperPickActive = false;
   let pendingInspectorMapping: { selector: string } | null = null;
-  const toggle = () => {
-    open = !open;
+  let narrowCollapseTimer: number | null = null;
+
+  const syncPanelDom = () => {
     panel.classList.toggle("open", open);
+    panel.classList.toggle("si-minimized", open && minimized);
     panel.setAttribute("aria-hidden", open ? "false" : "true");
     launcher.setAttribute("aria-expanded", open ? "true" : "false");
-    if (open) render();
+    minimizeBtn.textContent = minimized ? "Expand" : "Minimize";
+    minimizeBtn.setAttribute("aria-pressed", minimized ? "true" : "false");
+    root.classList.toggle("si-inspector-has-open-panel", open);
   };
+
+  const isNarrowViewport = () =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
+
+  const clearNarrowCollapseTimer = () => {
+    if (narrowCollapseTimer != null) {
+      clearTimeout(narrowCollapseTimer);
+      narrowCollapseTimer = null;
+    }
+  };
+
+  const scheduleNarrowAutoClose = () => {
+    clearNarrowCollapseTimer();
+    if (!open || !isNarrowViewport()) return;
+    narrowCollapseTimer = window.setTimeout(() => {
+      narrowCollapseTimer = null;
+      if (open && isNarrowViewport()) {
+        open = false;
+        syncPanelDom();
+      }
+    }, 42_000);
+  };
+
+  const bumpNarrowCollapseTimer = () => {
+    scheduleNarrowAutoClose();
+  };
+
+  const toggle = () => {
+    open = !open;
+    if (open && isNarrowViewport()) minimized = true;
+    if (!open) minimized = false;
+    syncPanelDom();
+    if (open) {
+      render();
+      scheduleNarrowAutoClose();
+    } else {
+      clearNarrowCollapseTimer();
+    }
+  };
+
+  const toggleMinimized = () => {
+    if (!open) return;
+    minimized = !minimized;
+    syncPanelDom();
+    bumpNarrowCollapseTimer();
+  };
+
+  panel.addEventListener("pointerdown", bumpNarrowCollapseTimer);
 
   const typingTarget = (t: EventTarget | null) => {
     if (!(t instanceof HTMLElement)) return false;
@@ -462,6 +530,10 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
   };
   window.addEventListener("keydown", keyHandler, true);
   closeBtn.addEventListener("click", toggle);
+  minimizeBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    toggleMinimized();
+  });
   launcher.addEventListener("click", (ev) => {
     ev.stopPropagation();
     toggle();
@@ -920,8 +992,8 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       curatedTimeline.length > 0
         ? curatedTimeline
             .map(
-              (ev) =>
-                `<li><time>${escHtml(formatTimelineClock(p.started_at, ev.t))}</time><span>${escHtml(ev.displayMessage)}</span></li>`,
+                (ev) =>
+                `<li><time>${escHtml(formatTimelineClock(p.started_at, ev.t))}</time> <span>${escHtml(ev.displayMessage)}</span></li>`,
             )
             .join("")
         : `<li class="si-timeline-empty"><span class="si-muted">No milestones yet — navigate, scroll, or use CTAs to populate this view.</span></li>`;
@@ -1275,12 +1347,12 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
           <select class="si-select" id="si-sm-surface-select">${surfaceOptionsHtml}</select>
           <button type="button" class="si-btn primary" id="si-sm-save">Save mapping</button>
         </div>
-        <h4 class="si-subh">Live slot preview</h4>
+        <h4 class="si-subh">Live experience preview</h4>
         <table class="si-table si-sm-preview">
           <thead><tr><th>Surface</th><th>Source</th><th>Preview</th><th>Action</th><th>Timing</th><th>Why / holdback</th></tr></thead>
           <tbody>${surfaceMapperPreviewRows}</tbody>
         </table>`
-            : `<p class="si-muted si-muted--block">Slot preview needs a booted runtime exposing <code class="si-code">getExperienceDecision</code> to the inspector.</p>`
+            : `<p class="si-muted si-muted--block">Experience preview needs a booted runtime exposing <code class="si-code">getExperienceDecision</code> to the inspector.</p>`
         }
       </div>
     </div>`
@@ -1436,14 +1508,18 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
   /** Debug / SPA: open drawer when `?si_debug=1` or `sessionStorage['si:debug'] === '1'`. */
   if (urlHasSiDebug()) {
     open = true;
-    panel.classList.add("open");
-    panel.setAttribute("aria-hidden", "false");
-    launcher.setAttribute("aria-expanded", "true");
+    if (isNarrowViewport()) minimized = true;
+    syncPanelDom();
     render();
+    scheduleNarrowAutoClose();
   }
+
+  syncPanelDom();
 
   return () => {
     unsub();
+    panel.removeEventListener("pointerdown", bumpNarrowCollapseTimer);
+    clearNarrowCollapseTimer();
     window.removeEventListener("keydown", keyHandler, true);
     document.removeEventListener("pointerdown", onMapperDocumentPointerDown, true);
     destroySurfaceMapperOverlay();

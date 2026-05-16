@@ -6,30 +6,9 @@ import {
   buyerInspectorNarrativeCredibilityIssue,
   joinBuyerInspectorNarrativeForTests,
 } from "./buyerInspectorNarrative";
+import { isBuyerUnsafeString } from "./buyerCopySafety";
 import type { ReplayResult } from "./replay/types";
 import { minimalProfile } from "../test/fixtures";
-
-const BUYER_FORBIDDEN = [
-  /route\s+ticks/i,
-  /\bcandidates?\b/i,
-  /\bcleared\s+gates\b/i,
-  /\bprogression\s+gates\b/i,
-  /primary\s+slot/i,
-  /engagement\s+score/i,
-  /activation\s+readiness\s+score/i,
-  /activation\s+readiness\s+\(/i,
-  /\b\d{2,3}\s+engagement\b/i,
-  /\broughly\s+\d+\s+activation\b/i,
-  /conversion\s+ready\b/i,
-  /\bladder\s+level/i,
-  /model\s+confidence/i,
-  /\bon\s+this\s+tick\b/i,
-  /\bevaluation\s+tick\b/i,
-  /\bticks?\s+counted\b/i,
-  /\bfired\b/i,
-  /\bprogression_surface_cooldown\b/i,
-  /\bProgression held\b/i,
-];
 
 function behaviorSnapshot(
   overrides: Partial<NonNullable<SessionProfile["behavior_snapshot"]>> = {},
@@ -250,9 +229,7 @@ describe("buyerInspectorNarrative", () => {
     });
     const v = buildBuyerInspectorView(p, envSuppressed("Thin signals for now."), null);
     const blob = joinBuyerInspectorNarrativeForTests(v);
-    for (const r of BUYER_FORBIDDEN) {
-      expect(blob, `matched ${r}`).not.toMatch(r);
-    }
+    expect(isBuyerUnsafeString(blob)).toBe(false);
     expect(buyerInspectorNarrativeCredibilityIssue(v)).toBeNull();
   });
 
@@ -305,9 +282,7 @@ describe("buyerInspectorNarrative", () => {
       ),
     ).toBe(false);
     const blob = joinBuyerInspectorNarrativeForTests(v);
-    for (const r of BUYER_FORBIDDEN) {
-      expect(blob, `matched ${r}`).not.toMatch(r);
-    }
+    expect(isBuyerUnsafeString(blob)).toBe(false);
     expect(buyerInspectorNarrativeCredibilityIssue(v)).toBeNull();
   });
 

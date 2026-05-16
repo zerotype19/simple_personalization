@@ -59,6 +59,9 @@ export default function Layout() {
         <span className="text-slate-500"> / </span>
         <span className="rounded bg-slate-900 px-2 py-1 text-slate-200">⌘+Shift+`</span>
         <span className="text-slate-500"> (Mac, backtick key)</span>.
+        <p className="mt-4 font-mono text-[10px] text-slate-600">
+          Build: demo {__SI_DEMO_GIT_SHA__} · SDK {__SI_SDK_GIT_SHA__} · snippet {__SI_SNIPPET_GIT_SHA__}
+        </p>
       </footer>
     </div>
   );

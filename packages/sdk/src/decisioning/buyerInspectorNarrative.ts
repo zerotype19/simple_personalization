@@ -13,9 +13,15 @@ import {
   getStateProgressionLadder,
   ladderLabel,
 } from "./experienceStatePresentation";
-import type { ReplayResult } from "./replay/types";
+import type { DecisionTransitionReason, ReplayResult } from "./replay/types";
+import {
+  BUYER_RUNTIME_SIGNAL_STILL_GATHERING,
+  buyerSafeLineOrNull,
+  filterBuyerSafeLines,
+  isBuyerUnsafeString,
+} from "./buyerCopySafety";
 
-const BUYER_REASON_COPY: Partial<Record<string, string>> = {
+const BUYER_REASON_COPY: Record<DecisionTransitionReason, string> = {
   first_frame: "Baseline established for this session.",
   readiness_crossed_threshold: "Interest crossed a level where a guided next step fits better.",
   commercial_phase_advanced: "Commercial journey phase moved forward.",
@@ -67,54 +73,13 @@ export interface BuyerInspectorView {
   };
 }
 
-/** Buyer copy must not echo operator/engine diagnostics. */
-function hasOperatorJargon(s: string): boolean {
-  const t = s.trim();
-  if (!t) return false;
-  const patterns = [
-    /route\s+ticks/i,
-    /\bcandidates?\b/i,
-    /\bcleared\s+gates\b/i,
-    /\bprogression\s+gates\b/i,
-    /\bgates\s+or\b/i,
-    /\bor\s+the\s+primary\s+slot\b/i,
-    /primary\s+slot/i,
-    /engagement\s+score/i,
-    /activation\s+readiness\s+score/i,
-    /activation\s+readiness\s+\(/i,
-    /\b\d{2,3}\s+engagement\b/i,
-    /\broughly\s+\d+\s+activation\b/i,
-    /conversion\s+ready\b/i,
-    /ladder\s+level/i,
-    /model\s+confidence/i,
-    /\bon\s+this\s+tick\b/i,
-    /\bevaluation\s+tick\b/i,
-    /\bticks?\s+counted\b/i,
-    /\bfired\b/i,
-    /\bprogression_surface_cooldown\b/i,
-    /\bProgression held\b/i,
-  ];
-  return patterns.some((r) => r.test(t));
-}
-
-/** Raw progression-memory lines — never buyer-facing. */
-function isProgressionEngineeringNote(raw: string): boolean {
-  const n = raw.trim();
-  if (!n) return false;
-  if (/\bprogression_surface_cooldown\b/i.test(n)) return true;
-  if (/\bProgression held\b/i.test(n)) return true;
-  if (/\bprogression_gate\b/i.test(n)) return true;
-  if (/\bsurface_cooldown\b/i.test(n)) return true;
-  return false;
-}
-
 function hasLeakage(s: string): boolean {
   if (/%/.test(s)) return true;
   if (/\b\d+\s*\/\s*100\b/.test(s)) return true;
   if (/\breadiness[_\s]?score\b/i.test(s)) return true;
   if (/\bmomentum\b/i.test(s)) return true;
   if (/\bthreshold\b.*\d/i.test(s)) return true;
-  if (hasOperatorJargon(s)) return true;
+  if (isBuyerUnsafeString(s)) return true;
   return false;
 }
 
@@ -280,13 +245,6 @@ function buildWithheld(
 ): string[] {
   const lines: string[] = [];
   if (!primary) {
-    const notes = envelope?.progression_notes?.filter(Boolean) ?? [];
-    for (const n of notes) {
-      if (isProgressionEngineeringNote(n)) continue;
-      if (!/hold|\bcool\b|pacing|restraint|back|withheld|pause/i.test(n)) continue;
-      if (hasLeakage(n) || hasOperatorJargon(n)) continue;
-      lines.push(tidySentence(n.trim()));
-    }
     const posture = profile.behavior_snapshot?.activation_readiness.interruption_posture;
     if (lines.length === 0 && posture === "avoid_interrupt") {
       lines.push("Heavier prompts stay back when the tab is often in the background or navigation stays exploratory.");
@@ -298,18 +256,6 @@ function buildWithheld(
     const sr = primary.suppression_reason.trim();
     if (!hasLeakage(sr)) {
       lines.push(`${humanSurface(primary.surface_id)} suppressed: ${sr}`);
-    }
-  }
-
-  const notes = envelope?.progression_notes?.filter(Boolean) ?? [];
-  for (const n of notes) {
-    if (isProgressionEngineeringNote(n)) continue;
-    if (
-      /hold|\bcool\b|pacing|restraint|back|withheld|pause/i.test(n) &&
-      !hasLeakage(n) &&
-      !hasOperatorJargon(n)
-    ) {
-      lines.push(tidySentence(n));
     }
   }
 
@@ -338,13 +284,15 @@ function buildWhatChanged(replay: ReplayResult | null): string | null {
   if (!replay?.transitions?.length) return null;
   const t = replay.transitions[replay.transitions.length - 1]!;
   if (!t.reasons.length) return null;
-  const phrase = t.reasons
-    .map((c) => BUYER_REASON_COPY[c] ?? "")
-    .filter(Boolean)
-    .slice(0, 2)
-    .join(" ");
-  if (!phrase.trim()) return null;
-  return tidySentence(`Shift detected: ${phrase}`);
+  const parts: string[] = [];
+  for (const c of t.reasons.slice(0, 2)) {
+    const phrase = BUYER_REASON_COPY[c];
+    if (!phrase || isBuyerUnsafeString(phrase)) return BUYER_RUNTIME_SIGNAL_STILL_GATHERING;
+    parts.push(phrase);
+  }
+  if (!parts.length) return BUYER_RUNTIME_SIGNAL_STILL_GATHERING;
+  const out = tidySentence(`Shift detected: ${parts.join(" ")}`);
+  return buyerSafeLineOrNull(out) ?? BUYER_RUNTIME_SIGNAL_STILL_GATHERING;
 }
 
 /**
@@ -378,26 +326,60 @@ export function buildBuyerInspectorView(
         restraintBody: buildRestraintBody(profile, envelope),
       };
 
-  const whyBullets = buildWhyBullets(profile, primary);
-  const withheld = buildWithheld(profile, primary, envelope);
+  const whyBullets = filterBuyerSafeLines(buildWhyBullets(profile, primary));
+  const withheld = filterBuyerSafeLines(buildWithheld(profile, primary, envelope));
   const expState = getExperienceState(profile, envelope, replay);
   const progression = getStateProgressionLadder(expState);
   const whatChanged = buildWhatChanged(replay);
-  const families = buildFamilies(profile);
+  const familiesRaw = buildFamilies(profile);
+  const families = {
+    primary: buyerSafeLineOrNull(familiesRaw.primary),
+    secondary: buyerSafeLineOrNull(familiesRaw.secondary),
+  };
 
   const statePresentation = {
-    currentStateLabel: ladderLabel(expState),
+    currentStateLabel: buyerSafeLineOrNull(ladderLabel(expState)) ?? ladderLabel(expState),
     ladder: progression,
-    escalationPosture: formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
-    whyThisState: buildRuntimeStayingSentence(profile, envelope, replay),
-    whatWouldMoveForward: buildRuntimeEscalateIfSentence(profile, envelope),
+    escalationPosture:
+      buyerSafeLineOrNull(formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope))) ??
+      formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
+    whyThisState:
+      buyerSafeLineOrNull(buildRuntimeStayingSentence(profile, envelope, replay)) ??
+      BUYER_RUNTIME_SIGNAL_STILL_GATHERING,
+    whatWouldMoveForward:
+      buyerSafeLineOrNull(buildRuntimeEscalateIfSentence(profile, envelope)) ??
+      "Keep browsing — a clearer next step will emerge when the visit firms up.",
     strongerActionWithheld: null,
   };
 
+  const commercialReadSafe =
+    buyerSafeLineOrNull(commercialRead) ??
+    "Session signals are still clarifying; the commercial read will sharpen after a little more browsing.";
+
+  const recommendedSafe = hasPrimaryExperience
+    ? {
+        ...recommended,
+        show: buyerSafeLineOrNull(recommended.show) ?? recommended.show,
+        surface: buyerSafeLineOrNull(recommended.surface) ?? recommended.surface,
+        timing: buyerSafeLineOrNull(recommended.timing) ?? recommended.timing,
+        escalationPosture:
+          buyerSafeLineOrNull(recommended.escalationPosture) ?? recommended.escalationPosture,
+        restraintBody: recommended.restraintBody,
+      }
+    : {
+        ...recommended,
+        show: buyerSafeLineOrNull(recommended.show) ?? recommended.show,
+        surface: buyerSafeLineOrNull(recommended.surface) ?? recommended.surface,
+        timing: buyerSafeLineOrNull(recommended.timing) ?? recommended.timing,
+        escalationPosture:
+          buyerSafeLineOrNull(recommended.escalationPosture) ?? recommended.escalationPosture,
+        restraintBody: buyerSafeLineOrNull(recommended.restraintBody ?? ""),
+      };
+
   return {
     hasPrimaryExperience,
-    commercialRead,
-    recommended,
+    commercialRead: commercialReadSafe,
+    recommended: recommendedSafe,
     whyBullets,
     withheld,
     progression,
@@ -433,7 +415,7 @@ export function joinBuyerInspectorNarrativeForTests(view: BuyerInspectorView): s
 /** Returns a short reason if any buyer string fails the credibility bar; otherwise null. */
 export function buyerInspectorNarrativeCredibilityIssue(view: BuyerInspectorView): string | null {
   const blob = joinBuyerInspectorNarrativeForTests(view);
-  if (hasOperatorJargon(blob)) return "operator jargon";
+  if (isBuyerUnsafeString(blob)) return "unsafe buyer phrase";
   if (/%/.test(blob)) return "percent sign";
   return null;
 }

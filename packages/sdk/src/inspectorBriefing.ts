@@ -2,6 +2,7 @@ import type { SessionProfile } from "@si/shared";
 import { marketerArrivalSourceHeadline, marketerLikelyVisitorMindset } from "./siteSemantics/acquisitionPanelCopy";
 import { timelineHumanPageLabel } from "./siteEnvironment";
 import { verticalDisplayName } from "./siteIntelligence/panelLabelMapper";
+import { isBuyerUnsafeString } from "./decisioning/buyerCopySafety";
 
 /** Single operator-facing activation line — avoids repeating playbook / note / NBA prose in the inspector. */
 export function synthesizedActivationRecommendation(p: SessionProfile): string {
@@ -89,6 +90,7 @@ export function curateIntelTimelineForInspector(
       prev.t = row.t;
       continue;
     }
+    if (isBuyerUnsafeString(row.displayMessage)) continue;
     out.push({ ...row });
   }
   return collapseViewedPageRuns(out).slice(-14);

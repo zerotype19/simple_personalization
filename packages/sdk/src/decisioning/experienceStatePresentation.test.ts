@@ -12,6 +12,7 @@ import {
   getStateProgressionLadder,
   ladderLabel,
 } from "./experienceStatePresentation";
+import { BUYER_RUNTIME_SIGNAL_STILL_GATHERING } from "./buyerCopySafety";
 import type { ReplayResult } from "./replay/types";
 
 function envPrimary(
@@ -239,6 +240,52 @@ describe("experienceStatePresentation", () => {
     const s = describeLatestReplayTransition(replay);
     expect(s).toBeTruthy();
     expect(s).not.toMatch(/%|\d+\s*\/\s*100|0\.\d{2,}/);
+  });
+
+  it("unknown replay transition reasons collapse to the canonical gathering line", () => {
+    const replay: ReplayResult = {
+      frames: [],
+      transitions: [
+        {
+          from_index: 0,
+          to_index: 1,
+          reasons: ["not_a_real_reason" as never],
+          primary_surface_from: null,
+          primary_surface_to: null,
+          suppression_delta: "unchanged",
+          timing_from: null,
+          timing_to: null,
+        },
+      ],
+      progression_summary: "",
+      suppression_summary: "",
+      timing_summary: "",
+    };
+    expect(describeLatestReplayTransition(replay)).toBe(BUYER_RUNTIME_SIGNAL_STILL_GATHERING);
+  });
+
+  it("maps timing transition reasons without collapsing to the insufficient-signal fallback", () => {
+    const replay: ReplayResult = {
+      frames: [],
+      transitions: [
+        {
+          from_index: 0,
+          to_index: 1,
+          reasons: ["timing_escalated", "timing_relaxed"],
+          primary_surface_from: "a",
+          primary_surface_to: "b",
+          suppression_delta: "unchanged",
+          timing_from: "immediate",
+          timing_to: "after_scroll",
+        },
+      ],
+      progression_summary: "",
+      suppression_summary: "",
+      timing_summary: "",
+    };
+    const s = describeLatestReplayTransition(replay);
+    expect(s).toMatch(/Changed because/i);
+    expect(s).not.toBe(BUYER_RUNTIME_SIGNAL_STILL_GATHERING);
   });
 
   it("buyer-visible sentences avoid raw percentages and score jargon", () => {

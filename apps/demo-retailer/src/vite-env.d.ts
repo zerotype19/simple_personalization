@@ -14,3 +14,7 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare const __SI_DEMO_GIT_SHA__: string;
+declare const __SI_SDK_GIT_SHA__: string;
+declare const __SI_SNIPPET_GIT_SHA__: string;

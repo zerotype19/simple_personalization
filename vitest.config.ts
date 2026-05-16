@@ -7,6 +7,7 @@ export default defineConfig({
     include: [
       "packages/shared/src/**/*.test.ts",
       "packages/sdk/src/**/*.test.ts",
+      "apps/demo-retailer/src/**/*.test.ts",
       "worker/src/**/*.test.ts",
     ],
     passWithNoTests: false,
@@ -20,6 +21,7 @@ export default defineConfig({
       "@si/shared/experiencePacks": path.resolve(__dirname, "packages/shared/src/experiencePacks.ts"),
       "@si/shared/demoMetrics": path.resolve(__dirname, "packages/shared/src/demoMetrics.ts"),
       "@si/shared": path.resolve(__dirname, "packages/shared/src/index.ts"),
+      "@si/sdk": path.resolve(__dirname, "packages/sdk/src/index.ts"),
     },
   },
 });

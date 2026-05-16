@@ -1,4 +1,5 @@
 import type { ExperienceDecisionEnvelope, SessionProfile } from "@si/shared";
+import { BUYER_RUNTIME_SIGNAL_STILL_GATHERING, isBuyerUnsafeString } from "./buyerCopySafety";
 import type { DecisionTransitionReason, ReplayResult } from "./replay/types";
 
 /** Canonical progression ladder (fixed ordering). */
@@ -33,18 +34,24 @@ const LABEL_TO_STATE: Record<string, ExperienceLadderState> = {
   "Escalation earned": "escalation_earned",
 };
 
-const TRANSITION_HINT: Partial<Record<DecisionTransitionReason, string>> = {
+const TRANSITION_HINT: Record<DecisionTransitionReason, string> = {
+  first_frame: "the replay established a baseline for this session",
   commercial_phase_advanced: "the commercial journey phase matured",
   comparison_behavior_detected: "comparison-style navigation became clearer",
   readiness_crossed_threshold: "interest crossed a point where softer guidance fits better",
   engagement_increased: "engagement deepened on recent pages",
-  cta_engagement_increased: "CTA engagement increased",
+  cta_engagement_increased: "calls-to-action drew more deliberate attention",
   pricing_signal_added: "pricing-oriented pages showed up in the path",
   escalation_stage_increased: "pacing memory recorded room for a stronger next step",
   suppression_due_to_low_confidence: "confidence was still building for a harder surface",
   progression_gate_blocked: "pacing intentionally held back a heavier step",
-  progression_cooldown_active: "cooldown pacing avoided repeating the same interruption",
+  progression_cooldown_active: "short pacing avoided repeating the same interruption",
+  cooldown_active: "a brief pacing pause applied between visible prompts",
   decision_family_rotated: "the active guidance family rotated to match the new moment",
+  surface_changed_same_family: "the recommended surface changed while the guidance theme stayed consistent",
+  timing_escalated: "experience timing became slightly more assertive",
+  timing_relaxed: "experience timing eased to stay patient",
+  offer_angle_changed: "the offer framing shifted to match visitor context",
   no_decision_maintained: "the runtime maintained deliberate restraint",
 };
 
@@ -173,10 +180,7 @@ export function getEscalationPosture(profile: SessionProfile, envelope: Experien
 function lastReplayHints(replay: ReplayResult | null | undefined): string | null {
   const t = replay?.transitions?.length ? replay.transitions[replay.transitions.length - 1] : null;
   if (!t?.reasons.length) return null;
-  const parts = t.reasons
-    .map((r) => TRANSITION_HINT[r])
-    .filter(Boolean)
-    .slice(0, 2);
+  const parts = t.reasons.map((r) => TRANSITION_HINT[r]).slice(0, 2);
   if (!parts.length) return null;
   return parts.join(" and ");
 }
@@ -285,9 +289,15 @@ export function buildRuntimeEscalateIfSentence(
 export function describeLatestReplayTransition(replay: ReplayResult | null | undefined): string | null {
   const t = replay?.transitions?.length ? replay.transitions[replay.transitions.length - 1] : null;
   if (!t?.reasons.length) return null;
-  const parts = t.reasons.map((r) => TRANSITION_HINT[r]).filter(Boolean).slice(0, 2);
-  if (!parts.length) return null;
-  return tidy(`Changed because ${parts.join(" and ")}.`);
+  const parts: string[] = [];
+  for (const r of t.reasons.slice(0, 2)) {
+    const hint = TRANSITION_HINT[r];
+    if (!hint || isBuyerUnsafeString(hint)) return BUYER_RUNTIME_SIGNAL_STILL_GATHERING;
+    parts.push(hint);
+  }
+  if (!parts.length) return BUYER_RUNTIME_SIGNAL_STILL_GATHERING;
+  const out = tidy(`Changed because ${parts.join(" and ")}.`);
+  return isBuyerUnsafeString(out) ? BUYER_RUNTIME_SIGNAL_STILL_GATHERING : out;
 }
 
 /** Map a ladder step label back to state (for scenario diff). */

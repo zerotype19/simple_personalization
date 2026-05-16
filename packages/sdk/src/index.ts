@@ -176,6 +176,14 @@ export {
 export { buildFixtureProfile } from "./decisioning/fixtures/buildFixtureProfile";
 export type { FixtureSessionInput } from "./decisioning/fixtures/types";
 export {
+  BUYER_RUNTIME_SIGNAL_STILL_GATHERING,
+  buyerSafeLineOrNull,
+  filterBuyerSafeLines,
+  isBuyerUnsafeString,
+  mapProgressionNoteForBuyer,
+  sanitizeBuyerVisibleString,
+} from "./decisioning/buyerCopySafety";
+export {
   buildBuyerInspectorView,
   buyerInspectorNarrativeCredibilityIssue,
   joinBuyerInspectorNarrativeForTests,

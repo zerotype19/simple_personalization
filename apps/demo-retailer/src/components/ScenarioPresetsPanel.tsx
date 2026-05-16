@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import {
   buildBuyerInspectorView,
   buildFixtureProfile,
+  buyerSafeLineOrNull,
   describeLatestReplayTransition,
   getExperienceState,
   getStateProgressionLadder,
+  joinBuyerInspectorNarrativeForTests,
   ladderLabel,
   runDecisionReplay,
 } from "@si/sdk";
@@ -89,15 +91,13 @@ export default function ScenarioPresetsPanel() {
     const a = getExperienceState(pp, pf.envelope, prevReplay);
     const b = getExperienceState(lastProfile, lastFrame.envelope, replay);
     if (a === b) return null;
-    return `${ladderLabel(a)} → ${ladderLabel(b)}`;
+    return buyerSafeLineOrNull(`${ladderLabel(a)} → ${ladderLabel(b)}`);
   }, [step, profiles, lastProfile, lastFrame, replay]);
 
-  const replayTransitionWhy = useMemo(() => describeLatestReplayTransition(replay), [replay]);
-
-  const strongerWithheldBecause =
-    !lastFrame.envelope.primary_decision && buyer.statePresentation.strongerActionWithheld
-      ? `Stronger action withheld because ${buyer.statePresentation.strongerActionWithheld}.`
-      : null;
+  const replayTransitionWhy = useMemo(() => {
+    const raw = describeLatestReplayTransition(replay);
+    return raw ? buyerSafeLineOrNull(raw) : null;
+  }, [replay]);
 
   const decisionShift = useMemo(() => {
     if (step === 0) return null;
@@ -107,7 +107,9 @@ export default function ScenarioPresetsPanel() {
     const pp = prevSlice[prevSlice.length - 1]!;
     const prevBuyer = buildBuyerInspectorView(pp, pf.envelope, prevReplay);
     if (prevBuyer.recommended.show === buyer.recommended.show) return null;
-    return `Decision shifted: ${prevBuyer.recommended.show} → ${buyer.recommended.show}`;
+    return buyerSafeLineOrNull(
+      `Decision shifted: ${prevBuyer.recommended.show} → ${buyer.recommended.show}`,
+    );
   }, [step, profiles, buyer]);
 
   const play = () => {
@@ -185,9 +187,9 @@ export default function ScenarioPresetsPanel() {
           </div>
 
           <div className="mt-4 border-t border-slate-800/80 pt-4">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Runtime ladder</div>
+            <div className="text-[11px] font-medium text-slate-500">Experience states</div>
             <p className="mt-1 text-[11px] text-slate-500">
-              Same five-state ladder as the buyer inspector — highlights move as replay frames advance.
+              Same five-state path as the buyer inspector — highlights move as replay frames advance.
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-2 text-xs text-slate-400">
               {runtimeLadder.steps.map((lbl, i) => (
@@ -234,16 +236,15 @@ export default function ScenarioPresetsPanel() {
               ) : null}
               {replayTransitionWhy && step > 0 ? (
                 <p className="text-slate-400">
-                  <span className="font-medium text-slate-500">Changed reason: </span>
+                  <span className="font-medium text-slate-500">What changed: </span>
                   {replayTransitionWhy}
                 </p>
               ) : null}
-              {strongerWithheldBecause ? <p className="text-amber-100/90">{strongerWithheldBecause}</p> : null}
             </div>
           </div>
 
           <div className="mt-4 border-t border-slate-800/80 pt-4">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Progression</div>
+            <div className="text-[11px] font-medium text-slate-500">Scenario steps</div>
             <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-2 text-xs text-slate-400">
               {selected.progressionLabels.map((lbl, i) => (
                 <span key={`${lbl}-${i}`} className="inline-flex items-center gap-2">
@@ -267,13 +268,28 @@ export default function ScenarioPresetsPanel() {
           </div>
 
           <div className="mt-4 space-y-2 border-t border-slate-800/80 pt-4 text-xs leading-relaxed text-slate-300">
+            <p className="text-slate-400">{buyer.commercialRead}</p>
+            <p>
+              <span className="text-slate-500">Judgment: </span>
+              {buyer.recommended.show}
+              {buyer.hasPrimaryExperience ? (
+                <>
+                  {" "}
+                  · <span className="text-slate-500">Surface: </span>
+                  {buyer.recommended.surface}
+                  {" "}
+                  · <span className="text-slate-500">Timing: </span>
+                  {buyer.recommended.timing}
+                </>
+              ) : null}
+            </p>
             {decisionShift ? <p className="text-slate-200">{decisionShift}</p> : null}
             {buyer.whatChanged && !decisionShift ? <p className="text-slate-400">{buyer.whatChanged}</p> : null}
           </div>
 
           {buyer.withheld.length > 0 ? (
             <div className="mt-3 rounded-md border border-slate-800 bg-slate-900/30 px-3 py-2 text-[11px] text-slate-400">
-              <div className="mb-1 font-medium uppercase tracking-wide text-slate-500">Why stronger escalation was withheld</div>
+              <div className="mb-1 font-medium text-slate-500">Why stronger escalation was withheld</div>
               <ul className="list-inside list-disc space-y-0.5">
                 {buyer.withheld.map((line) => (
                   <li key={line}>{line}</li>
@@ -281,23 +297,31 @@ export default function ScenarioPresetsPanel() {
               </ul>
             </div>
           ) : null}
-
-          {lastFrame.diagnostics.holdback_reasons.length > 0 ? (
-            <div className="mt-3 text-[11px] text-slate-500">
-              <span className="text-slate-500">Pipeline holdbacks: </span>
-              {[...new Set(lastFrame.diagnostics.holdback_reasons)].slice(0, 5).join(" · ")}
-            </div>
-          ) : null}
-
-          {lastFrame.envelope.primary_decision ? (
-            <div className="mt-3 text-[11px] text-slate-500">
-              Primary surface:{" "}
-              <span className="text-slate-300">{lastFrame.envelope.primary_decision.surface_id}</span> · timing{" "}
-              <span className="text-slate-300">{lastFrame.envelope.primary_decision.timing}</span>
-            </div>
-          ) : null}
         </div>
       </div>
     </section>
   );
+}
+
+/** Exported for tests — all strings the scenario panel would show buyers. */
+export function joinScenarioPanelBuyerTextForTests(args: {
+  buyer: ReturnType<typeof buildBuyerInspectorView>;
+  stateShift: string | null;
+  replayTransitionWhy: string | null;
+  decisionShift: string | null;
+  ladderLabels: readonly string[];
+  stepLabels: readonly string[];
+}): string {
+  return [
+    joinBuyerInspectorNarrativeForTests(args.buyer),
+    args.buyer.commercialRead,
+    args.buyer.recommended.show,
+    args.buyer.recommended.surface,
+    args.buyer.recommended.timing,
+    args.stateShift ?? "",
+    args.replayTransitionWhy ?? "",
+    args.decisionShift ?? "",
+    ...args.ladderLabels,
+    ...args.stepLabels,
+  ].join("\n");
 }

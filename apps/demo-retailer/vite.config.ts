@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,6 +10,20 @@ const rootDir = fileURLToPath(new URL(".", import.meta.url));
 const useCdnHostedSnippet =
   process.env.VITE_SI_DEMO_USE_HOSTED_SNIPPET === "1" ||
   process.env.VITE_SI_DEMO_USE_HOSTED_SNIPPET === "true";
+
+function gitShortSha(cwd: string): string {
+  try {
+    return execSync("git rev-parse --short HEAD", { encoding: "utf8", cwd }).trim();
+  } catch {
+    return "unknown";
+  }
+}
+
+const monoRepoSha = gitShortSha(rootDir);
+const snippetSha =
+  useCdnHostedSnippet && (process.env.VITE_SI_SNIPPET_GIT_SHA ?? "").trim()
+    ? (process.env.VITE_SI_SNIPPET_GIT_SHA ?? "").trim()
+    : monoRepoSha;
 
 const sdkAlias = useCdnHostedSnippet
   ? path.resolve(rootDir, "src/si-cdn-bridge.ts")
@@ -50,6 +65,11 @@ function assertHostedSnippetWhenWorkerEnv(): Plugin {
 }
 
 export default defineConfig({
+  define: {
+    __SI_DEMO_GIT_SHA__: JSON.stringify(monoRepoSha),
+    __SI_SDK_GIT_SHA__: JSON.stringify(monoRepoSha),
+    __SI_SNIPPET_GIT_SHA__: JSON.stringify(snippetSha),
+  },
   plugins: [assertCdnSnippetBridgeEnv(), assertHostedSnippetWhenWorkerEnv(), react()],
   resolve: {
     alias: [

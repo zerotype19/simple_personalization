@@ -9,6 +9,12 @@ export { buildRuleContext, evaluateExpression } from "../../../packages/sdk/src/
 export { runDecisionReplay } from "../../../packages/sdk/src/decisioning/replay";
 export { buildFixtureProfile } from "../../../packages/sdk/src/decisioning/fixtures/buildFixtureProfile";
 export { buildBuyerInspectorView } from "../../../packages/sdk/src/decisioning/buyerInspectorNarrative";
+export {
+  BUYER_RUNTIME_SIGNAL_STILL_GATHERING,
+  buyerSafeLineOrNull,
+  isBuyerUnsafeString,
+} from "../../../packages/sdk/src/decisioning/buyerCopySafety";
+export { joinBuyerInspectorNarrativeForTests } from "../../../packages/sdk/src/decisioning/buyerInspectorNarrative";
 export type { FixtureSessionInput } from "../../../packages/sdk/src/decisioning/fixtures/types";
 export {
   buildEscalationUnlockCondition,

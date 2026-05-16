@@ -172,6 +172,7 @@ describe("buildSurfaceDecisionPreview", () => {
   it("describes none as no strong decision yet", () => {
     const pr = buildSurfaceDecisionPreview(baseDecision({ action: "none" }));
     expect(pr.headline).toBe("No strong decision yet");
+    expect(pr.actionLine).toContain("this moment");
     expect(pr.suppressionLine).toBeNull();
   });
 
