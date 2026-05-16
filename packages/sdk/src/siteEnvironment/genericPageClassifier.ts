@@ -154,6 +154,10 @@ export function timelineHumanPageLabel(kind: GenericPageKind, pathname: string):
     if (/\/(blog|posts?|articles?|news|insights|editorial)\b/i.test(p)) return "Editorial content page";
     if (/\/(manifesto|guide|playbook|handbook)\b/i.test(p)) return "Guide or manifesto page";
     if (/\/(pricing|plans|subscribe|membership)\b/i.test(p)) return "Plans or subscription page";
+    if (/\/(compare)\b/i.test(p)) return "Compare or shortlist page";
+    if (/\/(finance|financing|payment|calculator)\b/i.test(p)) return "Financing or payment page";
+    if (/\/(test-?drive|testdrive)\b/i.test(p)) return "Test drive or appointment page";
+    if (/\/(inventory|vehicles|catalog)\b/i.test(p)) return "Inventory listing page";
     if (/\/(about|team|company|careers)\b/i.test(p)) return "About or company page";
     if (/\/(dive|learn|explore|start)\b/i.test(p)) return "Learning or onboarding page";
     // Single marketing slug path (e.g. /the-rhythmic-marketer) — still editorial-shaped.

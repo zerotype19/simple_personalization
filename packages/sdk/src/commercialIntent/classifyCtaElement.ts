@@ -37,6 +37,24 @@ function isHighIntent(actionFamily: string): boolean {
   ].includes(actionFamily);
 }
 
+/** Demo/markup tokens — not commercial phrases; use visible label instead. */
+const GENERIC_DATA_SI_MARKERS = new Set(["primary", "secondary", "tertiary", "default"]);
+
+function dataSiClassificationText(
+  dataSiCta?: string | null,
+  dataSiIntent?: string | null,
+): string | undefined {
+  const intent = dataSiIntent?.trim();
+  if (intent && !GENERIC_DATA_SI_MARKERS.has(intent)) {
+    return intent.replace(/_/g, " ");
+  }
+  const cta = dataSiCta?.trim();
+  if (!cta || GENERIC_DATA_SI_MARKERS.has(cta) || cta === "finance" || cta === "compare") {
+    return undefined;
+  }
+  return cta.replace(/_/g, " ");
+}
+
 function isHumanEscalation(actionFamily: string): boolean {
   return [
     "schedule_demo",
@@ -63,7 +81,7 @@ export function classifyCtaElement(
   const href = host instanceof HTMLAnchorElement ? host.href : host.getAttribute("href") ?? undefined;
 
   let action = classifyCommercialAction({
-    text: opts?.dataSiIntent?.replace(/_/g, " ") || opts?.dataSiCta?.replace(/_/g, " ") || text,
+    text: dataSiClassificationText(opts?.dataSiCta, opts?.dataSiIntent) || text,
     href: href ?? undefined,
     ariaLabel: aria,
     title,

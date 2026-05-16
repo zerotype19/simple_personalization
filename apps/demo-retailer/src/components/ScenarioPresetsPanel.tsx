@@ -30,8 +30,11 @@ const btnSecondary =
 const btnPrimary =
   "rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40";
 
+const DEFAULT_SCENARIO_PRESET_ID =
+  SCENARIO_PRESETS.find((p) => p.group === "auto_retail")?.id ?? SCENARIO_PRESETS[0]!.id;
+
 export default function ScenarioPresetsPanel() {
-  const [presetId, setPresetId] = useState<string>(SCENARIO_PRESETS[0]!.id);
+  const [presetId, setPresetId] = useState<string>(DEFAULT_SCENARIO_PRESET_ID);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
 
@@ -268,6 +271,9 @@ export default function ScenarioPresetsPanel() {
           </div>
 
           <div className="mt-4 space-y-2 border-t border-slate-800/80 pt-4 text-xs leading-relaxed text-slate-300">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+              Preset replay only — not your live session
+            </p>
             <p className="text-slate-400">{buyer.commercialRead}</p>
             <p>
               <span className="text-slate-500">Judgment: </span>

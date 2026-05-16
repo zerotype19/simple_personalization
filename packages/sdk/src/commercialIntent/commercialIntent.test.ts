@@ -65,6 +65,12 @@ describe("classifyCtaElement", () => {
     expect(r.action.action_family).toBe("schedule_demo");
     expect(r.should_count_as_high_intent).toBe(true);
   });
+
+  it("ignores generic data-si-cta=primary in favor of visible label", () => {
+    document.body.innerHTML = `<button data-si-cta="primary">Book test drive</button>`;
+    const r = classifyCtaElement(document.querySelector("button")!)!;
+    expect(r.action.action_family).toBe("schedule_test_drive");
+  });
 });
 
 describe("classifyFormIntent", () => {

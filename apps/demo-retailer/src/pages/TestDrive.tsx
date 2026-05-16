@@ -38,9 +38,10 @@ export default function TestDrivePage() {
         <button
           type="submit"
           data-si-cta="primary"
+          data-si-intent="schedule_test_drive"
           className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
         >
-          Submit demo lead
+          Book test drive
         </button>
       </form>
     </div>

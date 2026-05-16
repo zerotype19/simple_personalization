@@ -1344,7 +1344,7 @@ function mountInspectorImpl(opts: InspectorOptions): () => void {
       typeof document !== "undefined"
         ? `<div class="si-panel-section si-surface-mapper-op">
       <div class="si-card">
-        <h3>Surface mapper</h3>
+        <h3>Surface preview</h3>
         <p class="si-muted si-muted--block">
           Map known <code class="si-code">surface_id</code> values to page regions for this host+path only (<code class="si-code">${escHtml(getPageMappingKey())}</code>).
           Stored in <code class="si-code">sessionStorage</code> under <code class="si-code">si:surface_mappings</code>. Preview only — no DOM rewrites.
