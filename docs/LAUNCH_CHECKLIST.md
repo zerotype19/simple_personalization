@@ -6,6 +6,7 @@
 - **[EXTERNAL_BETA_CHECKLIST.md](./EXTERNAL_BETA_CHECKLIST.md)** — customer-facing beta readiness with **evidence** requirements; use before external pilots.
 - **[EXTERNAL_BETA_RUNBOOK.md](./EXTERNAL_BETA_RUNBOOK.md)** — ordered production verification commands and rollback notes.
 - **[PRIVACY_QA.md](./PRIVACY_QA.md)** — snippet storage and PII boundary verification (no runtime changes).
+- **[PILOT_ONBOARDING.md](./PILOT_ONBOARDING.md)** — customer pilot path (install → week 1 → closeout); see also [WEBMASTER_INSTALL_ONE_PAGER.md](./WEBMASTER_INSTALL_ONE_PAGER.md), [OPTIVIEW_DEMO_SCRIPT.md](./OPTIVIEW_DEMO_SCRIPT.md).
 - **[CLOUDFLARE_INVENTORY.md](./CLOUDFLARE_INVENTORY.md)** — infrastructure map; use it to confirm hostname → Cloudflare project mapping before changing domains or deleting resources.
 
 Use the sections below before pointing customers at **`https://cdn.optiview.ai/si.js`** and **`https://api.optiview.ai`**.

@@ -2,7 +2,7 @@
 
 **Customer-facing beta readiness** — run this before inviting external pilots, agencies, or unpaid beta sites. Technical deploy steps live in [LAUNCH_CHECKLIST.md](./LAUNCH_CHECKLIST.md). Operational order and commands: [EXTERNAL_BETA_RUNBOOK.md](./EXTERNAL_BETA_RUNBOOK.md).
 
-Related: [CLOUDFLARE_INVENTORY.md](./CLOUDFLARE_INVENTORY.md) (hostname → project map), [PRIVACY_QA.md](./PRIVACY_QA.md) (snippet privacy verification).
+Related: [CLOUDFLARE_INVENTORY.md](./CLOUDFLARE_INVENTORY.md) (hostname → project map), [PRIVACY_QA.md](./PRIVACY_QA.md) (snippet privacy verification), [PILOT_ONBOARDING.md](./PILOT_ONBOARDING.md) (customer pilot path).
 
 ---
 
