@@ -23,6 +23,10 @@ import { buildSafePersonalizationPlan } from "./contextBrain/safePersonalization
 import { archetypePersonasForVertical } from "./recommendation/archetypes";
 import { buildInferenceCertaintyBands, describeConversionSurfaces } from "./recommendation/inferenceCertainty";
 import { audienceForVertical, publicSiteTypeLabel } from "./siteIntelligence/publicLabels";
+import {
+  getInspectorPanelMode,
+  setInspectorPanelMode,
+} from "./inspectorPanelMode";
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
 import {
   liveSignalSectionTitle,
@@ -112,29 +116,6 @@ function formatBuyerSurfaceMapperHtml(regions: SurfaceRegion[], hasSlotApi: bool
     })
     .join("");
   return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>On-page experiences</h3><p class="si-muted si-muted--block">Recommended experience areas on this page — preview only.</p><div class="si-sm-buyer-grid">${rows}</div></div>`;
-}
-
-const INSPECTOR_MODE_STORAGE_KEY = "si:inspector_mode";
-
-type InspectorPanelMode = "buyer" | "operator";
-
-function getInspectorPanelMode(): InspectorPanelMode {
-  try {
-    const v = window.sessionStorage?.getItem(INSPECTOR_MODE_STORAGE_KEY);
-    if (v === "buyer" || v === "operator") return v;
-  } catch {
-    /* storage blocked */
-  }
-  if (urlHasSiDebug()) return "operator";
-  return "buyer";
-}
-
-function setInspectorPanelMode(mode: InspectorPanelMode): void {
-  try {
-    window.sessionStorage?.setItem(INSPECTOR_MODE_STORAGE_KEY, mode);
-  } catch {
-    /* storage blocked */
-  }
 }
 
 /** Buyer-facing judgment panel HTML (deterministic narrative layer). */
