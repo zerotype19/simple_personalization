@@ -20,11 +20,12 @@ export interface JourneyStep {
   corePath: boolean;
 }
 
+/** Scripted demo path only — not the inspector runtime ladder (see JourneyProgressPath). */
 export const PROGRESSION_LABELS = [
   "Exploring",
   "Evaluating",
   "Comparing",
-  "Escalation earned",
+  "Test-drive step",
 ] as const;
 
 export const LIVE_JOURNEY_STEPS: JourneyStep[] = [
@@ -82,7 +83,7 @@ export const LIVE_JOURNEY_STEPS: JourneyStep[] = [
       commercialIntent: "Scheduling intent from the form step — a strong human-escalation signal.",
       momentum: "Interest has deepened into commitment-oriented action.",
       judgment:
-        "Escalation is more earned — Optiview can reflect scheduling and visit readiness in the inspector.",
+        "Scheduling intent is a major signal — the inspector still applies runtime restraint when that is the better next move.",
     },
   },
   {

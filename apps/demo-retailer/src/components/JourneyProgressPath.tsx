@@ -7,7 +7,10 @@ export default function JourneyProgressPath() {
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/40 px-3 py-4">
-      <p className="mb-3 text-[11px] font-medium uppercase tracking-wide text-slate-500">Journey posture</p>
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">Demo path progress</p>
+      <p className="mb-3 text-xs leading-relaxed text-slate-500">
+        This shows where you are in the scripted demo path. The inspector shows Optiview&apos;s runtime judgment.
+      </p>
       <div className="flex flex-wrap items-center gap-x-1 gap-y-2 text-sm">
         {PROGRESSION_LABELS.map((label, i) => {
           const reached = current >= i;

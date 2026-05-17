@@ -211,7 +211,7 @@ function formatBuyerInspectorHtml(
         <div class="si-buyer-v">${escHtml(sp.whatWouldMoveForward)}</div>
       </div>
       <div class="si-buyer-state-ladder-wrap">
-        <div class="si-muted si-muted--block si-buyer-ladder-caption">Experience depth (qualitative)</div>
+        <div class="si-muted si-muted--block si-buyer-ladder-caption">Runtime experience depth (qualitative)</div>
         <ol class="si-ladder">${ladderRows}</ol>
       </div>
     </div>

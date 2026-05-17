@@ -49,9 +49,13 @@ export default function TestDrivePage() {
       </form>
 
       {submitted ? (
-        <p className="text-sm text-indigo-200/90">
-          Submitted — the inspector should open in buyer view with the live read highlighted.
-        </p>
+        <div className="space-y-2 rounded-lg border border-indigo-500/25 bg-indigo-950/30 px-3 py-2.5 text-sm text-indigo-100/90">
+          <p>Submitted — the inspector should open in buyer view with the live read highlighted.</p>
+          <p className="text-xs leading-relaxed text-slate-400">
+            Submitting the form is a high-intent action. Optiview may still withhold additional interruption if
+            the best next move is restraint.
+          </p>
+        </div>
       ) : null}
 
       <Link to="/finance" className="text-sm text-slate-500 hover:text-slate-300">
