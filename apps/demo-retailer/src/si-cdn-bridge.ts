@@ -89,6 +89,7 @@ function loadSnippet(): Promise<void> {
     if (import.meta.env.VITE_SI_DEMO_SNIPPET_INSPECTOR === "1") {
       s.setAttribute("data-inspector", "1");
     }
+    s.setAttribute("data-si-vertical", "auto_retail");
     s.onload = () => {
       void (async () => {
         try {

@@ -1,5 +1,6 @@
 import * as api from "./index";
 import { urlHasSiDebug } from "./si-debug";
+import { parseSiteVerticalOverride } from "./siteVerticalOverride";
 
 /** Replaced at IIFE build time via `tsup` `define` (empty strings / false when unset). */
 declare const __SI_EMBED_CONFIG_URL__: string;
@@ -68,8 +69,16 @@ export function boot(): void {
         script?.getAttribute("data-inspector") === "1" ||
         urlHasSiDebug() ||
         __SI_EMBED_FORCE_INSPECTOR__;
+      const siteVerticalOverride = parseSiteVerticalOverride(fromAttr("data-si-vertical"));
       try {
-        const rt = await api.boot({ configUrl, collectUrl, forceInspector, siteId, snippetKey });
+        const rt = await api.boot({
+          configUrl,
+          collectUrl,
+          forceInspector,
+          siteId,
+          snippetKey,
+          siteVerticalOverride,
+        });
         window.SessionIntel = {
           boot: api.boot,
           destroy: api.destroy,

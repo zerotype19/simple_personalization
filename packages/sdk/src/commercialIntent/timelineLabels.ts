@@ -1,4 +1,5 @@
-import type { CommercialActionInterpretation } from "@si/shared";
+import type { CommercialActionInterpretation, SiteVertical } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 
 const FAMILY_LABELS: Record<string, string> = {
   learn_more: "Explored product or feature details",
@@ -28,6 +29,16 @@ const FAMILY_LABELS: Record<string, string> = {
   apply: "Moved toward an application",
 };
 
-export function buyerSafeTimelineLabel(action: CommercialActionInterpretation): string {
+export function buyerSafeTimelineLabel(
+  action: CommercialActionInterpretation,
+  vertical?: SiteVertical,
+): string {
+  if (isAutoSiteVertical(vertical ?? "unknown") && action.action_family === "schedule_demo") {
+    const blob = `${action.matched_phrase} ${(action.evidence ?? []).join(" ")}`.toLowerCase();
+    if (/test[\s-]?drive|testdrive|data_si_intent/.test(blob)) {
+      return FAMILY_LABELS.schedule_test_drive;
+    }
+    return "Moved toward scheduling or an in-person visit";
+  }
   return FAMILY_LABELS[action.action_family] ?? "Took a meaningful commercial step on the page";
 }

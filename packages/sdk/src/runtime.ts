@@ -6,6 +6,7 @@ import type {
   PersonalizationSignal,
   SDKConfig,
   SessionProfile,
+  SiteVertical,
 } from "@si/shared";
 import { isAutoSiteVertical } from "@si/shared";
 import { computeConceptAffinityDetailed } from "@si/shared/contextBrain";
@@ -22,11 +23,8 @@ import { runRules } from "./rules";
 import { loadOrCreateProfile, persistProfile, resetProfile } from "./session";
 import { logSiDebug, urlHasSiDebug } from "./si-debug";
 import { inferPageContext } from "./site";
-import {
-  buildDynamicSignals,
-  classifyVertical,
-  runSiteScan,
-} from "./siteIntelligence";
+import { buildDynamicSignals, runSiteScan } from "./siteIntelligence";
+import { resolveSiteVertical } from "./siteVerticalOverride";
 import { buildActivationPayload, buildPersonalizationSignal } from "./siteSemantics/activationPayload";
 import { buildBehaviorSnapshot } from "./siteSemantics/behaviorSnapshot";
 import { appendIntelMilestones } from "./sessionIntel";
@@ -74,6 +72,11 @@ export interface BootOptions {
    * Default `emit` runs normal browser-local decisioning.
    */
   experienceDecisionMode?: "emit" | "observe_only";
+  /**
+   * Explicit site vertical — skips URL/copy inference (e.g. demo.optiview.ai auto journey).
+   * Also set via `data-si-vertical` on the hosted script tag.
+   */
+  siteVerticalOverride?: SiteVertical;
 }
 
 const SI_EXP_PROGRESSION_KEY = "si:exp_progression";
@@ -500,7 +503,11 @@ export class SessionIntelRuntime {
     const isNewPageContext = this.lastContextUrl !== pathKey;
 
     const scan = isNewPageContext ? runSiteScan() : this.profile.site_context.scan;
-    const { vertical, confidence } = classifyVertical(scan, window.location.pathname);
+    const { vertical, confidence } = resolveSiteVertical(
+      scan,
+      window.location.pathname,
+      this.opts.siteVerticalOverride,
+    );
     const ctx = inferPageContext({
       minimal: !isNewPageContext,
       vertical,

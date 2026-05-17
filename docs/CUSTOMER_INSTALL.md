@@ -36,6 +36,16 @@ Publisher **origin** must match a configured `sites.domain` in D1 for rows to pi
 
 You can also append **`?si_debug=1`** to the **page** URL, use **`sessionStorage.setItem('si:debug','1')`**, or **`data-inspector="1"`** on the script tag. See [SNIPPET_HOSTING.md](./SNIPPET_HOSTING.md).
 
+## Optional vertical override
+
+When your page copy does not match the journey you are demonstrating (for example a product-led demo with an auto-retail path), set an explicit vertical — **inference is skipped**:
+
+```html
+<script async src="https://cdn.optiview.ai/si.js" data-si-vertical="auto_retail" data-si-key="YOUR_PUBLIC_SNIPPET_KEY"></script>
+```
+
+Accepted values include `auto_retail`, `auto_oem`, `b2b_saas`, `ecommerce`, and other catalog verticals. Aliases: `auto` → `auto_retail`, `b2b` → `b2b_saas`.
+
 ## What the tag does
 
 - Runs **entirely in the visitor’s browser** after download from your snippet host (for example `cdn.optiview.ai`).

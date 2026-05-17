@@ -1,4 +1,5 @@
 import type { SiteVertical } from "@si/shared";
+import { isAutoSiteVertical } from "@si/shared";
 import {
   COMMERCIAL_ACTION_TAXONOMY,
   phrasesForAction,
@@ -56,17 +57,17 @@ function buildPhraseRules(): PhraseRule[] {
   return rules;
 }
 
-function pathHintAction(href: string | undefined): string | null {
+function pathHintAction(href: string | undefined, vertical?: SiteVertical): string | null {
   if (!href) return null;
   const path = href.split("?")[0]!.toLowerCase();
   if (/pricing|plans|rates|fees/.test(path)) return "view_pricing";
   if (/compare|vs\b/.test(path)) return "compare";
+  if (/test-?drive|testdrive/.test(path)) return "schedule_test_drive";
   if (/demo|schedule|book/.test(path)) return "schedule_demo";
   if (/trial|signup|register/.test(path)) return "start_trial";
   if (/checkout|cart/.test(path)) return "begin_checkout";
   if (/apply|application/.test(path)) return "apply";
   if (/finance|payment|calculator|apr|lease/.test(path)) return "view_financing";
-  if (/test-?drive|testdrive/.test(path)) return "schedule_test_drive";
   if (/dealer|locator|store/.test(path)) return "contact_dealer";
   if (/security|privacy|compliance/.test(path)) return "view_security";
   if (/return|shipping|warranty/.test(path)) return "view_returns";
@@ -75,6 +76,21 @@ function pathHintAction(href: string | undefined): string | null {
   if (/quote/.test(path)) return "request_quote";
   if (/build|configure|customize/.test(path)) return "configure";
   return null;
+}
+
+function preferAutoRetailActionFamily(
+  family: string,
+  normalized: string,
+  vertical?: SiteVertical,
+): string {
+  if (!isAutoSiteVertical(vertical ?? "unknown")) return family;
+  if (family === "schedule_demo" && /test[\s-]?drive|testdrive/.test(normalized)) {
+    return "schedule_test_drive";
+  }
+  if (family === "schedule_demo" && /\b(dealer|dealership|appointment|test\s*drive)\b/.test(normalized)) {
+    return "schedule_test_drive";
+  }
+  return family;
 }
 
 function verbNounMatch(normalized: string, entry: ActionTaxonomyEntry): boolean {
@@ -120,7 +136,7 @@ export function classifyCommercialAction(input: ClassifyCommercialActionInput): 
   const parts = [input.text, input.ariaLabel, input.title].filter(Boolean) as string[];
   const combined = normalizeActionText(parts.join(" "));
   if (!combined || combined.length < 2) {
-    const pathId = pathHintAction(input.href);
+    const pathId = pathHintAction(input.href, input.vertical);
     if (pathId) {
       const entry = COMMERCIAL_ACTION_TAXONOMY.find((a) => a.id === pathId);
       if (entry) return toInterpretation(entry, `href:${pathId}`, 0.62, ["path_semantic_hint"]);
@@ -132,18 +148,26 @@ export function classifyCommercialAction(input: ClassifyCommercialActionInput): 
     if (rule.normalized.length > combined.length + 4) continue;
     if (!combined.includes(rule.normalized)) continue;
     if (rule.negative.some((n) => n && combined.includes(n))) continue;
-    return toInterpretation(rule.entry, rule.phrase, 0.88, ["exact_phrase_match"]);
+    const family = preferAutoRetailActionFamily(rule.actionId, combined, input.vertical);
+    const entry =
+      family === rule.actionId
+        ? rule.entry
+        : COMMERCIAL_ACTION_TAXONOMY.find((a) => a.id === family) ?? rule.entry;
+    return toInterpretation(entry, rule.phrase, 0.88, ["exact_phrase_match"]);
   }
 
   for (const entry of COMMERCIAL_ACTION_TAXONOMY) {
     if (verbNounMatch(combined, entry)) {
       const negatives = (entry.negative_context ?? []).map(normalizeActionText);
       if (negatives.some((n) => combined.includes(n))) continue;
-      return toInterpretation(entry, combined, 0.72, ["verb_noun_match"]);
+      const family = preferAutoRetailActionFamily(entry.id, combined, input.vertical);
+      const resolved =
+        family === entry.id ? entry : (COMMERCIAL_ACTION_TAXONOMY.find((a) => a.id === family) ?? entry);
+      return toInterpretation(resolved, combined, 0.72, ["verb_noun_match"]);
     }
   }
 
-  const pathId = pathHintAction(input.href);
+  const pathId = pathHintAction(input.href, input.vertical);
   if (pathId) {
     const entry = COMMERCIAL_ACTION_TAXONOMY.find((a) => a.id === pathId);
     if (entry) return toInterpretation(entry, `href:${pathId}`, 0.65, ["path_semantic_hint"]);

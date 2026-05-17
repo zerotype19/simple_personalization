@@ -11,6 +11,7 @@ async function main() {
     configUrl: workerUrl("/config?demo=velocity"),
     collectUrl: workerUrl("/collect"),
     forceInspector: true,
+    siteVerticalOverride: "auto_retail",
   });
 
   ReactDOM.createRoot(document.getElementById("root")!).render(

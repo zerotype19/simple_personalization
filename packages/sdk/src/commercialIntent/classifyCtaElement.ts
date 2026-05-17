@@ -131,6 +131,6 @@ export function classifyCtaElement(
     is_repeated_chrome_cta,
     should_count_as_cta_click,
     should_count_as_high_intent,
-    timeline_label: buyerSafeTimelineLabel(action),
+    timeline_label: buyerSafeTimelineLabel(action, opts?.vertical),
   };
 }
