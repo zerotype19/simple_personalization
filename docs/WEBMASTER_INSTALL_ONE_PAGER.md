@@ -46,9 +46,16 @@ Surface IDs come from your vertical catalog ([SURFACE_CATALOGS.md](./SURFACE_CAT
 ## Verify (5 minutes)
 
 1. Open your site → DevTools → **Network** → confirm `si.js` loads from `cdn.optiview.ai`.
-2. Console: type `SessionIntel` — should be defined.
+2. Console:
+
+```js
+typeof window.SessionIntel === "object";
+typeof window.SessionIntel.getExperienceDecisionEnvelope === "function";
+window.SessionIntel.getExperienceDecisionEnvelope();
+```
+
 3. Click **SI** (bottom-left) or press **Ctrl+Shift+`** (backtick) to open the inspector.
-4. Browse a few pages; confirm timeline updates.
+4. Browse a few pages; confirm timeline and recommendations update.
 
 ---
 

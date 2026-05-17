@@ -10,7 +10,7 @@ Bridge from **interest → install → first readout** for beta customers and th
 | [WEBMASTER_INSTALL_ONE_PAGER.md](./WEBMASTER_INSTALL_ONE_PAGER.md) | Hand to implementation / GTM owner |
 | [PILOT_WEEK_ONE_GUIDE.md](./PILOT_WEEK_ONE_GUIDE.md) | Set expectations with stakeholders |
 | [PILOT_SUCCESS_SCORECARD.md](./PILOT_SUCCESS_SCORECARD.md) | Score pilot at closeout |
-| [OPTIVIEW_DEMO_SCRIPT.md](./OPTIVIEW_DEMO_SCRIPT.md) | Live product walkthrough |
+| [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Live product walkthrough (5 min) |
 | [SECURITY_PRIVACY_FAQ.md](./SECURITY_PRIVACY_FAQ.md) | Security / legal / privacy reviewers |
 
 **Technical references:** [CUSTOMER_INSTALL.md](./CUSTOMER_INSTALL.md) · [PRIVACY_QA.md](./PRIVACY_QA.md) · [EXTERNAL_BETA_RUNBOOK.md](./EXTERNAL_BETA_RUNBOOK.md) · [CMS_ACTIVATION_EXAMPLES.md](./CMS_ACTIVATION_EXAMPLES.md) · [FREE_ACCESS_ONBOARDING.md](./FREE_ACCESS_ONBOARDING.md)

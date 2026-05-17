@@ -1,4 +1,6 @@
-# Hosted drop-in snippet (`/si.js`)
+# Optiview hosted snippet (`/si.js`)
+
+Drop-in **Optiview** tag (`si.js` + `si-inspector.css`) for anonymous experience decisions on publisher sites.
 
 ## Production: dedicated CDN (`cdn.optiview.ai`)
 
@@ -16,11 +18,19 @@ For **tenant-aware** `/collect` routing, add the public install token (preferred
 
 `data-si-key` is an alias for D1 `sites.snippet_key`; `data-si-snippet-key` is accepted as a synonym. The Worker resolves **`snippet_key` before `site_id`**; if both are sent, they must match the same site row.
 
-Build with `pnpm build:snippet` and deploy with `pnpm deploy:snippet` (see [PRODUCTION_HOSTING.md](./PRODUCTION_HOSTING.md)). Artifacts include **`version.json`** and **`health.json`** for ops checks.
+Build with `pnpm build:snippet` and deploy with `pnpm deploy:snippet` (see [PRODUCTION_HOSTING.md](./PRODUCTION_HOSTING.md)). Artifacts include **`version.json`** and **`health.json`** for ops checks. Package a webmaster zip with `pnpm package:snippet` after building.
+
+### Cache TTL (beta)
+
+`_headers` ships **`Cache-Control: max-age=300`** on unversioned **`/si.js`** and **`/si-inspector.css`** during beta so fixes propagate quickly. **`version.json`** and **`health.json`** are **`no-cache`**. For production hardening, plan **immutable versioned URLs** (for example `si.js?v=<commit>`) with longer TTL on versioned paths, while keeping short or no-cache on the unversioned alias and on **`version.json`**.
+
+### Self-hosting a prebuilt bundle
+
+If you upload **`si.js`** and **`si-inspector.css`** from the hosted-snippet zip **without rebuilding**, the IIFE still calls the **baked** API host (`worker_url` in **`version.json`**, typically `https://api.optiview.ai`) and loads inspector CSS from the **baked** `snippet_origin` (typically `https://cdn.optiview.ai`). To point at your own API or CSS host, rebuild with **`VITE_SI_WORKER_URL`** and **`VITE_SI_SNIPPET_ORIGIN`** before upload. See [CUSTOMER_INSTALL.md](./CUSTOMER_INSTALL.md).
 
 ## Transitional: same origin as the demo
 
-The demo Pages app (**`si-session-demo`**) can still ship **`/si.js`** on the **same** hostname (for example `https://optiview.ai/si.js`) while you migrate DNS to the CDN project. That path is the Session Intelligence IIFE with your Worker’s `/config` and `/collect` URLs **baked in**, so other sites only need:
+The demo Pages app (**`si-session-demo`**) can still ship **`/si.js`** on the **same** hostname (for example `https://optiview.ai/si.js`) while you migrate DNS to the CDN project. That path is the Optiview IIFE with your Worker’s `/config` and `/collect` URLs **baked in**, so other sites only need:
 
 ```html
 <script async src="https://optiview.ai/si.js"></script>
@@ -40,7 +50,7 @@ Typical allowlist for **`https://optiview.ai/si.js`** on a publisher site:
 - **`connect-src`**: include your **Worker** origin (same base as `VITE_SI_WORKER_URL`) for **`/config`** and **`/collect`**.
 - **`style-src`**: include **`https://optiview.ai`** so the linked **`si-inspector.css`** can load.
 
-Chrome’s **“CSP blocks eval”** message usually points at **some other script** on the page (analytics, tag managers, A/B tools). The Session Intelligence IIFE does **not** rely on `eval()`. If DevTools attributes it to `script-src`, expand the stack or **Initiator** column to see which file triggered it.
+Chrome’s **“CSP blocks eval”** message usually points at **some other script** on the page (analytics, tag managers, A/B tools). The Optiview IIFE does **not** rely on `eval()`. If DevTools attributes it to `script-src`, expand the stack or **Initiator** column to see which file triggered it.
 
 ## Friendly check in the browser
 
@@ -56,7 +66,7 @@ Raw **`/si.js`** in a tab often looks like **nothing useful** (blank chrome or a
 
 ## Inspector on third-party sites (e.g. rhythm90.io)
 
-- After the script loads, look for the **SI** button at the **bottom-left** of the viewport — it toggles the Session Intelligence drawer. **Do not use Ctrl+Shift+D** in Chrome/Edge: that is reserved for **bookmark all tabs** and will not open our panel.
+- After the script loads, look for the **SI** button at the **bottom-left** of the viewport — it toggles the Optiview judgment panel. **Do not use Ctrl+Shift+D** in Chrome/Edge: that is reserved for **bookmark all tabs** and will not open our panel.
 - Keyboard shortcut: **Ctrl+Shift+Backtick** (the key labeled **\` \~**, usually above Tab), or **⌘+Shift+Backtick** on Mac. Some layouts use the same chord on the **IntlBackslash** key position instead.
 - Append **`?si_debug=1`** to the URL for the inspector and **`[Session Intelligence]`** console logs, and (on first paint) **open the drawer immediately**. Prefer a **full reload** with that query already present when **`si.js`** runs; SPAs that add the query later are picked up on the next SDK **`tick`** (see **Debugging** below). **`sessionStorage.setItem('si:debug','1')` + reload** also works.
 - **Verify you have the current `si.js`:** the minified file should contain the substring **`si-inspector-launcher`**. If you only see **`Ctrl+Shift+D`** in the inspector hint and no launcher string, your browser or a CDN is still serving an **older** copy — hard-refresh, wait out cache, or append **`?v=2`** to the script URL once to bust cache.

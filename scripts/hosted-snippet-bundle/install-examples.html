@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Optiview hosted snippet — install examples</title>
+</head>
+<body>
+  <h1>Optiview hosted snippet — install examples</h1>
+
+  <h2>Production CDN (recommended)</h2>
+  <pre>&lt;script async src="https://cdn.optiview.ai/si.js" data-si-key="YOUR_PUBLIC_SNIPPET_KEY"&gt;&lt;/script&gt;</pre>
+
+  <h2>Verify in the console</h2>
+  <pre>typeof window.SessionIntel === "object"
+typeof window.SessionIntel.getExperienceDecisionEnvelope === "function"
+window.SessionIntel.getExperienceDecisionEnvelope()</pre>
+
+  <h2>Subscribe to one surface</h2>
+  <pre>const surfaceId = "article_inline_mid";
+window.SessionIntel.subscribeToDecision(surfaceId, () => {
+  const decision = window.SessionIntel.getExperienceDecision(surfaceId);
+});</pre>
+
+  <h2>Self-host (rebuild required for custom API/CSS hosts)</h2>
+  <p>
+    Upload <code>cdn/si.js</code> and <code>cdn/si-inspector.css</code> together.
+    A prebuilt bundle still points at the baked <code>worker_url</code> and
+    <code>snippet_origin</code> in <code>version.json</code> unless you rebuild with
+    <code>VITE_SI_WORKER_URL</code> and <code>VITE_SI_SNIPPET_ORIGIN</code>.
+  </p>
+  <pre>&lt;script async src="https://YOUR_HOST/si.js" data-si-key="YOUR_PUBLIC_SNIPPET_KEY"&gt;&lt;/script&gt;</pre>
+
+  <p>See <code>README.txt</code> and <code>docs/CUSTOMER_INSTALL.md</code> in this bundle.</p>
+</body>
+</html>

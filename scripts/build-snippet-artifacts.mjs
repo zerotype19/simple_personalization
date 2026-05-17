@@ -92,7 +92,7 @@ if (process.env.SI_SNIPPET_WRITE_META === "1") {
   }
   const builtAt = new Date().toISOString();
   const versionPayload = {
-    name: "session-intelligence-snippet",
+    name: "optiview-hosted-snippet",
     version: pkgVersion,
     commit,
     built_at: builtAt,
@@ -102,13 +102,15 @@ if (process.env.SI_SNIPPET_WRITE_META === "1") {
   writeFileSync(path.join(outAbs, "version.json"), `${JSON.stringify(versionPayload, null, 2)}\n`, "utf8");
   writeFileSync(
     path.join(outAbs, "health.json"),
-    `${JSON.stringify({ ok: true, service: "session-intelligence-snippet" }, null, 2)}\n`,
+    `${JSON.stringify({ ok: true, service: "optiview-hosted-snippet" }, null, 2)}\n`,
     "utf8",
   );
   console.log("[build-snippet-artifacts] Wrote version.json + health.json");
 }
 
-const headers = `# Snippet CDN — short TTL during beta; tighten later with versioned paths.
+const headers = `# Optiview hosted snippet CDN — beta TTL (max-age=300 on JS/CSS).
+# Production may move to immutable versioned asset URLs + longer TTL on ?v=<commit> paths;
+# keep short/no-cache on unversioned si.js alias and on version.json / health.json.
 /si.js
   Cache-Control: max-age=300
 

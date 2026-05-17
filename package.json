@@ -7,6 +7,7 @@
   "scripts": {
     "build": "pnpm --filter @si/sdk build && pnpm --filter @si/demo-retailer build && pnpm --filter @si/dashboard build",
     "build:snippet": "node scripts/build-snippet-cdn.mjs",
+    "package:snippet": "node scripts/package-hosted-snippet.mjs",
     "build:marketing": "pnpm --filter @si/marketing-site build",
     "dev": "pnpm -r --parallel dev",
     "dev:demo": "pnpm --filter @si/demo-retailer dev",
