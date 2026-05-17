@@ -52,6 +52,7 @@ export function publicCorsHeaders(request?: Request): HeadersInit {
   if (origin) {
     return {
       "access-control-allow-origin": origin,
+      "access-control-allow-credentials": "true",
       "access-control-allow-methods": "GET,POST,OPTIONS",
       "access-control-allow-headers": "content-type",
       Vary: "Origin",
