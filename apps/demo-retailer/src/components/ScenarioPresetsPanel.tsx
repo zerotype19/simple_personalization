@@ -33,7 +33,7 @@ const btnPrimary =
 const DEFAULT_SCENARIO_PRESET_ID =
   SCENARIO_PRESETS.find((p) => p.group === "auto_retail")?.id ?? SCENARIO_PRESETS[0]!.id;
 
-export default function ScenarioPresetsPanel() {
+export default function ScenarioPresetsPanel({ embedded = false }: { embedded?: boolean }) {
   const [presetId, setPresetId] = useState<string>(DEFAULT_SCENARIO_PRESET_ID);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -132,15 +132,16 @@ export default function ScenarioPresetsPanel() {
   };
 
   return (
-    <section className="border-b border-slate-800 bg-slate-950/80">
-      <div className="mx-auto max-w-6xl px-4 py-5">
-        <div className="mb-4 flex flex-col gap-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Scenario presets</h2>
-          <p className="text-xs text-slate-500">
-            Deterministic session frames replayed through the same decision pipeline as the live runtime — no generated
-            traffic, no demo-only inference.
-          </p>
-        </div>
+    <section className={embedded ? "block" : "border-b border-slate-800 bg-slate-950/80"}>
+      <div className={embedded ? "px-4 pb-6" : "mx-auto max-w-6xl px-4 py-5"}>
+        {!embedded ? (
+          <div className="mb-4 flex flex-col gap-1">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Replay preset journeys</h2>
+            <p className="text-xs text-slate-500">
+              Deterministic session frames replayed through the same decision pipeline as the live runtime.
+            </p>
+          </div>
+        ) : null}
 
         <div className="space-y-5">
           {GROUP_ORDER.map((g) => (
@@ -189,6 +190,7 @@ export default function ScenarioPresetsPanel() {
             </div>
           </div>
 
+          {!embedded ? (
           <div className="mt-4 border-t border-slate-800/80 pt-4">
             <div className="text-[11px] font-medium text-slate-500">Experience states</div>
             <p className="mt-1 text-[11px] text-slate-500">
@@ -245,6 +247,8 @@ export default function ScenarioPresetsPanel() {
               ) : null}
             </div>
           </div>
+
+          ) : null}
 
           <div className="mt-4 border-t border-slate-800/80 pt-4">
             <div className="text-[11px] font-medium text-slate-500">Scenario steps</div>

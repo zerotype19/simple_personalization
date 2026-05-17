@@ -1,49 +1,62 @@
 import { FormEvent, useState } from "react";
+import { Link } from "react-router-dom";
 import { markConversion } from "@si/sdk";
+import { openInspectorAfterSubmit } from "../demo/demoActions";
 import { useSiPage } from "../hooks/useSiPage";
 
 export default function TestDrivePage() {
   useSiPage("test_drive");
   const [note, setNote] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     markConversion("lead_submit");
     window.dispatchEvent(new CustomEvent("si:conversion", { detail: { type: "lead_submit" } }));
-    alert("Thanks — demo lead submitted. Conversion event fired.");
+    setSubmitted(true);
     setNote("");
+    openInspectorAfterSubmit();
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-lg space-y-6" data-si-surface="test_drive_secondary_cta">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Schedule a test drive</h1>
-        <p className="mt-2 text-sm text-slate-300">
-          This form intentionally avoids collecting PII. Submitting fires a conversion signal for lift tracking.
+        <h1 className="text-xl font-semibold text-white">Book a test drive</h1>
+        <p className="mt-1 text-sm text-slate-400">
+          Submit the request — Optiview reads structure only, not what you type.
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="rounded-3xl border border-slate-800 bg-slate-950/40 p-8">
-        <label className="block text-xs text-slate-400">
-          Notes (optional)
+      <form onSubmit={onSubmit} className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <label className="block text-xs text-slate-500">
+          Notes (optional — not stored)
           <textarea
-            className="mt-2 w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-white"
-            rows={4}
+            className="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-white"
+            rows={3}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="e.g., interested in hybrid SUV, evenings only"
+            placeholder="Optional"
           />
         </label>
-
         <button
           type="submit"
           data-si-cta="primary"
           data-si-intent="schedule_test_drive"
-          className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400"
+          className="mt-4 w-full rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-400"
         >
-          Book test drive
+          Submit test-drive request
         </button>
       </form>
+
+      {submitted ? (
+        <p className="text-sm text-indigo-200/90">
+          Submitted — the inspector should open in buyer view with the live read highlighted.
+        </p>
+      ) : null}
+
+      <Link to="/finance" className="text-sm text-slate-500 hover:text-slate-300">
+        Back to financing
+      </Link>
     </div>
   );
 }

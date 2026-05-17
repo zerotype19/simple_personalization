@@ -1,104 +1,67 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSiPage } from "../hooks/useSiPage";
-import type { Vehicle } from "../data/vehicles";
 import { VEHICLES } from "../data/vehicles";
 
 export default function ComparePage() {
   useSiPage("compare");
   const [selected, setSelected] = useState<string[]>([VEHICLES[0].id, VEHICLES[1].id]);
 
-  const rows = useMemo(
-    () => VEHICLES.filter((v) => selected.includes(v.id)),
-    [selected],
-  );
-
-  const specs: Array<{ label: string; render: (v: Vehicle) => string }> = [
-    { label: "Price", render: (v) => `$${v.price.toLocaleString()}` },
-    { label: "MPG", render: (v) => v.mpg },
-    { label: "Category", render: (v) => v.category },
-  ];
+  const rows = useMemo(() => VEHICLES.filter((v) => selected.includes(v.id)), [selected]);
 
   function toggle(id: string) {
     setSelected((cur) => {
       if (cur.includes(id)) return cur.filter((x) => x !== id);
-      if (cur.length >= 3) return [...cur.slice(1), id];
+      if (cur.length >= 2) return [...cur.slice(1), id];
       return [...cur, id];
     });
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6" data-si-surface="card_comparison_module">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Compare vehicles</h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-300">
-          Selecting rows fires compare interactions. The table is tagged for DOM pattern detection.
-        </p>
+        <h1 className="text-xl font-semibold text-white">Compare vehicles</h1>
+        <p className="mt-1 text-sm text-slate-400">Select models — Optiview tracks comparison depth as you narrow options.</p>
       </div>
 
-      <div className="rounded-3xl border border-slate-800 bg-slate-950/40 p-6" data-si-compare>
-        <div className="text-sm font-semibold text-white">Pick up to 3 vehicles</div>
-        <div className="mt-4 grid gap-2 md:grid-cols-2">
-          {VEHICLES.map((v) => {
+      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-si-compare>
+        <div className="grid gap-2">
+          {VEHICLES.slice(0, 4).map((v) => {
             const on = selected.includes(v.id);
             return (
               <button
                 key={v.id}
                 type="button"
                 data-si-compare-item
+                data-si-intent="compare"
                 onClick={() => toggle(v.id)}
                 className={[
-                  "flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm",
-                  on ? "border-indigo-500/60 bg-indigo-500/10 text-white" : "border-slate-800 bg-slate-950 text-slate-200",
+                  "rounded-lg border px-3 py-2 text-left text-sm",
+                  on ? "border-indigo-500/50 bg-indigo-950/30 text-white" : "border-slate-800 text-slate-300",
                 ].join(" ")}
               >
-                <span className="font-semibold">{v.name}</span>
-                <span className="text-xs text-slate-400">{on ? "Selected" : "Tap"}</span>
+                {v.name} · ${v.price.toLocaleString()}
               </button>
             );
           })}
         </div>
+        {rows.length >= 2 ? (
+          <p className="mt-3 text-xs text-indigo-200/90">{rows.length} models in shortlist</p>
+        ) : null}
+      </div>
 
-        <div className="compare-table mt-8 overflow-x-auto">
-          <table className="w-full min-w-[720px] border-separate border-spacing-0 text-sm">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-slate-400">
-                <th className="border-b border-slate-800 py-3 pr-4">Feature</th>
-                {rows.map((v) => (
-                  <th key={v.id} className="border-b border-slate-800 px-4 py-3 font-semibold text-white">
-                    {v.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="text-slate-200">
-              {specs.map((spec) => (
-                <tr key={spec.label} className="border-b border-slate-900">
-                  <td className="py-3 pr-4 text-slate-400">{spec.label}</td>
-                  {rows.map((v) => (
-                    <td key={v.id} className="px-4 py-3">
-                      {spec.render(v)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link
-            data-si-cta="primary"
-            data-si-intent="schedule_test_drive"
-            className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white"
-            to="/test-drive"
-          >
-            Book a test drive
-          </Link>
-          <Link data-si-cta="finance" className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-white" to="/finance">
-            See payments for picks
-          </Link>
-        </div>
+      <div className="flex flex-wrap gap-3">
+        <Link
+          to="/finance"
+          data-si-cta="finance"
+          data-si-intent="view_financing"
+          className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400"
+        >
+          Review financing options
+        </Link>
+        <Link to="/inventory" className="text-sm text-slate-500 hover:text-slate-300">
+          View inventory (optional)
+        </Link>
       </div>
     </div>
   );
