@@ -30,9 +30,9 @@ export function InstallPage() {
           <h2 className="mt-1 font-semibold text-slate-900">Verify in the browser console</h2>
           <p className="mt-2 text-sm text-slate-600">After load, the global exposes helpers for inspection.</p>
           <div className="mt-4 space-y-3">
-            <CopyLine code="window.SessionIntel.getPersonalizationSignal()" />
-            <CopyLine code="window.SessionIntel.getActivationPayload()" />
-            <CopyLine code="window.SessionIntel.pushPersonalizationSignalAll()" />
+            <CopyLine code="typeof window.SessionIntel === 'object'" />
+            <CopyLine code="typeof window.SessionIntel.getExperienceDecisionEnvelope === 'function'" />
+            <CopyLine code="window.SessionIntel.getExperienceDecisionEnvelope()" />
           </div>
         </li>
         <li className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

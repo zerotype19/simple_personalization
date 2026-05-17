@@ -13,9 +13,6 @@ export function Layout() {
             Optiview
           </Link>
           <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <a href="/#how-it-works" className="text-sm font-medium text-slate-600 hover:text-slate-900">
-              Product
-            </a>
             <NavLink to="/demo" className={navClass}>
               Demo
             </NavLink>
@@ -44,21 +41,29 @@ export function Layout() {
         <Outlet />
       </main>
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl flex-wrap gap-x-6 gap-y-2 px-4 py-8 text-sm text-slate-600">
-          <span className="font-medium text-slate-800">Optiview</span>
-          <Link to="/privacy" className="hover:text-slate-900">
-            Privacy
-          </Link>
-          <Link to="/install" className="hover:text-slate-900">
-            Install
-          </Link>
-          <Link to="/demo" className="hover:text-slate-900">
-            Demo
-          </Link>
-          <a href={DASHBOARD_URL} className="hover:text-slate-900" rel="noreferrer">
-            Dashboard
-          </a>
-          <span className="text-slate-400">Contact: hello@optiview.ai</span>
+        <div className="mx-auto max-w-5xl px-4 py-8 text-sm text-slate-600">
+          <p className="mb-3 font-medium text-slate-800">Optiview — anonymous experience decision runtime</p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <Link to="/privacy" className="hover:text-slate-900">
+              Privacy
+            </Link>
+            <Link to="/install" className="hover:text-slate-900">
+              Install
+            </Link>
+            <Link to="/demo" className="hover:text-slate-900">
+              Demo
+            </Link>
+            <Link to="/integrations" className="hover:text-slate-900">
+              Integrations
+            </Link>
+            <Link to="/signup" className="hover:text-slate-900">
+              Get free access
+            </Link>
+            <a href={DASHBOARD_URL} className="hover:text-slate-900" rel="noreferrer">
+              Dashboard
+            </a>
+            <span className="text-slate-400">hello@optiview.ai</span>
+          </div>
         </div>
       </footer>
     </div>

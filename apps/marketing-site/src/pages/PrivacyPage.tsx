@@ -1,10 +1,23 @@
 export function PrivacyPage() {
   return (
     <article className="max-w-3xl space-y-10 text-slate-700">
-      <h1 className="mb-2 text-3xl font-semibold tracking-tight text-slate-900">Privacy and data posture</h1>
+      <h1 className="mb-2 text-3xl font-semibold tracking-tight text-slate-900">Privacy policy — Optiview runtime</h1>
+      <p className="mb-6 text-slate-600">
+        Optiview is an <strong>anonymous experience decision runtime</strong>, not an AI visibility or citation audit
+        product. This page describes the technical posture of the hosted snippet and optional collection endpoints.
+      </p>
       <p className="mb-8 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
         This page is not legal advice; it explains the product&apos;s technical privacy posture at a high level.
       </p>
+
+      <section className="mb-10">
+        <h2 className="mb-3 text-xl font-semibold text-slate-900">Cookies and dashboard login</h2>
+        <p className="text-slate-700">
+          The <strong>public snippet</strong> does not set tracking cookies. If you use the Optiview{" "}
+          <strong>operator dashboard</strong> or Cloudflare Access login, those flows may set session cookies managed by
+          your identity provider — separate from visitor-facing tag behavior on your website.
+        </p>
+      </section>
 
       <section className="mb-10">
         <h2 className="mb-3 text-xl font-semibold text-slate-900">What is collected</h2>

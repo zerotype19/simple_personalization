@@ -8,59 +8,65 @@ export function DemoPage() {
       <div>
         <h1 className="mb-3 text-3xl font-semibold tracking-tight text-slate-900">Live demo</h1>
         <p className="max-w-2xl text-slate-600">
-          The demo runs on a separate host so you can see Optiview&apos;s <strong>anonymous experience decisions</strong> on a
-          realistic retail-style site before you request access for your own domain.
+          See Optiview&apos;s <strong>anonymous experience decision runtime</strong> on a controlled auto-retail journey —
+          compare, financing, test drive, and restraint after high intent.
         </p>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="mb-3 font-semibold text-slate-900">Open the hosted demo</h2>
         <p className="mb-4 text-sm text-slate-600">
-          Use the demo site to watch <strong>experience decisions</strong> and payloads update as you navigate. When the
-          snippet inspector is enabled, use the on-page controls to inspect payloads without leaving the session.
+          Walk the core path at{" "}
+          <strong>demo.optiview.ai</strong>: compare two vehicles → review financing → book a test drive → submit the
+          scheduling form. The demo strip shows <strong>scripted path progress</strong>; the inspector shows{" "}
+          <strong>runtime judgment</strong> (they are not the same ladder).
         </p>
         <a
           href={DEMO_URL}
           className="inline-flex rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
           rel="noreferrer"
         >
-          Open demo site
+          See live demo
         </a>
       </div>
 
-      <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6">
-        <h2 className="mb-2 font-semibold text-slate-900">Inspector (placeholder)</h2>
-        <p className="text-sm text-slate-600">
-          Screenshot walkthroughs can be added here. For now, follow the on-demo instructions: open the Optiview
-          inspector from the demo chrome, then review activation, personalization, and experience decision payloads for
-          the current page.
-        </p>
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-3 font-semibold text-slate-900">Buyer judgment panel</h2>
+        <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-600">
+          <li>Click the <strong>SI</strong> control (bottom-left) or press <strong>Ctrl+Shift+`</strong> (backtick).</li>
+          <li>Stay on <strong>Buyer view</strong> for stakeholder-friendly copy.</li>
+          <li>
+            Read <strong>Current commercial read</strong>, <strong>Runtime experience depth</strong>,{" "}
+            <strong>Recommended next experience</strong>, and <strong>Why stronger escalation was withheld</strong>.
+          </li>
+          <li>After test-drive submit, confirm restraint: high intent ≠ automatic extra interruption.</li>
+        </ol>
       </div>
 
       <div>
-        <h2 className="mb-3 font-semibold text-slate-900">Console API (on pages with the snippet)</h2>
+        <h2 className="mb-3 font-semibold text-slate-900">Console verification (on pages with the snippet)</h2>
         <div className="space-y-3">
+          <CopyLine code="typeof window.SessionIntel === 'object'" />
+          <CopyLine code="typeof window.SessionIntel.getExperienceDecisionEnvelope === 'function'" />
           <CopyLine code="window.SessionIntel.getExperienceDecisionEnvelope()" />
-          <CopyLine code="window.SessionIntel.getPersonalizationSignal()" />
-          <CopyLine code="window.SessionIntel.getActivationPayload()" />
-          <CopyLine code="window.SessionIntel.pushPersonalizationSignalAll()" />
         </div>
       </div>
 
       <CodeBlock
-        label="Example: read experience envelope in console"
-        code={`// After the snippet loads:
-const envelope = window.SessionIntel.getExperienceDecisionEnvelope();
-console.log(envelope);`}
+        label="Subscribe to one surface"
+        code={`window.SessionIntel.subscribeToDecision("finance_payment_assist", () => {
+  const decision = window.SessionIntel.getExperienceDecision("finance_payment_assist");
+  // gate rendering on decision?.action === "show"
+});`}
       />
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-        <p className="mb-4 text-slate-600">When you are ready for your own snippet key and dashboard access:</p>
+        <p className="mb-4 text-slate-600">Ready for your own snippet key and dashboard access?</p>
         <Link
           to="/signup"
           className="inline-flex rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
         >
-          Get your free snippet key
+          Get free access
         </Link>
       </div>
     </div>

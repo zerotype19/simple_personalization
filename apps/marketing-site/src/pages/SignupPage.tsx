@@ -10,7 +10,8 @@ export function SignupPage() {
       <div>
         <h1 className="mb-3 text-3xl font-semibold tracking-tight text-slate-900">Get free access</h1>
         <p className="text-slate-600">
-          Request access for your site. We review requests manually, then provision a tenant, site, and snippet key.
+          Request pilot access for your site. We review requests manually, then provision a tenant, site, and snippet key
+          for the anonymous experience decision runtime.
         </p>
       </div>
       <SignupForm />

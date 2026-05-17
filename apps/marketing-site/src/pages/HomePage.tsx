@@ -31,12 +31,11 @@ export function HomePage() {
           Anonymous experience decision runtime
         </p>
         <h1 className="mb-4 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
-          Decide what to show on each surface—before visitors identify themselves.
+          Commercial judgment for anonymous traffic
         </h1>
         <p className="mb-6 max-w-2xl text-lg text-slate-600">
-          Optiview turns acquisition context, page semantics, and in-session behavior into <strong>experience decisions</strong>{" "}
-          (per <strong>surface</strong>) that your CMS, Adobe, Optimizely, GTM, Epsilon, and custom code can activate—still
-          anonymous, session-scoped by design.
+          Optiview helps websites decide <strong>what experience to show next</strong> — and{" "}
+          <strong>when to hold back</strong> — before identity exists.
         </p>
         <div className="flex flex-wrap gap-3">
           <a
@@ -44,7 +43,7 @@ export function HomePage() {
             className="rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
             rel="noreferrer"
           >
-            Try the live demo
+            See live demo
           </a>
           <Link
             to="/signup"
@@ -54,83 +53,100 @@ export function HomePage() {
           </Link>
         </div>
         <p className="mt-6 text-sm text-slate-500">
-          No fingerprinting. No identity graph. No raw search queries. Session-scoped by design.
+          Not identity resolution. Not a popup tool. Restraint is part of the product.
         </p>
       </div>
 
-      <Section id="how-it-works" title="How it works">
-        <ol className="list-decimal space-y-3 pl-5 text-slate-700">
-          <li>Install one script</li>
-          <li>Optiview reads the session in the browser</li>
-          <li>You receive an experience decision envelope (primary + per-surface slots)</li>
-          <li>Your tags or CMS code render, replace, or suppress the mapped surface</li>
-        </ol>
-        <CodeBlock label="Install snippet" code={scriptSnippet} />
-      </Section>
-
-      <Section title="What experience decisions can power">
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {[
-            "Soft popup",
-            "Interstitial",
-            "Offer, coupon, or rebate",
-            "Lead form",
-            "Guide or checklist download",
-            "Product recommendation module",
-            "Adobe Target or AEM component",
-            "Optimizely experiment",
-            "GTM trigger",
-            "Epsilon or event stream payload",
-          ].map((item) => (
-            <li key={item} className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm">
-              {item}
-            </li>
-          ))}
+      <Section id="what" title="What Optiview does">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>Interprets <strong>anonymous commercial behavior</strong> on your site — comparison, financing, scheduling, and more.</li>
+          <li>Understands <strong>intent, blockers, and momentum</strong> in plain language.</li>
+          <li>Recommends <strong>experience decisions</strong> per surface — show, defer, or suppress.</li>
+          <li>
+            Explains <strong>why escalation is or is not earned</strong> — high intent does not automatically mean interrupt
+            harder.
+          </li>
         </ul>
       </Section>
 
-      <Section title="Example anonymous visitor read">
-        <Card title="Returning evaluator from organic search">
-          <p className="mb-2">Reading implementation-focused content.</p>
-          <p className="mb-2 font-medium text-slate-800">Need: make this framework practical.</p>
-          <p>Recommended activation: implementation guide via inline CTA or soft popup.</p>
-        </Card>
-      </Section>
-
-      <Section title="Built for anonymous-first activation">
-        <p>
-          Most personalization improves after login or a form fill. Optiview is an{" "}
-          <strong>anonymous experience decision runtime</strong>: it recommends which surfaces to show or hold back on the
-          first visits, using session-scoped context—so inline modules, offers, forms, guides, and experiments can follow
-          the same contract your recipes define.
-        </p>
-      </Section>
-
-      <Section title="Integrations">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Card title="GTM / dataLayer">Push decision payloads into the tag manager layer your teams already use.</Card>
-          <Card title="Adobe AEP / Web SDK">Send structured events aligned with your Adobe stack.</Card>
-          <Card title="Adobe Client Data Layer / AEM">Feed component-level decisions from a shared data layer.</Card>
-          <Card title="Adobe Target">Use decisions as input to Target activities and offers.</Card>
-          <Card title="Optimizely">Wire the payload into experimentation and activation.</Card>
-          <Card title="Epsilon / generic collectors">Emit compatible events for your event pipeline.</Card>
-          <Card title="Custom CMS slots">Map surface IDs to regions in your headless or traditional CMS.</Card>
+      <Section id="different" title="Why it is different">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[
+            ["Not identity resolution", "No cross-site graph. No fingerprinting. Session-scoped on your origin."],
+            ["Not a popup tool", "Decisions can be inline, deferred, or null — withholding is first-class."],
+            ["Not a CDP", "Commercial judgment for the visit, not a warehouse of profiles."],
+            ["Not generic personalization", "Restraint and reassurance are valid outcomes — not every signal earns pressure."],
+          ].map(([title, body]) => (
+            <Card key={title} title={title}>
+              {body}
+            </Card>
+          ))}
         </div>
-        <p className="pt-2">
-          <Link to="/integrations" className="text-sm font-medium text-accent hover:underline">
-            View integration examples
+      </Section>
+
+      <Section id="how-it-works" title="How it works">
+        <ol className="list-decimal space-y-3 pl-5">
+          <li>Install one async tag on your site.</li>
+          <li>Optiview reads page roles, CTAs, forms, and marked surfaces — structure only, not what visitors type.</li>
+          <li>The runtime emits <strong>experience decisions</strong> in the browser (no round trip required for judgment).</li>
+          <li>
+            Feed decisions to <strong>GTM</strong>, <strong>Adobe</strong>, <strong>Optimizely</strong>, <strong>AEM</strong>,{" "}
+            <strong>Shopify</strong>, <strong>React</strong>, or your CMS — you control what actually renders.
+          </li>
+        </ol>
+        <CodeBlock label="Install snippet" code={scriptSnippet} />
+        <p className="text-sm">
+          <Link to="/install" className="font-medium text-accent hover:underline">
+            Full install checklist
+          </Link>
+          {" · "}
+          <Link to="/integrations" className="font-medium text-accent hover:underline">
+            Integration examples
           </Link>
         </p>
       </Section>
 
-      <Section title="Privacy posture">
+      <Section id="demo" title="Demo and proof">
+        <p>
+          The hosted demo at{" "}
+          <a href={DEMO_URL} className="font-medium text-accent hover:underline" rel="noreferrer">
+            demo.optiview.ai
+          </a>{" "}
+          walks a controlled auto-retail journey: <strong>compare vehicles</strong> →{" "}
+          <strong>review financing</strong> → <strong>book a test drive</strong> → submit a scheduling request.
+        </p>
+        <p>
+          Open the <strong>buyer judgment panel</strong> (SI control, bottom-left) to read the live commercial read, runtime
+          experience depth, recommended next experience, and why stronger escalation was withheld — the same story you can show
+          in a pilot review.
+        </p>
+        <div className="pt-2">
+          <a
+            href={DEMO_URL}
+            className="inline-flex rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
+            rel="noreferrer"
+          >
+            Open demo.optiview.ai
+          </a>
+        </div>
+      </Section>
+
+      <Section id="privacy" title="Privacy posture">
         <ul className="list-disc space-y-2 pl-5">
-          <li>Anonymous sessionStorage for in-browser session state; one optional localStorage key (<code className="text-xs">si:returning</code>) for return-visit detection on your origin only</li>
-          <li>No cookies, fingerprinting, or cross-site identity graph</li>
-          <li>No keystroke logging</li>
-          <li>No raw form values</li>
-          <li>Query themes only where applicable, not raw query storage in the product flow described here</li>
-          <li>Customer-owned site analytics remain yours; Optiview does not replace your analytics contract</li>
+          <li>
+            <strong>Anonymous</strong> — session-scoped decisions; not designed to resolve visitors to known individuals.
+          </li>
+          <li>
+            <strong>First-party</strong> — runs on your origin; storage does not follow visitors across other sites.
+          </li>
+          <li>
+            <strong>sessionStorage</strong> for anonymous session state (<code className="text-xs">si:session</code> and related keys).
+          </li>
+          <li>
+            <strong>One localStorage key only</strong>: <code className="text-xs">si:returning</code> (timestamp for return-visit detection).
+          </li>
+          <li>No tracking cookies from the snippet · no fingerprinting · no raw form values · no raw search query storage.</li>
+          <li>Optional <code className="text-xs">/collect</code> to your Worker — you control whether server collection is enabled.</li>
         </ul>
         <p className="pt-2">
           <Link to="/privacy" className="text-sm font-medium text-accent hover:underline">
@@ -140,22 +156,22 @@ export function HomePage() {
       </Section>
 
       <div className="rounded-2xl border border-slate-200 bg-indigo-50/60 p-8 text-center">
-        <h2 className="mb-2 text-xl font-semibold text-slate-900">Ready to try it?</h2>
-        <p className="mb-6 text-slate-600">Get free access for your site, or explore the hosted demo first.</p>
+        <h2 className="mb-2 text-xl font-semibold text-slate-900">Ready for a pilot?</h2>
+        <p className="mb-6 text-slate-600">See the live demo, then request free access for your domain.</p>
         <div className="flex flex-wrap justify-center gap-3">
-          <Link
-            to="/signup"
-            className="rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
-          >
-            Start free
-          </Link>
           <a
             href={DEMO_URL}
-            className="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            className="rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-600"
             rel="noreferrer"
           >
             See live demo
           </a>
+          <Link
+            to="/signup"
+            className="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+          >
+            Request pilot access
+          </Link>
         </div>
       </div>
     </div>
