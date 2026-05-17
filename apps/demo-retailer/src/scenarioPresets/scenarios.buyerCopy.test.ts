@@ -40,6 +40,9 @@ describe("scenario preset buyer copy", () => {
         });
         expect(isBuyerUnsafeString(panelBlob), `unsafe panel preset=${preset.id} step=${step}`).toBe(false);
         expect(panelBlob).not.toMatch(/progression_surface_cooldown|Progression held|primary_decision/i);
+        expect(panelBlob).not.toMatch(
+          /surface_id|data-si-surface|Activation readiness|readiness moved|Finance Payment Assist|Inventory Assist Module/i,
+        );
       }
     }
   });

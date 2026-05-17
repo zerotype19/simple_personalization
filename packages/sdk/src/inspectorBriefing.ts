@@ -127,7 +127,12 @@ function collapseViewedPageRuns(rows: { t: number; message: string; displayMessa
 
 function shortenTimelineMessage(m: string): string {
   if (m === SCROLL_LABEL) return "Sustained deep reading";
-  if (m === "Activation readiness increased") return "Activation readiness moved up";
+  if (m === "Activation readiness increased") {
+    return "The runtime detected stronger progression toward action";
+  }
+  if (m === "The session appears to be moving beyond early research") {
+    return "The visitor appears more comfortable moving toward a next step";
+  }
   const viewedPath = m.match(/^Viewed (.+) — .+$/);
   if (viewedPath) return `Viewed ${viewedPath[1]}`;
   return m;

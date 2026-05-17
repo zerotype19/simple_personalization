@@ -92,6 +92,7 @@ export class Batcher {
         method: "POST",
         body,
         keepalive: true,
+        credentials: "omit",
         headers: { "content-type": "application/json" },
       }).then(() => undefined);
       await this.inFlight;

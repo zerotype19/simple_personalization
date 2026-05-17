@@ -183,6 +183,7 @@ export {
   mapProgressionNoteForBuyer,
   sanitizeBuyerVisibleString,
 } from "./decisioning/buyerCopySafety";
+export { buyerSurfaceLabel } from "./decisioning/buyerSurfaceLabels";
 export {
   buildBuyerInspectorView,
   buyerInspectorNarrativeCredibilityIssue,

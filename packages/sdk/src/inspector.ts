@@ -1,6 +1,7 @@
 import type { ExperienceDecisionEnvelope, ExperienceDecision, SessionProfile } from "@si/shared";
 import { buildBuyerCommercialIntentRead } from "./commercialIntent";
 import { buyerSafeLineOrNull } from "./decisioning/buyerCopySafety";
+import { buyerSurfaceLabel } from "./decisioning/buyerSurfaceLabels";
 import {
   buildBuyerInspectorView,
   type BuyerInspectorView,
@@ -86,10 +87,10 @@ function escBuyerHtml(s: string | null | undefined, fallback = ""): string {
 
 function formatBuyerSurfaceMapperHtml(regions: SurfaceRegion[], hasSlotApi: boolean): string {
   if (!hasSlotApi) {
-    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface preview</h3><p class="si-muted si-muted--block">Experience preview needs a booted Session Intelligence runtime with <code class="si-code">getExperienceDecision</code>.</p></div>`;
+    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>On-page experiences</h3><p class="si-muted si-muted--block">Experience preview will appear once the runtime is connected on this page.</p></div>`;
   }
   if (!regions.length) {
-    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface preview</h3><p class="si-muted si-muted--block">No regions yet. Add <code class="si-code">data-si-surface="surface_id"</code> on host DOM, or use operator mode to map a region for this path (sessionStorage only).</p></div>`;
+    return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>On-page experiences</h3><p class="si-muted si-muted--block">No recommended experience is active yet for this area. The runtime is still observing visitor behavior before recommending a stronger experience here.</p></div>`;
   }
   const rows = regions
     .map((r) => {
@@ -102,7 +103,7 @@ function formatBuyerSurfaceMapperHtml(regions: SurfaceRegion[], hasSlotApi: bool
       const timing = pr ? escBuyerHtml(pr.timing, "—") : "—";
       const action = pr ? escBuyerHtml(pr.actionLine, "—") : "—";
       return `<div class="si-sm-buyer-row">
-        <div class="si-sm-buyer-k">${escHtml(r.surface_id.replace(/_/g, " "))}</div>
+        <div class="si-sm-buyer-k">${escBuyerHtml(buyerSurfaceLabel(r.surface_id), "Experience area")}</div>
         <div class="si-sm-buyer-v">
           <div><b>${action}</b> · ${timing}</div>
           ${withheld}
@@ -110,7 +111,7 @@ function formatBuyerSurfaceMapperHtml(regions: SurfaceRegion[], hasSlotApi: bool
       </div>`;
     })
     .join("");
-  return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>Surface preview</h3><p class="si-muted si-muted--block">Mapped surfaces on this page — preview only.</p><div class="si-sm-buyer-grid">${rows}</div></div>`;
+  return `<div class="si-card si-buyer-section si-buyer-surface-map"><h3>On-page experiences</h3><p class="si-muted si-muted--block">Recommended experience areas on this page — preview only.</p><div class="si-sm-buyer-grid">${rows}</div></div>`;
 }
 
 const INSPECTOR_MODE_STORAGE_KEY = "si:inspector_mode";
@@ -124,6 +125,7 @@ function getInspectorPanelMode(): InspectorPanelMode {
   } catch {
     /* storage blocked */
   }
+  if (urlHasSiDebug()) return "operator";
   return "buyer";
 }
 
@@ -242,7 +244,7 @@ function formatBuyerInspectorHtml(
       <div class="si-buyer-kv">
         <div class="si-buyer-k">${escHtml(firstRecLabel)}</div>
         <div class="si-buyer-v">${escHtml(view.recommended.show)}</div>
-        <div class="si-buyer-k">Surface</div>
+        <div class="si-buyer-k">Experience</div>
         <div class="si-buyer-v">${escHtml(view.recommended.surface)}</div>
         <div class="si-buyer-k">Timing</div>
         <div class="si-buyer-v">${escHtml(view.recommended.timing)}</div>

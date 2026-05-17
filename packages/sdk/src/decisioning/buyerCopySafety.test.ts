@@ -13,6 +13,9 @@ describe("buyerCopySafety", () => {
     expect(isBuyerUnsafeString("Progression held x (progression_surface_cooldown)")).toBe(true);
     expect(isBuyerUnsafeString("route ticks counted")).toBe(true);
     expect(isBuyerUnsafeString("activation readiness crossed")).toBe(true);
+    expect(isBuyerUnsafeString("Activation readiness moved up")).toBe(true);
+    expect(isBuyerUnsafeString('data-si-surface="surface_id"')).toBe(true);
+    expect(isBuyerUnsafeString("Finance Payment Assist")).toBe(false);
     expect(isBuyerUnsafeString("primary slot")).toBe(true);
     expect(isBuyerUnsafeString("cooldown active")).toBe(true);
     expect(isBuyerUnsafeString("ladder level 3")).toBe(true);

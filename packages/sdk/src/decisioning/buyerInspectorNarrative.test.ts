@@ -217,6 +217,33 @@ describe("buyerInspectorNarrative", () => {
     expect(v.whatChanged!.toLowerCase()).toContain("shift detected");
   });
 
+  it("uses human experience labels instead of title-cased surface ids", () => {
+    const primary = {
+      id: "d_fin",
+      surface_id: "finance_payment_assist",
+      action: "show" as const,
+      message_angle: "payment",
+      offer_type: "payment_estimate",
+      headline: "Estimate payment before you visit",
+      body: "Body",
+      cta_label: "Estimate",
+      target_url_hint: "/finance",
+      timing: "next_navigation" as const,
+      friction: "low" as const,
+      priority: 1,
+      confidence: 0.7,
+      reason: [],
+      evidence: [],
+      ttl_seconds: 300,
+      expires_at: Date.now() + 300_000,
+      privacy_scope: "session_only" as const,
+      visitor_status: "anonymous" as const,
+    };
+    const v = buildBuyerInspectorView(minimalProfile(), envWithPrimary(primary), null);
+    expect(v.recommended.surface).toBe("Payment reassurance");
+    expect(v.recommended.surface).not.toMatch(/Finance Payment Assist|finance_payment_assist/i);
+  });
+
   it("buyer join text avoids forbidden operator vocabulary", () => {
     const p = minimalProfile({
       behavior_snapshot: behaviorSnapshot({

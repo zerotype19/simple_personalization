@@ -285,7 +285,7 @@ export default function ScenarioPresetsPanel({ embedded = false }: { embedded?: 
               {buyer.hasPrimaryExperience ? (
                 <>
                   {" "}
-                  · <span className="text-slate-500">Surface: </span>
+                  · <span className="text-slate-500">Experience: </span>
                   {buyer.recommended.surface}
                   {" "}
                   · <span className="text-slate-500">Timing: </span>

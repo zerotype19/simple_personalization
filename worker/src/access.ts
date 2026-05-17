@@ -47,7 +47,16 @@ export function dashboardCorsHeaders(request: Request, env: EnvAccess): HeadersI
   };
 }
 
-export function publicCorsHeaders(): HeadersInit {
+export function publicCorsHeaders(request?: Request): HeadersInit {
+  const origin = request?.headers.get("Origin");
+  if (origin) {
+    return {
+      "access-control-allow-origin": origin,
+      "access-control-allow-methods": "GET,POST,OPTIONS",
+      "access-control-allow-headers": "content-type",
+      Vary: "Origin",
+    };
+  }
   return {
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET,POST,OPTIONS",
@@ -55,20 +64,20 @@ export function publicCorsHeaders(): HeadersInit {
   };
 }
 
-export function jsonPublic(data: unknown, init: ResponseInit = {}): Response {
+export function jsonPublic(data: unknown, init: ResponseInit = {}, request?: Request): Response {
   return new Response(JSON.stringify(data), {
     ...init,
     headers: {
       "content-type": "application/json; charset=utf-8",
       ...(init.headers ?? {}),
-      ...publicCorsHeaders(),
+      ...publicCorsHeaders(request),
     },
   });
 }
 
 export function jsonDashboard(data: unknown, request: Request, env: EnvAccess, init: ResponseInit = {}): Response {
   const dc = dashboardCorsHeaders(request, env);
-  const cors = dc ?? publicCorsHeaders();
+  const cors = dc ?? publicCorsHeaders(request);
   return new Response(JSON.stringify(data), {
     ...init,
     headers: {

@@ -21,6 +21,7 @@ import {
   isBuyerUnsafeString,
 } from "./buyerCopySafety";
 import { buildCommercialIntentDecisionReasons } from "./commercialIntentDecisionCoupling";
+import { buyerSurfaceLabel } from "./buyerSurfaceLabels";
 
 const BUYER_REASON_COPY: Record<DecisionTransitionReason, string> = {
   first_frame: "Baseline established for this session.",
@@ -103,12 +104,6 @@ function humanPhase(phase: CommercialJourneyPhase | undefined): string {
     support_service: "service or support-seeking context",
   };
   return map[phase] ?? phase.replace(/_/g, " ");
-}
-
-function humanSurface(surfaceId: string): string {
-  return surfaceId
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function humanTiming(timing: ExperienceDecision["timing"]): string {
@@ -264,7 +259,7 @@ function buildWithheld(
   if (primary.action === "suppress" && primary.suppression_reason?.trim()) {
     const sr = primary.suppression_reason.trim();
     if (!hasLeakage(sr)) {
-      lines.push(`${humanSurface(primary.surface_id)} suppressed: ${sr}`);
+      lines.push(`${buyerSurfaceLabel(primary.surface_id)} held back: ${sr}`);
     }
   }
 
@@ -320,7 +315,7 @@ export function buildBuyerInspectorView(
   const recommended = primary
     ? {
         show: primary.headline?.trim() || primary.offer_type.replace(/_/g, " "),
-        surface: humanSurface(primary.surface_id),
+        surface: buyerSurfaceLabel(primary.surface_id),
         timing: humanTiming(primary.timing),
         escalationPosture: formatEscalationPostureForBuyer(getEscalationPosture(profile, envelope)),
         confidenceChip: null,

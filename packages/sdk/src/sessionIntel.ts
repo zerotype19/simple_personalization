@@ -73,7 +73,11 @@ export function appendIntelMilestones(
     if (prev == null) meta.last_readiness_pushed = readiness;
     else if (readiness - prev >= 14) {
       meta.last_readiness_pushed = readiness;
-      pushIntelEvent(profile, "Activation readiness increased", `readiness:${readiness}`);
+      pushIntelEvent(
+        profile,
+        "The session appears to be moving beyond early research",
+        `readiness:${readiness}`,
+      );
     }
   }
 }

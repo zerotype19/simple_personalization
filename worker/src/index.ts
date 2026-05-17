@@ -44,10 +44,10 @@ export default {
 
     if (request.method === "OPTIONS") {
       if (url.pathname.startsWith("/dashboard")) {
-        const h = dashboardCorsHeaders(request, env) ?? publicCorsHeaders();
+        const h = dashboardCorsHeaders(request, env) ?? publicCorsHeaders(request);
         return new Response(null, { headers: h });
       }
-      return new Response(null, { headers: publicCorsHeaders() });
+      return new Response(null, { headers: publicCorsHeaders(request) });
     }
 
     try {
@@ -346,33 +346,33 @@ async function handleInsights(request: Request, env: Env): Promise<Response> {
 async function handleCollect(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
   const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
   if (!(await rateLimit(env, ip))) {
-    return jsonPublic({ error: "rate_limited" }, { status: 429 });
+    return jsonPublic({ error: "rate_limited" }, { status: 429 }, request);
   }
 
   const text = await request.text();
   if (text.length > 50_000) {
-    return jsonPublic({ error: "payload_too_large" }, { status: 413 });
+    return jsonPublic({ error: "payload_too_large" }, { status: 413 }, request);
   }
 
   let body: unknown;
   try {
     body = JSON.parse(text);
   } catch {
-    return jsonPublic({ error: "invalid_json" }, { status: 400 });
+    return jsonPublic({ error: "invalid_json" }, { status: 400 }, request);
   }
 
   const envelope = body as CollectEnvelope;
-  if (!envelope || typeof envelope !== "object") return jsonPublic({ error: "invalid_body" }, { status: 400 });
-  if (typeof envelope.reason !== "string") return jsonPublic({ error: "invalid_reason" }, { status: 400 });
+  if (!envelope || typeof envelope !== "object") return jsonPublic({ error: "invalid_body" }, { status: 400 }, request);
+  if (typeof envelope.reason !== "string") return jsonPublic({ error: "invalid_reason" }, { status: 400 }, request);
 
   const payload = envelope.payload;
   const err = validatePayload(payload);
-  if (err) return jsonPublic({ error: err }, { status: 400 });
+  if (err) return jsonPublic({ error: err }, { status: 400 }, request);
 
   const p = payload as AnalyticsPayload;
   const siteRes = await resolveCollectSite(env.SI_DB, envelope, p.origin);
   if (siteRes && "error" in siteRes) {
-    return jsonPublic({ error: siteRes.error }, { status: 400 });
+    return jsonPublic({ error: siteRes.error }, { status: 400 }, request);
   }
   const tenantId = siteRes?.tenant_id ?? null;
   const siteId = siteRes?.site_id ?? null;
@@ -413,7 +413,7 @@ async function handleCollect(request: Request, env: Env, ctx: ExecutionContext):
       .catch(() => undefined),
   );
 
-  return jsonPublic({ ok: true });
+  return jsonPublic({ ok: true }, {}, request);
 }
 
 export function validatePayload(payload: unknown): string | null {
