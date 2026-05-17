@@ -28,6 +28,19 @@ describe("form submit commercial intent", () => {
     </form>`;
     const r = classifyFormIntent(document.querySelector("form")! as HTMLFormElement);
     expect(r.form_type).toBe("appointment");
+    expect(buyerSafeFormTimelineLabel("appointment")).toBe(
+      "Moved toward scheduling or an in-person visit",
+    );
+  });
+
+  it("classifies hyphenated test-drive submit labels", () => {
+    document.body.innerHTML = `<form>
+      <label>Notes (optional — not stored)</label>
+      <textarea name="notes" placeholder="Optional"></textarea>
+      <button type="submit">Submit test-drive request</button>
+    </form>`;
+    const r = classifyFormIntent(document.querySelector("form")! as HTMLFormElement);
+    expect(r.form_type).toBe("appointment");
   });
 
   it("classifies finance application forms", () => {

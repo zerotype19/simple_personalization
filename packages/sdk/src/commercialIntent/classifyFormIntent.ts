@@ -68,7 +68,11 @@ export function classifyFormIntent(form: HTMLFormElement): FormIntent {
     };
   }
 
-  if (/\b(test drive|book test drive|schedule test drive)\b/.test(blob)) {
+  if (
+    /\b(test[\s-]?drive|book[\s-]?test[\s-]?drive|schedule[\s-]?test[\s-]?drive|submit[\s-]?test[\s-]?drive)\b/.test(
+      blob,
+    )
+  ) {
     evidence.push("test_drive_form");
     return {
       form_type: "appointment",

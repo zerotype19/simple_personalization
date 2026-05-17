@@ -163,6 +163,30 @@ describe("experienceStatePresentation", () => {
     expect(getExperienceState(p, null, null)).toBe("comparing");
   });
 
+  it("does not map auto retail finance + form focus to Implementation-focused", () => {
+    const p = minimalProfile({
+      site_context: { ...minimalProfile().site_context, vertical: "auto_retail", vertical_confidence: 90 },
+      signals: {
+        ...minimalProfile().signals,
+        finance_interactions: 2,
+        form_field_focus_events: 1,
+        pages_viewed: 3,
+        path_sequence: ["/compare", "/finance", "/test-drive"],
+      },
+      behavior_snapshot: bs({
+        navigation: {
+          journey_pattern: "x",
+          journey_velocity: "deliberate",
+          comparison_behavior: true,
+          high_intent_transition: false,
+          path_summary: "/test-drive",
+        },
+        commercial_journey_phase: "comparison",
+      }),
+    });
+    expect(getExperienceState(p, null, null)).toBe("comparing");
+  });
+
   it("maps an implementation checklist style path to Implementation-focused", () => {
     const p = minimalProfile({
       signals: {

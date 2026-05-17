@@ -2,11 +2,11 @@ import type { FormIntentType } from "@si/shared";
 
 const FORM_TIMELINE: Record<FormIntentType, string> = {
   lead: "Submitted a lead or contact form",
-  newsletter: "Signed up for updates or a newsletter",
+  newsletter: "Subscribed or requested updates",
   search: "Submitted a search",
   checkout: "Moved toward checkout",
   application: "Moved into an application flow",
-  quote: "Requested a quote or pricing follow-up",
+  quote: "Requested quote or pricing guidance",
   appointment: "Moved toward scheduling or an in-person visit",
   eligibility: "Requested eligibility or coverage guidance",
   login: "Signed in or opened an account path",

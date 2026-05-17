@@ -76,8 +76,10 @@ function implementationPathSignals(profile: SessionProfile): boolean {
   const rx =
     /implementation|rollout|roll-out|eligib|calculat|config|onboard|deploy|migrate|adoption|stakeholder|integrat|readiness|checklist|fit\b|setup|security-review/i;
   if (paths.some((p) => rx.test(p))) return true;
+  const vertical = profile.site_context?.vertical ?? "";
+  const b2bStyleVertical = vertical === "b2b_saas" || vertical === "financial_services" || vertical === "healthcare";
   const offer = (profile.signals?.finance_interactions ?? 0) > 0 && (profile.signals?.form_field_focus_events ?? 0) > 0;
-  if (offer) return true;
+  if (b2bStyleVertical && offer) return true;
   return false;
 }
 
